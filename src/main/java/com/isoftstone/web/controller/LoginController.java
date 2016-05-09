@@ -15,6 +15,11 @@ public class LoginController {
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public String login(@RequestParam(value = "username") String username,
 			@RequestParam(value = "password") String password, HttpSession session) {
+		
+		if(session.getAttribute("userId") != null) {
+			return "已经登录";
+		}
+		
 		int id = 0;
 		LoginDao loginDao = new LoginDao();
 
