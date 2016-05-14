@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;  
   
 public class JdbcUtil {  
-    private static String url = "jdbc:mysql://115.159.45.39:3306/factory_vehicle_system";  
+    private static String url = "jdbc:mysql://115.159.45.39:3306/factory_vehicle_system?useUnicode=true&characterEncoding=UTF-8";  
     private static String username = "factory_vehicle";  
     private static String password = "MfPwtdHpycq3BXtV";  
     private static String driverName = "com.mysql.jdbc.Driver";  
