@@ -3,6 +3,8 @@ package com.isoftstone.web.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -128,5 +130,19 @@ public class StationController {
 		}
 		
 		return  new ResponseEntity<Station>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	/*导出excel*/
+	@RequestMapping(value = "/api/Excel/Station", method = RequestMethod.POST)
+	public ResponseEntity<String> addStaToExcel(@RequestBody List<Station> stalist,HttpServletRequest request) {
+				
+		String path="/public/excel/";
+		String realpath=request.getSession().getServletContext().getRealPath(path);
+		if(staDao.addToExcel(stalist,realpath)){
+			return new ResponseEntity<String>("/excel/站点.xls",HttpStatus.OK);
+		}
+		
+		// 如果出现异常，将状态码设为 internal server error(寻找更好的解决方案中……)
+		return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }

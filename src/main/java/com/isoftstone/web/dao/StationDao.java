@@ -1,11 +1,18 @@
 package com.isoftstone.web.dao;
 
+import java.io.FileOutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import com.isoftstone.web.pojo.Station;
 import com.isoftstone.web.util.JdbcUtil;
@@ -207,5 +214,56 @@ public class StationDao {
 
 		return false;
 	}
+	
+	public boolean addToExcel(List<Station> stalist,String path)
+	{
+		// 第一步，创建一个webbook，对应一个Excel文件  
+        HSSFWorkbook wb = new HSSFWorkbook();  
+        // 第二步，在webbook中添加一个sheet,对应Excel文件中的sheet  
+        HSSFSheet sheet = wb.createSheet("站点信息表");  
+        // 第三步，在sheet中添加表头第0行,注意老版本poi对Excel的行数列数有限制short  
+        HSSFRow row = sheet.createRow((int) 0);  
+        // 第四步，创建单元格，并设置值表头 设置表头居中  
+        HSSFCellStyle style = wb.createCellStyle();  
+        style.setAlignment(HSSFCellStyle.ALIGN_CENTER); // 创建一个居中格式  
+  
+        HSSFCell cell = row.createCell((short) 0);  
+        cell.setCellValue("站点id");  
+        cell.setCellStyle(style);  
+        cell = row.createCell((short) 1);  
+        cell.setCellValue("站点名称");  
+        cell.setCellStyle(style);  
+        cell = row.createCell((short) 2);  
+        cell.setCellValue("经度");  
+        cell.setCellStyle(style);  
+        cell = row.createCell((short) 3);  
+        cell.setCellValue("纬度");  
+        cell.setCellStyle(style);   
+  
+        for (int i = 0; i < stalist.size(); i++)  
+        {  
+            row = sheet.createRow((int) i + 1);  
+            Station sta = (Station) stalist.get(i);  
+            // 第四步，创建单元格，并设置值  
+            row.createCell((short) 0).setCellValue(sta.getS_id());  
+            row.createCell((short) 1).setCellValue(sta.getS_name());  
+            row.createCell((short) 2).setCellValue(sta.getLongitude());  
+            row.createCell((short) 3).setCellValue(sta.getLatitude()); 
+        }  
+        // 第六步，将文件存到指定位置  
+        try  
+        {  
+        	String name=path+"站点.xls";
+            FileOutputStream fout = new FileOutputStream(name);  
+            wb.write(fout);  
+            fout.close();  
+            return true;
+        }  
+        catch (Exception e)  
+        {  
+            e.printStackTrace();  
+        }  
+        return false;
+    }  
 	
 }
