@@ -1,0 +1,96 @@
+html,body {
+	width: 100%;
+	height: 100%;
+}
+#login-page	{
+	width: inherit;
+	height: inherit;
+	min-width: 500px;
+	min-height: 400px;
+
+	background:url(../images/login-images/grid-left.svg) 0 0 no-repeat,
+			url(../images/login-images/grid-right.svg) 100% 0 no-repeat,
+			url(../images/login-images/grid-bottom.svg) 50% 105% no-repeat,
+			#000000;	
+}
+#login-page .container {
+	position: relative;
+
+	width: 500px;
+	height: inherit;
+}
+#login-page #login-form {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-top: -160px;
+	margin-left: -200px;
+
+	display: block;
+	width: 400px;
+	height: 300px;
+}
+#login-form .login-title {
+	width: inherit;
+	height: 100px;
+}
+#login-form .login-title h1{
+	width: inherit;
+	height: 60px;
+
+	line-height: 60px;
+	font-size: 42px;
+	color: #ffffff;
+	text-align: center;
+	font-family: '华文行楷';
+}
+#login-form .form {
+	margin-top: 20px;
+
+	width: inherit;
+	height: 180px;
+}
+
+#login-form .form input {
+	margin-bottom: 20px;
+	margin-left: 50px;
+
+	width: 298px;
+	height: 38px;
+
+	color: #000000;
+	text-align: center;
+	font-size: 18px;
+	
+	background-color: #d2c8c8;
+	border: 1px solid #ffffff;
+	border-radius: 5px;
+
+	outline: none;
+}
+#login-form .form input:hover {
+	background-color: #ffffff;
+	border-color: #001b26;
+}
+#login-form .form button {
+	margin-left: 100px;
+
+	width: 198px;
+	height: 38px;
+
+	color:#ffffff;
+	text-align: center;
+	font-size: 18px;
+	
+	background-color: rgba(0,0,0,0);
+	border: 1px solid #ffffff;
+	border-radius: 20px;
+	
+	outline: none;
+	cursor: pointer;
+}
+#login-form .form button:hover {
+	color:#000000;
+	font-weight: bold;
+	background-color: #ffffff;
+}

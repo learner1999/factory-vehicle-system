@@ -1,0 +1,178 @@
+#mainbody {
+	position: relative;
+
+	width: inherit;
+	height: inherit;
+	min-width: 800px;
+	min-height: 600px;
+}
+#sidebar {
+	position: absolute;
+
+	width: 280px;
+	height: 100%;
+
+	background-color: #262d40;
+}
+#sidebar .sidebar-logo {
+	position: relative;
+
+	width: inherit;
+	height: 100px;
+}
+#sidebar .sidebar-logo a {
+	color: #ffffff;
+	font-weight: 400;
+	text-decoration: none !important;
+}
+#sidebar .sidebar-logo a img {
+	margin: 0 20px;
+
+	width: 240px;
+	height: 100px;
+}
+
+#sidebar .sidebar-admin {
+	position: relative;
+
+	width: 250px;
+
+	margin: 10px 15px 100px;
+}
+#sidebar .sidebar-admin ul {
+	display: block;
+	width: inherit;
+
+	list-style: none;
+}
+#sidebar .sidebar-admin .nav > li + .nav-header {
+	margin-top: 20px;
+}
+#sidebar .sidebar-admin .nav .nav-header {
+	width: inherit;
+	height: 22px;
+
+	color:#ffffff;
+	font-size: 18px;
+	font-weight: 400;
+	text-shadow: none;
+}
+#sidebar .sidebar-admin .nav > li {
+	position: relative;
+	display: block;
+}
+#sidebar .sidebar-admin .nav > li > a {
+	border-radius: 2px;
+	line-height: 20px;
+	padding: 8px 5px 8px 0;
+	margin: 0;
+	text-shadow: inherit;
+	font-size: 13px;
+	font-weight: 500;
+	color: #ffffff;
+}
+#sidebar .sidebar-admin .nav > li > a:hover {
+	margin-left: 10px !important;
+	
+	background-color: #488fd2;
+	border-left: 5px solid #245c90;
+
+	transition: all 0.3s ease-in-out;
+}
+#sidebar .sidebar-admin .nav > li > a > span {
+	display: inline-block;
+	color: #ffffff;
+	font-size: 14px;
+	margin: 0 15px 0 10px;
+	text-align: center;
+	width: 20px;
+}
+
+#mainbody .content {
+	padding-bottom: 50px;
+	position: relative;
+	margin-left: 280px;
+	min-height: 600px;
+}
+#mainbody .content #topbar {
+	position: relative;
+	margin: 0;
+	padding: 0 10px 0 30px;
+
+	height: 50px;
+	border-left: 2px solid #5c9df5;
+
+	background-color: #488fd2;
+	border-radius: 0px !important;
+	color: #cacaca;
+}
+#topbar ul.nav.user-menu {
+	height: 50px;
+}
+#topbar ul > li {
+	position: relative;
+	float: right;
+	display: block;
+
+	height: inherit;
+}
+#topbar ul li.user-name {
+	max-width: 100px;
+	line-height: 50px;
+	margin-right: 20px;
+}
+#topbar ul li.user-name > a {
+	position: relative;
+	height: inherit;
+	padding: 0 0;
+	
+	font-size: 22px;
+	color: #ffffff;
+	line-height: 50px;
+	font-family: '华文行楷'; 
+}
+#topbar ul li.user-name > a > img {
+	position: absolute;
+	top: 8px;
+	left: -40px;
+
+	display: inline-block;
+	width: 35px;
+	height: 35px;
+
+	padding: 2px;
+	border: 2px solid #d7d9e5;
+	border-radius: 50%;
+	margin-right: 10px;
+}
+#topbar ul li.user-name > a:hover {
+	background-color: #488fd2;
+	color: #D5CACA;
+}
+#topbar ul li.quit {
+	/*position: absolute;
+	top: 0;
+	right: 10px;*/
+	width: 50px;
+	height: 50px;
+}
+#topbar ul li.quit span {
+	width: inherit;
+	height: inherit;
+	font-size: 30px;
+	line-height: 50px;
+	text-align: center;
+	cursor: pointer;
+}
+#topbar ul li.quit span:hover {
+	color: #ffffff;
+}
+#topbar .title {
+	position: absolute;
+
+	height: 50px;
+
+	line-height: 50px;
+	font-size: 30px;
+	font-family: '华文行楷';
+}
