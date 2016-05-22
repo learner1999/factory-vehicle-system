@@ -21,7 +21,7 @@ public class Car_manage_Controller {
 	Car_dao car=new Car_dao();//初始化对象（方法的对象）
 	
 	//获取全部车辆信息的控制器
-	@RequestMapping(value = "/api/car_infor", method = RequestMethod.GET)
+	@RequestMapping(value = "/api/car_inf", method = RequestMethod.GET)
 	public ResponseEntity<List<Car_inf>> getAllcar() //
 	{
 		List<Car_inf> carList= car.getAllcar();

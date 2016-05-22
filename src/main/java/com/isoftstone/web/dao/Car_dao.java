@@ -52,13 +52,15 @@ public class Car_dao {
 	
 	public Car_inf getcarByid(int id)
 	{
-		Car_inf car = new Car_inf();
-		String sql="select * from car_information where c_id ="+id+"";
+		Car_inf car = null;
+		String sql="select * from car_information where c_id =?";
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, id);
 			result = stmt.executeQuery();
 			while (result.next()) {
+				car = new Car_inf();
 				car.setId(result.getInt(1));
 				car.setBrand(result.getString(2));
 				car.setSeat(result.getInt(3));
