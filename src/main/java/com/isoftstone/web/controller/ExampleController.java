@@ -21,6 +21,7 @@ public class ExampleController {
 	
 	
 	/***
+	 * 通过给 listAllUsers 方法添加可选 GET 参数实现 条件查找
 	 * 查询用户，如果含 name 参数，则查询符合条件的用户；不含 name 参数，则查询所有用户
 	 * url:http://www.example.com/api/user{?name=test}
 	 * method:GET
