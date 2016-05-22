@@ -18,7 +18,7 @@ public class TestUserDao2 {
 	 * @return 所有用户构成的 list
 	 */
 	public List<TestUser2> findAllUsers() {
-		
+
 		// 创建数据库连接时需要的对象
 		Connection conn = null;
 		PreparedStatement stmt = null;
@@ -32,16 +32,19 @@ public class TestUserDao2 {
 
 		try {
 			conn = JdbcUtil.getConnection();
-			stmt = conn.prepareStatement(strSql);  // 这个地方用了 prepareStatement，主要目的是防止 sql 注入
+			stmt = conn.prepareStatement(strSql); // 这个地方用了
+													// prepareStatement，主要目的是防止
+													// sql 注入
 			result = stmt.executeQuery();
 			while (result.next()) {
-				TestUser2 user = fetchData(result);  // 写了一个 fetchData 函数便于获取数据库返回的数据
+				TestUser2 user = fetchData(result); // 写了一个 fetchData
+													// 函数便于获取数据库返回的数据
 				userList.add(user);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			JdbcUtil.close(result, stmt, conn);  // 在最后记得关闭数据库连接
+			JdbcUtil.close(result, stmt, conn); // 在最后记得关闭数据库连接
 		}
 
 		return userList;
@@ -55,7 +58,7 @@ public class TestUserDao2 {
 	 * @return 用户信息
 	 */
 	public TestUser2 findById(int id) {
-		
+
 		// jdbc 必备
 		Connection conn = null;
 		PreparedStatement stmt = null;
@@ -63,22 +66,22 @@ public class TestUserDao2 {
 
 		// 用来存放查询得到的用户信息
 		TestUser2 user = null;
-		
+
 		// 数据库查询字符串，其中的 '?' 号是一个占位符，预编译的方式（prepareStatement）需要这种写法
 		String strSql = "SELECT * FROM `user` WHERE id=?";
 
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(strSql);
-			stmt.setInt(1, id);  // 将 id 值替换至  '?' 号占位的地方
+			stmt.setInt(1, id); // 将 id 值替换至 '?' 号占位的地方
 			result = stmt.executeQuery();
 			if (result.next()) {
-				user = fetchData(result);  // 提取数据库返回的信息
+				user = fetchData(result); // 提取数据库返回的信息
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			JdbcUtil.close(result, stmt, conn);  // 关闭数据库连接
+			JdbcUtil.close(result, stmt, conn); // 关闭数据库连接
 		}
 
 		return user;
@@ -144,19 +147,19 @@ public class TestUserDao2 {
 	public boolean createUser(TestUser2 user) {
 		Connection conn = null;
 		PreparedStatement stmt = null;
-		
+
 		// 3 个占位符，分别对应位置为 1,2,3
 		String strSql = "INSERT INTO `user` (username, password, authority) VALUES (?, ?, ?)";
 
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(strSql);
-			
+
 			// 替换占位符位置的值
 			stmt.setString(1, user.getUsername());
 			stmt.setString(2, user.getPassword());
 			stmt.setInt(3, user.getAuthority());
-			
+
 			int counter = stmt.executeUpdate();
 			if (1 == counter) {
 				return true;
@@ -183,7 +186,7 @@ public class TestUserDao2 {
 	public boolean updateUser(int id, TestUser2 user) {
 		Connection conn = null;
 		PreparedStatement stmt = null;
-		
+
 		String strSql = "UPDATE `user` SET `username`=?, `password`=?, `authority`=? WHERE (`id`=?)";
 
 		try {
@@ -217,7 +220,7 @@ public class TestUserDao2 {
 	public boolean deleteUser(int id) {
 		Connection conn = null;
 		PreparedStatement stmt = null;
-		
+
 		String strSql = "DELETE FROM `user` WHERE (`id`=?)";
 
 		try {
@@ -236,6 +239,37 @@ public class TestUserDao2 {
 		}
 
 		return false;
+	}
+
+	public List<TestUser2> findByName(String name) {
+		// 创建数据库连接时需要的对象
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		ResultSet result = null;
+
+		// 创建一个 List 用于存放 User 对象
+		List<TestUser2> userList = new ArrayList<>();
+
+		// 数据库查询语句
+		String strSql = "SELECT * FROM `user` WHERE username like ?";
+
+		try {
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(strSql); 
+			stmt.setString(1, "%" + name + "%");
+			result = stmt.executeQuery();
+			while (result.next()) {
+				TestUser2 user = fetchData(result); 
+				userList.add(user);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			JdbcUtil.close(result, stmt, conn); // 在最后记得关闭数据库连接
+		}
+
+		return userList;
+
 	}
 
 }

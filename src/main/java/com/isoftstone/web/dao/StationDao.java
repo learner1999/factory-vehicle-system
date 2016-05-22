@@ -215,6 +215,38 @@ public class StationDao {
 		return false;
 	}
 	
+	/**
+	 * 通过经纬度查找站点
+	 * @param longitude
+	 * @param latitude
+	 * @return
+	 */
+	public Station getStaByPosition(double longitude, double latitude) {
+		Station station = null;
+		
+		String sql = "select * from station_information where longitude=? AND latitude=?";
+		
+		try {
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(sql);
+			stmt.setDouble(1, longitude);
+			stmt.setDouble(2, latitude);
+			result = stmt.executeQuery();
+			if(result.next()) {
+				Station sta = new Station();
+				sta.setS_id(result.getInt("s_id"));
+				sta.setS_name(result.getString("s_name"));
+				sta.setLongitude(result.getDouble("longitude"));
+				sta.setLatitude(result.getDouble("latitude"));
+				station = sta;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return station;
+	}
+	
 	public boolean addToExcel(List<Station> stalist,String path)
 	{
 		// 第一步，创建一个webbook，对应一个Excel文件  

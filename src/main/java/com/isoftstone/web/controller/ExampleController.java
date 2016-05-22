@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.isoftstone.web.dao.TestUserDao2;
@@ -20,13 +21,22 @@ public class ExampleController {
 	
 	
 	/***
-	 * 查询所有用户
-	 * url:http://www.example.com/api/user/
+	 * 通过给 listAllUsers 方法添加可选 GET 参数实现 条件查找
+	 * 查询用户，如果含 name 参数，则查询符合条件的用户；不含 name 参数，则查询所有用户
+	 * url:http://www.example.com/api/user{?name=test}
 	 * method:GET
 	 * @return 所有用户的信息
 	 */
 	@RequestMapping(value = "/api/user", method = RequestMethod.GET)
-	public ResponseEntity<List<TestUser2>> listAllUsers() {
+	public ResponseEntity<List<TestUser2>> listAllUsers(
+			@RequestParam(value = "name", required = false) String name) {
+		
+		// 如果请求数据时带上了 name 参数，则查找符合要求的用户，否则列出所有用户
+		if(name != null) {
+			return getUserByName(name);
+		}
+		
+		
 		List<TestUser2> users = userDao.findAllUsers();
 		
 		// 如果查询不到用户，将 http 状态码设置为 NO_CONTENT
@@ -38,7 +48,19 @@ public class ExampleController {
 		return new ResponseEntity<List<TestUser2>>(users, HttpStatus.OK);
 	}
 	
-	
+	/**
+	 * 通过 name 进行模糊查询
+	 * @param name
+	 * @return
+	 */
+	public ResponseEntity<List<TestUser2>> getUserByName(String name) {
+		List<TestUser2> listUser = userDao.findByName(name);
+		if(listUser.isEmpty()) {
+			return new ResponseEntity<List<TestUser2>>(HttpStatus.NO_CONTENT);
+		}
+		
+		return new ResponseEntity<List<TestUser2>>(listUser, HttpStatus.OK);
+	}
 	
 	/***
 	 * 获取单个用户信息，指定 id
@@ -59,6 +81,8 @@ public class ExampleController {
 		
 		return new ResponseEntity<TestUser2>(user, HttpStatus.OK);
 	}
+	
+	
 	
 	
 	/***
