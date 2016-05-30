@@ -17,35 +17,32 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import com.isoftstone.web.dao.Car_dao;
 import com.isoftstone.web.pojo.Station;
 import com.isoftstone.web.pojo.Car_inf;
+import com.isoftstone.web.pojo.TestUser2;
 import com.isoftstone.web.util.JdbcUtil;
+import com.mysql.jdbc.CallableStatement;
 public class Car_dao {
 	private Connection conn = null;
 	private PreparedStatement stmt = null;
 	private ResultSet result = null;
+	CallableStatement cs = null;
 	
 	public List getAllcar()
 	{
 		List<Car_inf> carList = new ArrayList<>();
-		String sql="select * from car_information";
+		String proc="{call FindAllcar()}";
 		try {
 			conn = JdbcUtil.getConnection();
-			stmt = conn.prepareStatement(sql);
-			result = stmt.executeQuery();
+			cs = (CallableStatement) conn.prepareCall(proc);
+			result = cs.executeQuery();
 			while (result.next()) {
-				Car_inf car = new Car_inf();
-				car.setId(result.getInt(1));
-				car.setBrand(result.getString(2));
-				car.setSeat(result.getInt(3));
-				car.setLogon(result.getDate(4));
-				car.setDated(result.getDate(5));
-				car.setLicense(result.getString(6));
-				car.setD_license(result.getString(7));
+				Car_inf car = fetchcar(result);
 				carList.add(car);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			JdbcUtil.close(result, stmt, conn);
+			JdbcUtil.closecs(cs);
 		}
 		return carList;
 	}
@@ -53,26 +50,20 @@ public class Car_dao {
 	public Car_inf getcarByid(int id)
 	{
 		Car_inf car = null;
-		String sql="select * from car_information where c_id =?";
+		String proc="{call GetcarByid(?)}";
 		try {
 			conn = JdbcUtil.getConnection();
-			stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, id);
-			result = stmt.executeQuery();
+			cs = (CallableStatement) conn.prepareCall(proc);
+			cs.setInt(1, id);
+			result = cs.executeQuery();
 			while (result.next()) {
-				car = new Car_inf();
-				car.setId(result.getInt(1));
-				car.setBrand(result.getString(2));
-				car.setSeat(result.getInt(3));
-				car.setLogon(result.getDate(4));
-				car.setDated(result.getDate(5));
-				car.setLicense(result.getString(6));
-				car.setD_license(result.getString(7));
+				car = fetchcar(result);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			JdbcUtil.close(result, stmt, conn);
+			JdbcUtil.closecs(cs);
 		}
 		return car;
 	}
@@ -80,50 +71,38 @@ public class Car_dao {
 	public List getcarBybrand(String brand)
 	{
 		List<Car_inf> carList = new ArrayList<>();
-		String sql="select * from car_information where c_brand ='"+brand+"'";
+		String proc="{call GetcarBybrand(?)}";
 		try {
 			conn = JdbcUtil.getConnection();
-			stmt = conn.prepareStatement(sql);
-			result = stmt.executeQuery();
+			cs = (CallableStatement) conn.prepareCall(proc);
+			cs.setString(1, "%" +brand+ "%");
+			result =cs.executeQuery();
 			while (result.next()) {
-				Car_inf car = new Car_inf();
-				car.setId(result.getInt(1));
-				car.setBrand(result.getString(2));
-				car.setSeat(result.getInt(3));
-				car.setLogon(result.getDate(4));
-				car.setDated(result.getDate(5));
-				car.setLicense(result.getString(6));
-				car.setD_license(result.getString(7));
+				Car_inf car = fetchcar(result);
 				carList.add(car);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			JdbcUtil.close(result, stmt, conn);
+			JdbcUtil.closecs(cs);
 		}
 		return carList;
 	}
-	
+	/*
 	public List getcarBydriving_license(String d_license)
 	{
 		List<Car_inf> carList = new ArrayList<Car_inf>();
-		String sql="select * from car_information where c_driving_license ='"+d_license+"'";
+		String sql="select * from car_information where c_driving_license =?";
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
+			stmt.setString(1, d_license);
 			result = stmt.executeQuery();
 			
 			while (result.next()) {
-				Car_inf car = new Car_inf();
-				car.setId(result.getInt(1));
-				car.setBrand(result.getString(2));
-				car.setSeat(result.getInt(3));
-				car.setLogon(result.getDate(4));
-				car.setDated(result.getDate(5));
-				car.setLicense(result.getString(6));
-				car.setD_license(result.getString(7));
-				carList.add(car);
-				
+				Car_inf car = fetchcar(result);
+				carList.add(car);	
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -132,40 +111,37 @@ public class Car_dao {
 		}
 		return carList;
 	}
+	*/
 	
 	public List getcarByid1(int id)
 	{
 		List<Car_inf> carList = new ArrayList<>();
-		String sql="select * from car_information where c_id ="+id+"";
+		String proc="{call GetcarByid(?)}";
 		try {
 			conn = JdbcUtil.getConnection();
-			stmt = conn.prepareStatement(sql);
-			result = stmt.executeQuery();
+			cs = (CallableStatement) conn.prepareCall(proc);
+			cs.setInt(1, id);
+			result = cs.executeQuery();
 			while (result.next()) {
-				Car_inf car = new Car_inf();
-				car.setId(result.getInt(1));
-				car.setBrand(result.getString(2));
-				car.setSeat(result.getInt(3));
-				car.setLogon(result.getDate(4));
-				car.setDated(result.getDate(5));
-				car.setLicense(result.getString(6));
-				car.setD_license(result.getString(7));
+				Car_inf car =fetchcar(result);
 				carList.add(car);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			JdbcUtil.close(result, stmt, conn);
+			JdbcUtil.closecs(cs);
 		}
 		return carList;
 	}
 	
 	public boolean is_license(String c_license){
-		String sql="select c_license from car_information where c_license='"+c_license+"'";
+		String proc="{call is_license(?)}";
 		try{
 			conn = JdbcUtil.getConnection();
-			stmt = conn.prepareStatement(sql);
-			result = stmt.executeQuery();
+			cs = (CallableStatement) conn.prepareCall(proc);
+			cs.setString(1, c_license);
+			result = cs.executeQuery();
 			if(result.next())
 			{	
 				return true;
@@ -175,16 +151,18 @@ public class Car_dao {
 				e.printStackTrace();
 			} finally {
 				JdbcUtil.close(result, stmt, conn);
+				JdbcUtil.closecs(cs);
 			}
 		return false;
 		}
 	
 	public boolean is_Dlicense(String d_license){
-		String sql="select c_driving_license from car_information where c_driving_license'"+d_license+"'";
+		String proc="{call is_d_license(?)}";
 		try{
 			conn = JdbcUtil.getConnection();
-			stmt = conn.prepareStatement(sql);
-			result = stmt.executeQuery();
+			cs = (CallableStatement) conn.prepareCall(proc);
+			cs.setString(1, d_license);
+			result = cs.executeQuery();
 			if(result.next())
 			{	
 				return true;
@@ -194,16 +172,18 @@ public class Car_dao {
 				e.printStackTrace();
 			} finally {
 				JdbcUtil.close(result, stmt, conn);
+				JdbcUtil.closecs(cs);
 			}
 		return false;
 		}
 	
 	public boolean is_id(int id){
-		String sql="select c_id from car_information where c_id="+id+"";
+		String proc="{call is_id(?)}";
 		try{
 			conn = JdbcUtil.getConnection();
-			stmt = conn.prepareStatement(sql);
-			result = stmt.executeQuery();
+			cs = (CallableStatement) conn.prepareCall(proc);
+			cs.setInt(1, id);
+			result = cs.executeQuery();
 			if(result.next())
 			{	
 				return true;
@@ -213,15 +193,18 @@ public class Car_dao {
 				e.printStackTrace();
 			} finally {
 				JdbcUtil.close(result, stmt, conn);
+				JdbcUtil.closecs(cs);
 			}
 		return false;
 		}
+	
 	public boolean deletecar(int id){
-		String sql="delete from car_information where c_id="+id+"";
+		String proc="{call deletecar(?)}";
 		try{
 			conn = JdbcUtil.getConnection();
-			stmt = conn.prepareStatement(sql);
-			int counter = stmt.executeUpdate();
+			cs = (CallableStatement) conn.prepareCall(proc);
+			cs.setInt(1, id);
+			int counter = cs.executeUpdate();
 			if (1 == counter) {
 				return true;
 			}
@@ -230,24 +213,25 @@ public class Car_dao {
 				e.printStackTrace();
 			} finally {
 				JdbcUtil.close(result, stmt, conn);
+				JdbcUtil.closecs(cs);
 			}
 		return false;
 		}
 			
 	
 	public boolean createcar(Car_inf car1){
-		String sql="insert into car_information values(?,?,?,?,?,?,?)";
+		String proc="{call increasecar(?,?,?,?,?,?,?)}";
 		try{
 			conn = JdbcUtil.getConnection();
-			stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, car1.getId());
-			stmt.setString(2, car1.getBrand());
-			stmt.setInt(3,car1.getSeat());
-			stmt.setDate(4, car1.getLogon());
-			stmt.setDate(5, car1.getDated());
-			stmt.setString(6,car1.getLicense());
-			stmt.setString(7, car1.getD_license());
-			if(stmt.executeUpdate()==1){
+			cs = (CallableStatement) conn.prepareCall(proc);
+			cs.setInt(1, car1.getId());
+			cs.setString(2, car1.getBrand());
+			cs.setInt(3,car1.getSeat());
+			cs.setDate(4, car1.getLogon());
+			cs.setDate(5, car1.getDated());
+			cs.setString(6,car1.getLicense());
+			cs.setString(7, car1.getD_license());
+			if(cs.executeUpdate()==1){
 				return true;
 			}		
 		}catch (SQLException e) {
@@ -255,23 +239,24 @@ public class Car_dao {
 			e.printStackTrace();
 		} finally {
 			JdbcUtil.close(null, stmt, conn);
+			JdbcUtil.closecs(cs);
 		}
 		return false;
 	}
 	
 	public boolean updatecar(Car_inf car1,int id){
-		String sql="update car_information set c_id= ?,c_brand= ?,c_seat= ?,c_logon= ?,c_dated= ?,c_license= ?,c_driving_license= ? where c_id="+id+"";
+		String proc="{call updatecar(?,?,?,?,?,?,?)}";
 		try{
 			conn = JdbcUtil.getConnection();
-			stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, car1.getId());
-			stmt.setString(2, car1.getBrand());
-			stmt.setInt(3,car1.getSeat());
-			stmt.setDate(4, car1.getLogon());
-			stmt.setDate(5, car1.getDated());
-			stmt.setString(6,car1.getLicense());
-			stmt.setString(7, car1.getD_license());
-			if(stmt.executeUpdate()==1){
+			cs = (CallableStatement) conn.prepareCall(proc);
+			cs.setInt(1, car1.getId());
+			cs.setString(2, car1.getBrand());
+			cs.setInt(3,car1.getSeat());
+			cs.setDate(4, car1.getLogon());
+			cs.setDate(5, car1.getDated());
+			cs.setString(6,car1.getLicense());
+			cs.setString(7, car1.getD_license());
+			if(cs.executeUpdate()==1){
 				return true;
 			}		
 		}catch (SQLException e) {
@@ -279,6 +264,7 @@ public class Car_dao {
 			e.printStackTrace();
 		} finally {
 			JdbcUtil.close(null, stmt, conn);
+			JdbcUtil.closecs(cs);
 		}
 		return false;
 	}	
@@ -286,44 +272,44 @@ public class Car_dao {
 	public boolean addToExcel(List<Car_inf> carlist,String path)
 	{
 		
-		System.out.println("生成excel方法\n");
-		// 第一步，创建一个webbook，对应一个Excel文件  
+		System.out.println("���excel����\n");
+		// ��һ��������һ��webbook����Ӧһ��Excel�ļ�  
         HSSFWorkbook wb = new HSSFWorkbook();  
-        // 第二步，在webbook中添加一个sheet,对应Excel文件中的sheet  
-        HSSFSheet sheet = wb.createSheet("车辆信息表");  
-        // 第三步，在sheet中添加表头第0行,注意老版本poi对Excel的行数列数有限制short  
+        // �ڶ�������webbook�����һ��sheet,��ӦExcel�ļ��е�sheet  
+        HSSFSheet sheet = wb.createSheet("������Ϣ��");  
+        // ������sheet����ӱ�ͷ��0��,ע���ϰ汾poi��Excel����������������short  
         HSSFRow row = sheet.createRow((int) 0);  
-        // 第四步，创建单元格，并设置值表头 设置表头居中  
+        // ���Ĳ���������Ԫ�񣬲�����ֵ��ͷ ���ñ�ͷ����  
         HSSFCellStyle style = wb.createCellStyle();  
-        style.setAlignment(HSSFCellStyle.ALIGN_CENTER); // 创建一个居中格式  
+        style.setAlignment(HSSFCellStyle.ALIGN_CENTER); // ����һ�����и�ʽ  
   
         HSSFCell cell = row.createCell((short) 0);  
-        cell.setCellValue("车辆id");  
+        cell.setCellValue("����id");  
         cell.setCellStyle(style);  
         cell = row.createCell((short) 1);  
-        cell.setCellValue("品牌");  
+        cell.setCellValue("Ʒ��");  
         cell.setCellStyle(style);  
         cell = row.createCell((short) 2);  
-        cell.setCellValue("座位数");  
+        cell.setCellValue("��λ��");  
         cell.setCellStyle(style);  
         cell = row.createCell((short) 3);  
-        cell.setCellValue("注册日期");  
+        cell.setCellValue("ע������");  
         cell.setCellStyle(style); 
         cell = row.createCell((short) 4);  
-        cell.setCellValue("保险日期");  
+        cell.setCellValue("��������");  
         cell.setCellStyle(style);  
         cell = row.createCell((short) 5);  
-        cell.setCellValue("驾驶证");  
+        cell.setCellValue("��ʻ֤");  
         cell.setCellStyle(style);  
         cell = row.createCell((short) 6);  
-        cell.setCellValue("行驶证");  
+        cell.setCellValue("��ʻ֤");  
         cell.setCellStyle(style);   
   
         for (int i = 0; i < carlist.size(); i++)  
         {  
             row = sheet.createRow((int) i + 1);  
             Car_inf car = (Car_inf) carlist.get(i);  
-            // 第四步，创建单元格，并设置值  
+            // ���Ĳ���������Ԫ�񣬲�����ֵ  
             String logon=car.getLogon().toString();
             String dated=car.getDated().toString();
             row.createCell((short) 0).setCellValue(car.getId());  
@@ -335,15 +321,15 @@ public class Car_dao {
             row.createCell((short) 6).setCellValue(car.getD_license()); 
             
         }  
-        // 第六步，将文件存到指定位置  
+        // �������ļ��浽ָ��λ��  
         try  
         {  
         	 System.out.println("true\n");
-        	String name=path+"车辆信息.xls";
+        	String name=path+"������Ϣ.xls";
             FileOutputStream fout = new FileOutputStream(name);  
             wb.write(fout);  
             fout.close();  
-            System.out.println("成功\n");
+            System.out.println("�ɹ�\n");
             return true;
         }  
         catch (Exception e)  
@@ -353,5 +339,17 @@ public class Car_dao {
        
         return false;
     }  
+	
+	private Car_inf fetchcar(ResultSet result) throws SQLException {
+		Car_inf carlist = new Car_inf();
+         carlist.setId(result.getInt("c_id"));
+         carlist.setBrand(result.getString("c_brand"));
+         carlist.setSeat(result.getInt("c_seat"));
+         carlist.setLogon(result.getDate("c_logon"));
+         carlist.setDated(result.getDate("c_dated"));
+         carlist.setLicense(result.getString("c_license"));
+         carlist.setD_license(result.getString("c_driving_license"));
+		return carlist;
+	}
 
 }

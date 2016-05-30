@@ -1,5 +1,6 @@
 package com.isoftstone.web.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,40 +11,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.isoftstone.web.dao.StationDao;
 import com.isoftstone.web.pojo.Station;
+import com.isoftstone.web.pojo.TestUser2;
 
 @RestController
 public class StationController {
 	private StationDao staDao=new StationDao();
 	/*查询部分*/
 	
-	/*全哥喜欢的通过id查询(●'◡'●)*/
-	@RequestMapping(value="/api/Station/{s_id}",method=RequestMethod.GET)
-	public ResponseEntity<Station> getStationById(@PathVariable("s_id") int s_id)
-	{
-		Station sta=staDao.getStaById(s_id);
-		if(sta.getS_name()==null)
-		{
-			return new ResponseEntity<Station>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<Station>(sta, HttpStatus.OK);
-	}
-	
-	 /*获得所有的站点信息，如果有name参数返回根据name模糊搜索的集合*/
+	 /*获得所有的站点信息*/
 	@RequestMapping(value = "/api/Station", method = RequestMethod.GET)
-	public ResponseEntity<List<Station>> getAllStation(@RequestParam(value="name",required=false) String s_name)
+	public ResponseEntity<List<Station>> getAllStation()
 	{
-		System.out.println("获取用户通过s_name=" + s_name);
-		if(s_name!=null)
-		{
-			List<Station> stationList = staDao.getStaByName(s_name);
-			return new ResponseEntity<List<Station>>(stationList, HttpStatus.OK);
-		}
-		
 		List<Station> stationList = staDao.getAllStations();
 		if(stationList.isEmpty()) {
 			return new ResponseEntity<List<Station>>(HttpStatus.NO_CONTENT);
@@ -51,6 +33,18 @@ public class StationController {
 		return new ResponseEntity<List<Station>>(stationList, HttpStatus.OK);
 	}
 	
+	/*通过站点名字模糊搜索*/
+	@RequestMapping(value = "/api/Station/{s_name}", method = RequestMethod.GET)
+	public ResponseEntity<List<Station>> getSomeStation(@PathVariable("s_name") String s_name)
+	{
+		System.out.println("获取用户通过s_name=" + s_name);
+		List<Station> stationList = staDao.getStaByName(s_name);
+		if(stationList.isEmpty()) {
+			System.out.println("用户没有找到 s_name=" + s_name);
+			return new ResponseEntity<List<Station>>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<List<Station>>(stationList, HttpStatus.OK);
+	}
 	
 	/*新增一个站点
 	 * 这里的json对象是一个Station类。但是由于主键已经设置过了自增
@@ -75,7 +69,7 @@ public class StationController {
 		if(staDao.isxyExist(sta.getLongitude(), sta.getLatitude()))
 		{
 			System.out.println("在此位置上已经有站点了");
-			return new ResponseEntity<Station>(HttpStatus.BAD_GATEWAY);
+			return new ResponseEntity<Station>(HttpStatus.CONFLICT);
 		}
 		
 		// 创建站点
@@ -132,7 +126,7 @@ public class StationController {
 		
 		if(staDao.deleteSta(id)) {
 			System.out.println("OK");
-			return new ResponseEntity<Station>(HttpStatus.OK);
+			return new ResponseEntity<Station>(HttpStatus.NO_CONTENT);
 		}
 		
 		return  new ResponseEntity<Station>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -150,19 +144,5 @@ public class StationController {
 		
 		// 如果出现异常，将状态码设为 internal server error(寻找更好的解决方案中……)
 		return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
-	}
-	
-	
-	//反推路线
-	@RequestMapping(value = "/api/StaToRoute/{s_id}", method = RequestMethod.GET)
-	public ResponseEntity<List<String>> getRouteBysta(@PathVariable("s_id") int s_id)
-	{
-		System.out.println("获取用户通过s_id=" + s_id);
-		
-		List<String> strList=staDao.getS_car(s_id);
-		if(strList.isEmpty()) {
-			return new ResponseEntity<List<String>>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<List<String>>(strList, HttpStatus.OK);
 	}
 }

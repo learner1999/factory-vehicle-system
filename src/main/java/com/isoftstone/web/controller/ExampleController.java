@@ -48,6 +48,9 @@ public class ExampleController {
 		return new ResponseEntity<List<TestUser2>>(users, HttpStatus.OK);
 	}
 	
+
+	
+	
 	/**
 	 * 通过 name 进行模糊查询
 	 * @param name
@@ -72,7 +75,6 @@ public class ExampleController {
 	@RequestMapping(value = "/api/user/{id}", method = RequestMethod.GET)  // {id} 表示路径中这个位置是一个变化的参数，参数名为 id
 	public ResponseEntity<TestUser2> getUser(@PathVariable("id") int id) {  // 在参数 id 前添加 PathVariable，表示这个参数对应路径中的 id 值
 		System.out.println("获取用户通过id=" + id);
-		
 		TestUser2 user = userDao.findById(id);
 		if(null == user) {
 			System.out.println("用户没有找到 id=" + id);
@@ -92,16 +94,20 @@ public class ExampleController {
 	 * @param user 全哥提交 json 格式的完整的 user 信息
 	 * @return 创建成功，返回创建的用户的信息
 	 */
+	//创建新的用户(只限于行政部、总务部人员)
 	@RequestMapping(value = "/api/user", method = RequestMethod.POST)
 	// 下面一行 RequestBody 这个注解表示全哥会传一个 json对象过来，对应 TestUser2，框架会自动将信息提取到参数 user 中，测试方法在 coding
 	public ResponseEntity<TestUser2> createUser(@RequestBody TestUser2 user) { 
 		System.out.println("创建用户 " + user.getUsername());
-		
 		// 检查提交的数据是否完整，如果不完整，将状态码设置为 BAD_REQUEST
-		if(null == user.getUsername() || null == user.getPassword() || 0 == user.getAuthority()) {
+		if(null == user.getUsername() || 0 == user.getAuthority()) {
 			return new ResponseEntity<TestUser2>(HttpStatus.BAD_REQUEST);
 		}
-		
+		//检测是否是行政部或者总务部
+		if(userDao.isUserTrue(user)){
+			System.out.println("用户 " + user.getUsername() + "不是行政部或者总务部人员");
+			return new ResponseEntity<TestUser2>(HttpStatus.CONFLICT);
+		}
 		// 检测用户名是否冲突
 		if(userDao.isUserExist(user)) {
 			System.out.println("用户 " + user.getUsername() + "已存在");
@@ -113,7 +119,6 @@ public class ExampleController {
 		if(userDao.createUser(user)) {
 			return new ResponseEntity<TestUser2>(user, HttpStatus.CREATED);
 		}
-		
 		// 如果出现异常，将状态码设为 internal server error(寻找更好的解决方案中……)
 		return new ResponseEntity<TestUser2>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}

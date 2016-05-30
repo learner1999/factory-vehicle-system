@@ -1,4 +1,4 @@
-package com.isoftstone.web.controller;
+﻿package com.isoftstone.web.controller;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.isoftstone.web.dao.Car_dao;
@@ -21,26 +22,25 @@ public class Car_manage_Controller {
 	Car_dao car=new Car_dao();//初始化对象（方法的对象）
 	
 	//获取全部车辆信息的控制器
-	@RequestMapping(value = "/api/car_inf", method = RequestMethod.GET)
+	/*@RequestMapping(value = "/api/car_inf", method = RequestMethod.GET)
 	public ResponseEntity<List<Car_inf>> getAllcar() //
 	{
+		System.out.print("运行了!!!");
 		List<Car_inf> carList= car.getAllcar();
 		if(carList.isEmpty()) {//结果为空
 			System.out.print("结果为空");
 			return new ResponseEntity<List<Car_inf>>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<List<Car_inf>>(carList, HttpStatus.OK);
-	}
+	}*/
 	
 	//增加车辆的控制器
 	@RequestMapping(value ="/api/car_inf", method = RequestMethod.POST)
 	public ResponseEntity<Car_inf> createcar(@RequestBody Car_inf car1){
-		
-		if(car1.getId() == 0){//判断主键id是不是为空
-			System.out.print("c_id不能为空");
+		if(car1.getId() == 0 ||car.is_id(car1.getId())){//判断主键id是不是为空或已存在
+			System.out.print("c_id不能为空或已存在");
 			return new ResponseEntity<Car_inf>(HttpStatus.BAD_REQUEST);
 		}
-		
 		if(car.is_license(car1.getLicense())){//判断驾驶证是否存在
 			System.out.print("驾驶证已存在");
 			return new ResponseEntity<Car_inf>(HttpStatus.CONFLICT);
@@ -61,7 +61,7 @@ public class Car_manage_Controller {
 	
 	
     //删除车辆信息控制器 （根据c_id）
-	@RequestMapping(value ="/api/car_inf/deletebyid/{id}", method = RequestMethod.DELETE)
+	@RequestMapping(value ="/api/car_inf/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<Car_inf> deletecar(@PathVariable("id") int id){
 		if(false==car.is_id(id)){
 			System.out.print("ID不存在");
@@ -75,11 +75,10 @@ public class Car_manage_Controller {
 	}
 	
 	
-	//查询控制器(c_id,c_brand,_driving-license)
-	@RequestMapping(value ="/api/car_inf/findbyid/{id}", method = RequestMethod.GET)
+	//查询控制器(c_id,c_brand)
+	@RequestMapping(value ="/api/car_inf/{id}", method = RequestMethod.GET)
 	public ResponseEntity<List<Car_inf>> getcarByid(@PathVariable("id") int id) //
 	{
-		
 		List<Car_inf> carList= car.getcarByid1(id);
 		if(carList.isEmpty()) {
 			System.out.print("查询失败");
@@ -87,30 +86,37 @@ public class Car_manage_Controller {
 		}
 		return new ResponseEntity<List<Car_inf>>(carList, HttpStatus.OK);
 	}
-	@RequestMapping(value ="/api/car_inf/findbybrand/{brand}", method = RequestMethod.GET)
-	public ResponseEntity<List<Car_inf>> getcarBybrand(@PathVariable("brand") String brand) //
+
+	@RequestMapping(value ="/api/car_inf", method = RequestMethod.GET)
+	public ResponseEntity<List<Car_inf>> getallcar(
+			@RequestParam(value = "brand", required = false) String brand) 
 	{
-		List<Car_inf> carList= car.getcarBybrand(brand);
+		System.out.print("执行了这一步1");
+		if(brand!=null){
+			return getcarBybrand(brand);
+		}
+		
+		List<Car_inf> carList= car.getAllcar();
+		System.out.print("执行了这一步2");
 		if(carList.isEmpty()) {
 			System.out.print("查询失败");
 			return new ResponseEntity<List<Car_inf>>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<List<Car_inf>>(carList, HttpStatus.OK);
 	}
-	
-	@RequestMapping(value ="/api/car_inf/findbylicense/{d_license}", method = RequestMethod.GET)
-	public ResponseEntity<List<Car_inf>> getcarByd_license(@PathVariable("d_license") String d_license) //
-	{
-		List<Car_inf> carList= car.getcarBydriving_license(d_license);
-		if(carList.isEmpty()) {
-			System.out.print("查询失败");
-			return new ResponseEntity<List<Car_inf>>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<List<Car_inf>>(carList, HttpStatus.OK);
-	}
+	//根据品牌获得汽车信息
+	public ResponseEntity<List<Car_inf>> getcarBybrand(String brand) {
+        List<Car_inf> carlist = car.getcarBybrand(brand);
+        if(carlist.isEmpty()) {
+            return new ResponseEntity<List<Car_inf>>(HttpStatus.NO_CONTENT);
+        }
+
+        return new ResponseEntity<List<Car_inf>>(carlist, HttpStatus.OK);
+    }
+
 	
 	//修改车辆信息(根据id选择要修改的信息)
-	@RequestMapping(value ="/api/car_inf/updatebyid/{id}", method = RequestMethod.POST)
+	@RequestMapping(value ="/api/car_inf/{id}", method = RequestMethod.POST)
    public ResponseEntity<Car_inf> updatecar(@PathVariable("id") int id,@RequestBody Car_inf car1){
 	  Car_inf car2=car.getcarByid(id);
 	   if(null== car2){
@@ -147,7 +153,7 @@ public class Car_manage_Controller {
 	@RequestMapping(value = "/api/Excel/car_inf", method = RequestMethod.POST)
 	public ResponseEntity<String> addStaToExcel(@RequestBody List<Car_inf> carlist,HttpServletRequest request) {
 		 System.out.print("生成excel\n");
-		String path="/public/excel/";
+		String path="/public/excel/";//成功后到tomcat中寻找
 		String realpath=request.getSession().getServletContext().getRealPath(path);
 		if(car.addToExcel(carlist,realpath)){
 			//System.out.print("成功\n");

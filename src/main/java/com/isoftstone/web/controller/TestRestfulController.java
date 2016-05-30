@@ -48,8 +48,6 @@ public class TestRestfulController {
 		return name;
 	}
 
-	
-
 	@RequestMapping("/getUserBody")
 	public TestUser getUserBody(@RequestBody String body) {  // 加上 RequestBody 表示此处的参数是访问时传来的数据
 		ObjectMapper mapper = new ObjectMapper();

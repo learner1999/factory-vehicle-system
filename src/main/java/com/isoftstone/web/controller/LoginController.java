@@ -22,9 +22,7 @@ public class LoginController {
 		
 		int id = 0;
 		LoginDao loginDao = new LoginDao();
-
 		id = loginDao.login(username, password);
-
 		if (0 == id) {
 			return "账号或密码错误";
 		} else {

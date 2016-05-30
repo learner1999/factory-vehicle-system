@@ -5,6 +5,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;  
 import java.sql.SQLException;  
 import java.sql.Statement;  
+
+import com.mysql.jdbc.CallableStatement;
   
 public class JdbcUtil {  
     private static String url = "jdbc:mysql://115.159.45.39:3306/factory_vehicle_system?useUnicode=true&characterEncoding=UTF-8";  
@@ -60,4 +62,17 @@ public class JdbcUtil {
         }  
   
     }  
+    
+    public static void closecs(CallableStatement cs){
+    	try {  
+            if (cs != null) {  
+                cs.close();  
+  
+            }  
+        } catch (SQLException e) {  
+            // TODO Auto-generated catch block  
+            e.printStackTrace();  
+        }
+    	
+    }
 }  

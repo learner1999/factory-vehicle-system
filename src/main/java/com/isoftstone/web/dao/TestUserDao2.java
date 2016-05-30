@@ -9,9 +9,10 @@ import java.util.List;
 
 import com.isoftstone.web.pojo.TestUser2;
 import com.isoftstone.web.util.JdbcUtil;
+import com.mysql.jdbc.CallableStatement;
 
 public class TestUserDao2 {
-
+	CallableStatement cs = null;
 	/***
 	 * 查找所有用户
 	 * 
@@ -117,7 +118,32 @@ public class TestUserDao2 {
 
 		return false;
 	}
+     //用户是否为总务部或者行政部员工
+	public boolean isUserTrue(TestUser2 user) {
+		Connection conn = null;
+		ResultSet result = null;
+		PreparedStatement stmt = null;
+		String prco = "{call IS_Uid(?)}";
+		try {
+			int a=Integer.parseInt(user.getUsername());
+			conn = JdbcUtil.getConnection();
+			cs= (CallableStatement) conn.prepareCall(prco);
+			cs.setInt(1,a);
+			result = cs.executeQuery();
+			if(result.next()){
+				if(result.getInt("res")==0)
+				return true;	
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+			JdbcUtil.closecs(cs);
+		}
 
+		return false;
+	}
+	
 	/***
 	 * 将 ResultSet 中的数据提取到 user 对象中
 	 * 
@@ -147,19 +173,24 @@ public class TestUserDao2 {
 	public boolean createUser(TestUser2 user) {
 		Connection conn = null;
 		PreparedStatement stmt = null;
-
 		// 3 个占位符，分别对应位置为 1,2,3
-		String strSql = "INSERT INTO `user` (username, password, authority) VALUES (?, ?, ?)";
-
+		String strSql = "INSERT INTO `user` (username,authority) VALUES (?,?)";
+		String strSql1 = "INSERT INTO `user` (username, password,authority) VALUES (?,?,?)";
 		try {
 			conn = JdbcUtil.getConnection();
-			stmt = conn.prepareStatement(strSql);
-
 			// 替换占位符位置的值
-			stmt.setString(1, user.getUsername());
-			stmt.setString(2, user.getPassword());
-			stmt.setInt(3, user.getAuthority());
-
+			if(null==user.getPassword()){
+			 stmt = conn.prepareStatement(strSql);
+			 stmt.setString(1, user.getUsername());
+			 stmt.setInt(2, user.getAuthority());
+			}
+			else{
+				 stmt = conn.prepareStatement(strSql1);
+				 stmt.setString(1, user.getUsername());
+				 stmt.setString(2, user.getPassword());
+				 stmt.setInt(3, user.getAuthority());
+			}
+			
 			int counter = stmt.executeUpdate();
 			if (1 == counter) {
 				return true;
