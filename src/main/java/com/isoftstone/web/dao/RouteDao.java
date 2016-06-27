@@ -115,29 +115,26 @@ public class RouteDao {
 	 * @param route
 	 * @return
 	 */
-	public boolean updateRoute(int carId, Route route) {
+	public boolean updateRoute(int carId, Route curRoute) {
+		// 先将路线原来的状态保存
+		Route oldRoute = findById(carId);
 
 		StationDao staDao = new StationDao();
 
 		// 数据库查询语句：添加站点信息
 		String strSql = "INSERT INTO car" + carId + " (`s_id`) VALUES (?);";
 
-		// // 删除路线表
-		// deleteRoute(carId);
-		//
-		// // 创建路线表
-		// createRoute(carId);
-
 		// 重构路线表，清空表记录，同时将自增字段计数归零
-		truncateRoute(carId);
+		if(!truncateRoute(carId)) {
+			return false;
+		}
 
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(strSql);
 
-			List<Station> listStation = route.getStations();
-
 			// 遍历提交的站点信息
+			List<Station> listStation = curRoute.getStations();
 			for (int i = 0; i < listStation.size(); i++) {
 				Station curStation = listStation.get(i);
 
@@ -162,12 +159,22 @@ public class RouteDao {
 		} finally {
 			JdbcUtil.close(null, stmt, conn);
 		}
+		
+		// 更新当前路线新增站点的所属路线字段
+		addCarIdToSta(carId, oldRoute, curRoute);
+		
+		// 更新当前路线删除站点的所属路线字段
+		delCarIdFromSta(carId, oldRoute, curRoute);
 
 		return true;
 	}
 
-	private void truncateRoute(int carId) {
-		// 数据库查询语句：删除对应 carId 的路线表
+	/**
+	 * 清空路线表，同时重置自增字段计数
+	 * @param carId
+	 */
+	public boolean truncateRoute(int carId) {
+		// 数据库查询语句：重构 carId 的路线表
 		String strSql = "TRUNCATE TABLE car" + carId + ";";
 
 		try {
@@ -176,56 +183,89 @@ public class RouteDao {
 			stmt = conn.prepareStatement(strSql);
 			stmt.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			return false;
 		} finally {
 			JdbcUtil.close(null, stmt, conn);
 		}
+		
+		return true;
 	}
-
+	
+	
 	/**
-	 * 删除对应 carId 的路线表
-	 * 
-	 * @param carId
+	 * 比较新旧路线之间站点变化，为删除的站点更新所属路线字段
+	 * @param carId	路线（车辆）id
+	 * @param oldRoute 修改前的路线
+	 * @param curRoute 即将修改成的路线
+	 * @return 是否成功
 	 */
-	private void deleteRoute(int carId) {
-
-		// 数据库查询语句：删除对应 carId 的路线表
-		String strSql = "DROP TABLE IF EXISTS car" + carId + ";";
-
-		try {
-			// 删除路线表
-			conn = JdbcUtil.getConnection();
-			stmt = conn.prepareStatement(strSql);
-			stmt.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			JdbcUtil.close(null, stmt, conn);
+	public boolean delCarIdFromSta(int carId, Route oldRoute, Route curRoute) {
+		
+		StationDao staDao = new StationDao();
+		
+		List<Integer> oldStation = fetchStationId(oldRoute.getStations());
+		List<Integer> curStation = fetchStationId(curRoute.getStations());
+		
+		
+		// 找出路线中删除的站点，oldStation 中留下的站点就是更新路线删除的站点
+		if(!oldStation.removeAll(curStation)) {
+			return false;
 		}
+		
+		System.out.println(oldStation);
+		
+		// 分别为每一个删除的站点更新所属路线字段
+		for(int i = 0, length = oldStation.size(); i < length; i++) {
+			int staIdTemp = oldStation.get(i);
+			staDao.delCarToSta(staIdTemp, carId + "");
+		}
+		
+		return true;
 	}
-
+	
+	
 	/**
-	 * 创建对应 carId 路线表
-	 * 
-	 * @param carId
+	 * 比较新旧路线之间站点变化，为新增的站点更新所属路线字段
+	 * @param carId	路线（车辆）id
+	 * @param oldRoute 修改前的路线
+	 * @param curRoute 即将修改成的路线
+	 * @return 是否成功
 	 */
-	private void createRoute(int carId) {
-
-		// 数据库查询语句：新建对应 carId 的路线表
-		String strSql = "CREATE TABLE `car" + carId + "` (" + "`s_id`  int(7) NULL DEFAULT NULL ,"
-				+ "`order`  int(11) NOT NULL AUTO_INCREMENT ," + "PRIMARY KEY (`order`) " + ") " + "ENGINE=InnoDB "
-				+ "DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci " + ";";
-
-		try {
-			// 创建路线表
-			conn = JdbcUtil.getConnection();
-			stmt = conn.prepareStatement(strSql);
-			stmt.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			JdbcUtil.close(null, stmt, conn);
+	public boolean addCarIdToSta(int carId, Route oldRoute, Route curRoute) {
+		
+		StationDao staDao = new StationDao();
+		
+		List<Integer> oldStation = fetchStationId(oldRoute.getStations());
+		List<Integer> curStation = fetchStationId(curRoute.getStations());
+		
+		// 找出路线中新增的站点，curStation 中留下的站点就是更新路线新增的站点
+		if(!curStation.removeAll(oldStation)) {
+			return false;
 		}
+		
+		// 分别为每一个新增的站点更新所属路线字段
+		for(int i = 0, length = curStation.size(); i < length; i++) {
+			int staIdTemp = curStation.get(i);
+			staDao.addCarToSta(staIdTemp, carId + "");
+		}
+		
+		return true;
+	}
+	
+	
+	/**
+	 * 从 List<Station> 中单独取出 id 构成一个 List
+	 * @param listSta
+	 * @return
+	 */
+	public List<Integer> fetchStationId(List<Station> listSta) {
+		List<Integer> listStaId = new ArrayList<>();
+		
+		for(int i = 0, length = listSta.size(); i < length; i++) {
+			listStaId.add(listSta.get(i).getS_id());
+		}
+		
+		return listStaId;
 	}
 
 }
