@@ -6,6 +6,9 @@ public class Emlopee {
 	private String epart;
 	private int egroup;
 	private int etime;
+	private double ex;
+	private double ey;
+	
 	public int getEid() {
 		return eid;
 	}
@@ -35,6 +38,18 @@ public class Emlopee {
 	}
 	public void setEtime(int etime) {
 		this.etime = etime;
+	}
+	public double getEx() {
+		return ex;
+	}
+	public void setEx(double ex) {
+		this.ex = ex;
+	}
+	public double getEy() {
+		return ey;
+	}
+	public void setEy(double ey) {
+		this.ey = ey;
 	}
 	
 }

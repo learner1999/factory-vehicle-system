@@ -14,6 +14,13 @@ public class EmlopeeDao {
 	private PreparedStatement stmt = null;
 	private ResultSet result = null;
 	
+	/***
+	 * 通过员工id查询员工信息
+	 * 
+	 * @param e_id
+	 *            要查询的员工id
+	 * @return 查询的员工信息
+	 */
 	public Emlopee getEmlopById(int e_id)
 	{
 		Emlopee emlop=new Emlopee();
@@ -29,6 +36,8 @@ public class EmlopeeDao {
 				emlop.setEpart(result.getString("epart"));
 				emlop.setEgroup(result.getInt("egroup"));
 				emlop.setEtime(result.getInt("etime"));
+				emlop.setEx(result.getDouble("ex"));
+				emlop.setEy(result.getDouble("ey"));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

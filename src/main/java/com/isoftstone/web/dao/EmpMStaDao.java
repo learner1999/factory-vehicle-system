@@ -23,7 +23,14 @@ public class EmpMStaDao {
 	//获得所有的(不包括需要处理的)
 	//根据员工名模糊查询获得的（也不包括需要处理的）（由于主要的功能和员工没什么关系，所以员工就做这些）
 	
-	//通过站点id查看此站点的员工
+	//
+	/***
+	 * 通过站点id查看此站点的员工
+	 * 
+	 * @param s_id
+	 *            要查询的站点id
+	 * @return 员工id集合
+	 */
 	public List<Emlopee> getEmlopBySta(int s_id)
 	{
 		List<Emlopee> emlopList=new ArrayList<Emlopee>();
@@ -47,7 +54,13 @@ public class EmpMStaDao {
 		return emlopList;
 	}
 	
-	//通过员工id找到这条记录
+	/***
+	 * 通过员工id找到这条记录
+	 * 
+	 * @param e_id
+	 *            员工id
+	 * @return 员工站点对应信息
+	 */
 	public EmpMatchSta getEmsByEid(int e_id)
 	{
 		EmpMatchSta ems=new EmpMatchSta();
@@ -60,6 +73,8 @@ public class EmpMStaDao {
 			while (result.next()) {
 				ems.setE_id(result.getInt("e_id"));
 				ems.setS_id(result.getInt("s_id"));
+				ems.setE_x(result.getDouble("e_x"));
+				ems.setE_y(result.getDouble("e_y"));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -69,7 +84,11 @@ public class EmpMStaDao {
 		return ems;
 	}
 	
-	//找到新增但还没有为其建造站点的员工
+	/***
+	 * 找到新增但还没有为其建造站点的员工
+	 * 
+	 * @return 这类员工信息集
+	 */
 	public List<Emlopee> matchEAndS()
 	{
 		List<Emlopee> emlopList=new ArrayList<Emlopee>();
@@ -86,6 +105,8 @@ public class EmpMStaDao {
 				emlop.setEpart(result.getString("epart"));
 				emlop.setEgroup(result.getInt("egroup"));
 				emlop.setEtime(result.getInt("etime"));
+				emlop.setEx(result.getInt("ex"));
+				emlop.setEy(result.getInt("ey"));
 				emlopList.add(emlop);
 			}
 		} catch (SQLException e) {
@@ -96,15 +117,23 @@ public class EmpMStaDao {
 		return emlopList;
 	}
 	
-	//这里跟一个新增的
+	/***
+	 * 新增员工站点对应表信息
+	 * 
+	 * @param ems
+	 *            员工站点对应信息
+	 * @return 是否添加成功
+	 */
 	public boolean creatEMS(EmpMatchSta ems)
 	{
-		String sql="insert into employee_station(e_id,s_id) values (?,?)";
+		String sql="insert into employee_station(e_id,s_id,e_x,e_y) values (?,?,?,?)";
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
 			stmt.setInt(1, ems.getE_id());
 			stmt.setInt(2, ems.getS_id());
+			stmt.setDouble(3,ems.getE_x());
+			stmt.setDouble(4, ems.getE_y());
 			int counter = stmt.executeUpdate();
 			if (1 == counter) {
 				JdbcUtil.close(null, stmt, conn);
@@ -120,7 +149,13 @@ public class EmpMStaDao {
 		return false;
 	}
 	
-	//还有修改员工对应的站点表
+	/***
+	 * 修改员工对应的站点表
+	 * 
+	 * @param e_id,ems
+	 *            员工id,员工站点对应信息
+	 * @return 是否修改成功
+	 */
 	public boolean updateEMSByEid(int e_id, EmpMatchSta ems) {
 		String sql = "update  employee_station set s_id=? where e_id=?";
 
@@ -144,7 +179,11 @@ public class EmpMStaDao {
 		return false;
 	}
 	
-	//找到虽有匹配站点但没有员工信息的记录，
+	/***
+	 * 找到虽有匹配站点但没有员工信息的记录
+	 * 
+	 * @return 这类员工信息集
+	 */
 	public List<EmpMatchSta> matchSAndE()
 	{
 		List<EmpMatchSta> emsList=new ArrayList<EmpMatchSta>();
@@ -158,6 +197,8 @@ public class EmpMStaDao {
 				//获得emlop
 				ems.setE_id(result.getInt("e_id"));
 				ems.setS_id(result.getInt("s_id"));
+				ems.setE_x(result.getDouble("e_x"));
+				ems.setE_y(result.getDouble("e_y"));
 				emsList.add(ems);
 			}
 		} catch (SQLException e) {
@@ -168,7 +209,13 @@ public class EmpMStaDao {
 		return emsList;
 	}
 	
-	//这里后面要跟一个删除的
+	/***
+	 * 删除某员工对应的员工站点信息
+	 * 
+	 * @param e_id
+	 *            员工id
+	 * @return 是否删除成功
+	 */
 	public boolean deleteEms(int e_id) {
 		String sql = "delete from employee_station where e_id=?";
 		try {

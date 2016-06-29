@@ -22,9 +22,11 @@ public class StationDao {
 	private PreparedStatement stmt = null;
 	private ResultSet result = null;
 
-	/* 查询部分 */
-
-	/* 获得所有的站点信息 */
+	/***
+	 * 查询数据库中所有的站点信息
+	 * 
+	 * @return 所有站点信息
+	 */
 	public List<Station> getAllStations() {
 		List<Station> stationList = new ArrayList<>();
 		String sql = "select * from station_information";
@@ -49,7 +51,13 @@ public class StationDao {
 		return stationList;
 	}
 
-	/* 通过站点名字模糊搜索 */
+	/***
+	 * 通过站点名字模糊搜索
+	 * 
+	 * @param name_part
+	 *            模糊查询的字段
+	 * @return 模糊搜索的查询结果
+	 */
 	public List<Station> getStaByName(String name_part) {
 		List<Station> stationList = new ArrayList<>();
 		String sql = "select * from station_information where s_name like ?";
@@ -75,7 +83,13 @@ public class StationDao {
 		return stationList;
 	}
 
-	/* 通过id获取到对应的站点信息 */
+	/***
+	 * 通过id获取到对应的站点信息
+	 * 
+	 * @param id
+	 *            站点id
+	 * @return 查询结果
+	 */
 	public Station getStaById(int id) {
 		Station sta = new Station();
 		String sql = "select * from station_information where s_id=?";
@@ -99,8 +113,13 @@ public class StationDao {
 		return sta;
 	}
 
-	/* 添加部分 */
-	/* 新增一个站点,最后一个属性可以为空 */
+	/***
+	 * 新增一个站点
+	 * 
+	 * @param sta
+	 *            新增的站点对象
+	 * @return 是否增加成功
+	 */
 	public boolean createStation(Station sta) {
 		String sql = "insert into station_information(s_name,longitude,latitude) values(?,?,?)";
 		try {
@@ -124,7 +143,13 @@ public class StationDao {
 		return false;
 	}
 
-	/* 测试站点是否已经存在，用不到最后一个 */
+	/***
+	 * 测试站点是否已经存在
+	 * 
+	 * @param s_name
+	 *            查询的站点名称
+	 * @return 是否存在
+	 */
 	public boolean isStationExist(String s_name) {
 		String sql = "select s_name from station_information where s_name=?";
 
@@ -145,7 +170,13 @@ public class StationDao {
 		return false;
 	}
 
-	/* 测试在这个坐标点上是否已经有站点了，用不到最后一个 */
+	/***
+	 * 测试在这个坐标点上是否已经有站点了
+	 * 
+	 * @param x,y
+	 *            经度，纬度
+	 * @return 是否存在
+	 */
 	public boolean isxyExist(double x, double y) {
 		String sql = "select longitude,latitude from station_information where longitude=? and latitude=?";
 
@@ -167,8 +198,13 @@ public class StationDao {
 		return false;
 	}
 
-	/* 修改部分 */
-	/* 获得id和Station对象，通过id用新的数据替换掉原来的数据 ，最后一个是不可以手动修改的*/
+	/***
+	 *  获得id和Station对象，通过id用新的数据替换掉原来的数据
+	 * 
+	 * @param id,staNow
+	 *            要修改的站点id，修改后的站点对象
+	 * @return 是否修改成功
+	 */
 	public boolean updateStaById(int id, Station staNow) {
 		String sql = "update  station_information set s_name=?,longitude=?,latitude=? "
 				+ " where s_id=?";
@@ -194,8 +230,13 @@ public class StationDao {
 		return false;
 	}
 
-	/* 删除部分 */
-	/* 根据站点的id删除掉一个站点 ，用不到最后一个*/
+	/***
+	 * 根据站点的id删除掉一个站点
+	 * 
+	 * @param s_id
+	 *            要删除的站点id
+	 * @return 是否删除成功
+	 */
 	public boolean deleteSta(int id) {
 		String sql = "delete from station_information where s_id=?";
 		try {
@@ -251,7 +292,14 @@ public class StationDao {
 
 		return station;
 	}
-
+	
+	/***
+	 * 将站点数据Excel导出
+	 * 
+	 * @param stalist,path
+	 *            要导出的站点集合，excel文件下载地址
+	 * @return 是否导出成功
+	 */
 	public boolean addToExcel(List<Station> stalist, String path) {
 		// 第一步，创建一个webbook，对应一个Excel文件
 		HSSFWorkbook wb = new HSSFWorkbook();
@@ -298,7 +346,11 @@ public class StationDao {
 		return false;
 	}
 
-	// 检测无用站点?????不知道有没有用
+	/***
+	 * 检测无用站点
+	 * 
+	 * @return 无用站点集
+	 */
 	public List<Station> isStationUsed() {
 		List<Station> stationList = new ArrayList<>();
 		String sql = "select * from station_information where s_car is null";
@@ -324,7 +376,13 @@ public class StationDao {
 		return stationList;
 	}
 	
-	//获得String的list，传进来的参数是在数据库查出来的
+	/***
+	 * 将string,string,string格式的字符串转换为stringList
+	 * 
+	 * @param str
+	 *            原字符串
+	 * @return 转换后的string集合
+	 */
 	public List<String> getStaList(String str)
 	{
 		List<String> staList=new ArrayList<String>();
@@ -347,7 +405,13 @@ public class StationDao {
 		return staList;
 	}
 	
-	//从字符串里面删除特定的车辆，返回处理后的字符串
+	/***
+	 * 从字符串里面删除特定的字符
+	 * 
+	 * @param str,car
+	 *            原字符串，要删除的字符串
+	 * @return 处理后的字符串
+	 */
 	public String delFromStaList(String str,String car)
 	{
 		List<String> strList=getStaList(str);
@@ -370,7 +434,13 @@ public class StationDao {
 		return strTurn;
 	}
 	
-	//往字符串里加入一辆车，返回处理后的字符串
+	/***
+	 * 往字符串里添加一个字符串
+	 * 
+	 * @param str,car
+	 *            原字符串，要添加的字符串
+	 * @return 处理后的字符串
+	 */
 	public String addToStaList(String str,String car)
 	{
 		if(str.equals("")==true)
@@ -385,7 +455,14 @@ public class StationDao {
 	
 	/*涛哥看向我！！！
 	 * 以下的函数都是给你用的！！！*/
-	//向站点中添加一辆车
+	//
+	/***
+	 * 向站点车辆对应表中添加一辆车
+	 * 
+	 * @param id,car
+	 *            要处理的站点id，要添加的车辆
+	 * @return 是否添加成功
+	 */
 	public boolean addCarToSta(int id,String car)
 	{
 		String str=getStaById(id).getS_car();
@@ -412,7 +489,13 @@ public class StationDao {
 		return false;
 	}
 	
-	//从站点对应表中删除这辆车
+	/***
+	 * 从站点对应表中删除这辆车
+	 * 
+	 * @param id,car
+	 *            要处理的站点id，要删除的车辆
+	 * @return 是否添加成功
+	 */
 	public boolean delCarToSta(int id,String car)
 	{
 		String str=getStaById(id).getS_car();
@@ -439,7 +522,13 @@ public class StationDao {
 		return false;
 	}
 	
-	// 通过站点id反推其路线
+	/***
+	 * 通过站点id反推其路线
+	 * 
+	 * @param id
+	 *            查询的站点id
+	 * @return 路线集合
+	 */
 	public List<String> getS_car(int id) {
 		String sql = "select s_car from station_information where s_id=?";
 		try {
