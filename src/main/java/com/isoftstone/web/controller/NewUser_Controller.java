@@ -60,6 +60,7 @@ public class NewUser_Controller {
 		
 			// 创建用户
 			if(userDao.createUser(user)) {
+				System.out.println("创建用户"+user.getUsername()+"成功");
 				return new ResponseEntity<TestUser2>(user, HttpStatus.CREATED);
 			}
 			// 如果出现异常，将状态码设为 internal server error(寻找更好的解决方案中……)
@@ -94,19 +95,19 @@ public class NewUser_Controller {
 		}
 	/**
 	 * 注销账号信息
-	 * @param username
+	 * @param id
 	 * @return
 	 */
-		@RequestMapping(value = "/api/Newuser", method = RequestMethod.DELETE)
-		public ResponseEntity<TestUser2> deleteUser(@RequestBody TestUser2 user) {
-			System.out.println("删除一个用户名=" + user.getUsername());
+		@RequestMapping(value = "/api/Newuser/{username}", method = RequestMethod.DELETE)
+		public ResponseEntity<TestUser2> deleteUser(@PathVariable("username") String username) {
+			System.out.println("删除一个用户名=" + username);
 			// 检测对应 id 用户是否存在，不存在将状态码设为 NOT_FOUND
-			if(userDao.findByusername(user.getUsername())) {
-				System.out.println("找不到 用户名=" +user.getUsername()+" 的用户");
+			if(userDao.findByusername(username)) {
+				System.out.println("找不到 用户名=" +username+" 的用户");
 				return new ResponseEntity<TestUser2>(HttpStatus.NOT_FOUND);
 			}
 			// 数据库操作
-			if(userDao.deleteUser(user.getUsername())) {
+			if(userDao.deleteUser(username)) {
 				System.out.println("删除成功");
 				return new ResponseEntity<TestUser2>(HttpStatus.OK);
 			}
