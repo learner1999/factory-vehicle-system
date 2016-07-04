@@ -26,6 +26,10 @@ public class Car_dao {
 	private ResultSet result = null;
 	CallableStatement cs = null;
 	
+	/**
+	 * 查询所有车辆信息
+	 * @return 所有车辆信息构成的list
+	 */
 	public List getAllcar()
 	{
 		List<Car_inf> carList = new ArrayList<>();
@@ -47,6 +51,11 @@ public class Car_dao {
 		return carList;
 	}
 	
+	/**
+	 * 查询指定id的车辆信息
+	 * @param id
+	 * @return 该车辆信息构成的list
+	 */
 	public Car_inf getcarByid(int id)
 	{
 		Car_inf car = null;
@@ -67,7 +76,11 @@ public class Car_dao {
 		}
 		return car;
 	}
-	
+	/**
+	 * 查询指定品牌的车辆信息
+	 * @param brand
+	 * @return 该品牌车辆构成的list
+	 */
 	public List getcarBybrand(String brand)
 	{
 		List<Car_inf> carList = new ArrayList<>();
@@ -112,7 +125,11 @@ public class Car_dao {
 		return carList;
 	}
 	*/
-	
+	/**
+	 * 查询指定id车辆信息
+	 * @param id
+	 * @return 此id车辆的list
+	 */
 	public List getcarByid1(int id)
 	{
 		List<Car_inf> carList = new ArrayList<>();
@@ -134,6 +151,10 @@ public class Car_dao {
 		}
 		return carList;
 	}
+	/**
+	 * 判断此驾驶证是否已经存在
+	 * @param c_license
+	 * @return 是否存在
 	
 	public boolean is_license(String c_license){
 		String proc="{call is_license(?)}";
@@ -155,7 +176,13 @@ public class Car_dao {
 			}
 		return false;
 		}
-	
+		
+		 */
+	/**
+	 * 判断行驶证是否存在
+	 * @param d_license
+	 * @return 是否存在
+	 */
 	public boolean is_Dlicense(String d_license){
 		String proc="{call is_d_license(?)}";
 		try{
@@ -177,6 +204,11 @@ public class Car_dao {
 		return false;
 		}
 	
+	/**
+	 * 判断此车辆id是否已存在
+	 * @param id
+	 * @return 是否存在
+	 */
 	public boolean is_id(int id){
 		String proc="{call is_id(?)}";
 		try{
@@ -197,7 +229,11 @@ public class Car_dao {
 			}
 		return false;
 		}
-	
+	/**
+	 *  删除指定车辆信息
+	 * @param id
+	 * @return 是否删除成功
+	 */
 	public boolean deletecar(int id){
 		String proc="{call deletecar(?)}";
 		try{
@@ -218,9 +254,13 @@ public class Car_dao {
 		return false;
 		}
 			
-	
+	/**
+	 * 创建新的车辆信息
+	 * @param car1
+	 * @return 是否创建成功
+	 */
 	public boolean createcar(Car_inf car1){
-		String proc="{call increasecar(?,?,?,?,?,?,?)}";
+		String proc="{call increasecar(?,?,?,?,?,?)}";
 		try{
 			conn = JdbcUtil.getConnection();
 			cs = (CallableStatement) conn.prepareCall(proc);
@@ -229,8 +269,7 @@ public class Car_dao {
 			cs.setInt(3,car1.getSeat());
 			cs.setDate(4, car1.getLogon());
 			cs.setDate(5, car1.getDated());
-			cs.setString(6,car1.getLicense());
-			cs.setString(7, car1.getD_license());
+			cs.setString(6, car1.getD_license());
 			if(cs.executeUpdate()==1){
 				return true;
 			}		
@@ -243,9 +282,14 @@ public class Car_dao {
 		}
 		return false;
 	}
-	
+	/**
+	 * 更新指定车辆信息记录
+	 * @param car1
+	 * @param id
+	 * @return 是否更新成功
+	 */
 	public boolean updatecar(Car_inf car1,int id){
-		String proc="{call updatecar(?,?,?,?,?,?,?)}";
+		String proc="{call updatecar(?,?,?,?,?,?)}";
 		try{
 			conn = JdbcUtil.getConnection();
 			cs = (CallableStatement) conn.prepareCall(proc);
@@ -254,8 +298,7 @@ public class Car_dao {
 			cs.setInt(3,car1.getSeat());
 			cs.setDate(4, car1.getLogon());
 			cs.setDate(5, car1.getDated());
-			cs.setString(6,car1.getLicense());
-			cs.setString(7, car1.getD_license());
+			cs.setString(6, car1.getD_license());
 			if(cs.executeUpdate()==1){
 				return true;
 			}		
@@ -268,7 +311,12 @@ public class Car_dao {
 		}
 		return false;
 	}	
-		
+	/**
+	 * 输入车辆信息和excel存储路径,产生车辆信息excel表
+	 * @param carlist
+	 * @param path
+	 * @return 是否导入到excel表格中
+	 */
 	public boolean addToExcel(List<Car_inf> carlist,String path)
 	{
 		
@@ -300,9 +348,6 @@ public class Car_dao {
         cell.setCellStyle(style);  
         cell = row.createCell((short) 5);  
         cell.setCellValue("��ʻ֤");  
-        cell.setCellStyle(style);  
-        cell = row.createCell((short) 6);  
-        cell.setCellValue("��ʻ֤");  
         cell.setCellStyle(style);   
   
         for (int i = 0; i < carlist.size(); i++)  
@@ -317,15 +362,14 @@ public class Car_dao {
             row.createCell((short) 2).setCellValue(car.getSeat());  
             row.createCell((short) 3).setCellValue(logon); 
             row.createCell((short) 4).setCellValue(dated); 
-            row.createCell((short) 5).setCellValue(car.getLicense()); 
-            row.createCell((short) 6).setCellValue(car.getD_license()); 
+            row.createCell((short) 5).setCellValue(car.getD_license()); 
             
         }  
         // �������ļ��浽ָ��λ��  
         try  
         {  
         	 System.out.println("true\n");
-        	String name=path+"������Ϣ.xls";
+        	String name=path+"车辆信息.xls";
             FileOutputStream fout = new FileOutputStream(name);  
             wb.write(fout);  
             fout.close();  
@@ -339,7 +383,14 @@ public class Car_dao {
        
         return false;
     }  
-	
+	/***
+	 * 将 ResultSet 中的数据提取到 carlist 对象中
+	 * 
+	 * @param result
+	 *            执行数据库查询后返回的 ResultSet
+	 * @return carlist 对象
+	 * @throws SQLException
+	 */
 	private Car_inf fetchcar(ResultSet result) throws SQLException {
 		Car_inf carlist = new Car_inf();
          carlist.setId(result.getInt("c_id"));
@@ -347,7 +398,6 @@ public class Car_dao {
          carlist.setSeat(result.getInt("c_seat"));
          carlist.setLogon(result.getDate("c_logon"));
          carlist.setDated(result.getDate("c_dated"));
-         carlist.setLicense(result.getString("c_license"));
          carlist.setD_license(result.getString("c_driving_license"));
 		return carlist;
 	}

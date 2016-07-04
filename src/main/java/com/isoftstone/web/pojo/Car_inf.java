@@ -8,7 +8,6 @@ public class Car_inf {
 	private int seat;
 	private Date logon;
 	private Date dated;
-	private String license;
 	private String d_license;
 	
 	public int getId() {
@@ -41,12 +40,7 @@ public class Car_inf {
 	public void setDated(Date dated) {
 		this.dated = dated;
 	}
-	public String getLicense() {
-		return license;
-	}
-	public void setLicense(String license) {
-		this.license = license;
-	}
+	
 	public String getD_license() {
 		return d_license;
 	}

@@ -21,29 +21,19 @@ import com.isoftstone.web.pojo.Car_inf;
 public class Car_manage_Controller {
 	Car_dao car=new Car_dao();//初始化对象（方法的对象）
 	
-	//获取全部车辆信息的控制器
-	/*@RequestMapping(value = "/api/car_inf", method = RequestMethod.GET)
-	public ResponseEntity<List<Car_inf>> getAllcar() //
-	{
-		System.out.print("运行了!!!");
-		List<Car_inf> carList= car.getAllcar();
-		if(carList.isEmpty()) {//结果为空
-			System.out.print("结果为空");
-			return new ResponseEntity<List<Car_inf>>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<List<Car_inf>>(carList, HttpStatus.OK);
-	}*/
 	
-	//增加车辆的控制器
+	
+	/**
+	 * 新增一辆车的信息
+	 * 主键ID不能为空或已存在，驾驶证行驶证都不能已存在
+	 * @param car1
+	 * @return
+	 */
 	@RequestMapping(value ="/api/car_inf", method = RequestMethod.POST)
 	public ResponseEntity<Car_inf> createcar(@RequestBody Car_inf car1){
 		if(car1.getId() == 0 ||car.is_id(car1.getId())){//判断主键id是不是为空或已存在
 			System.out.print("c_id不能为空或已存在");
 			return new ResponseEntity<Car_inf>(HttpStatus.BAD_REQUEST);
-		}
-		if(car.is_license(car1.getLicense())){//判断驾驶证是否存在
-			System.out.print("驾驶证已存在");
-			return new ResponseEntity<Car_inf>(HttpStatus.CONFLICT);
 		}
 		
 		if(car.is_Dlicense(car1.getD_license())){//判断行驶证是否存在
@@ -60,7 +50,11 @@ public class Car_manage_Controller {
 	}
 	
 	
-    //删除车辆信息控制器 （根据c_id）
+    /**
+     * 根据车辆id删除车辆信息
+     * @param id
+     * @return
+     */
 	@RequestMapping(value ="/api/car_inf/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<Car_inf> deletecar(@PathVariable("id") int id){
 		if(false==car.is_id(id)){
@@ -75,7 +69,11 @@ public class Car_manage_Controller {
 	}
 	
 	
-	//查询控制器(c_id,c_brand)
+	/**
+	 * 根据车辆id查询车辆信息
+	 * @param id
+	 * @return
+	 */
 	@RequestMapping(value ="/api/car_inf/{id}", method = RequestMethod.GET)
 	public ResponseEntity<List<Car_inf>> getcarByid(@PathVariable("id") int id) //
 	{
@@ -86,25 +84,33 @@ public class Car_manage_Controller {
 		}
 		return new ResponseEntity<List<Car_inf>>(carList, HttpStatus.OK);
 	}
-
+	
+	
+/**
+ * 根据车辆品牌查询车辆信息(如果不输入参数brand,则会显示所有车辆信息)
+ * @param brand
+ * @return
+ */
 	@RequestMapping(value ="/api/car_inf", method = RequestMethod.GET)
 	public ResponseEntity<List<Car_inf>> getallcar(
 			@RequestParam(value = "brand", required = false) String brand) 
 	{
-		System.out.print("执行了这一步1");
 		if(brand!=null){
 			return getcarBybrand(brand);
 		}
 		
 		List<Car_inf> carList= car.getAllcar();
-		System.out.print("执行了这一步2");
 		if(carList.isEmpty()) {
 			System.out.print("查询失败");
 			return new ResponseEntity<List<Car_inf>>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<List<Car_inf>>(carList, HttpStatus.OK);
 	}
-	//根据品牌获得汽车信息
+	/**
+	 * 根据车辆品牌返回车辆信息
+	 * @param brand
+	 * @return
+	 */
 	public ResponseEntity<List<Car_inf>> getcarBybrand(String brand) {
         List<Car_inf> carlist = car.getcarBybrand(brand);
         if(carlist.isEmpty()) {
@@ -115,12 +121,17 @@ public class Car_manage_Controller {
     }
 
 	
-	//修改车辆信息(根据id选择要修改的信息)
-	@RequestMapping(value ="/api/car_inf/{id}", method = RequestMethod.POST)
+/**
+ * 根据车辆id，修改并更新车辆信息
+ * @param id
+ * @param car1
+ * @return
+ */
+	@RequestMapping(value ="/api/car_inf/{id}", method = RequestMethod.PUT)
    public ResponseEntity<Car_inf> updatecar(@PathVariable("id") int id,@RequestBody Car_inf car1){
 	  Car_inf car2=car.getcarByid(id);
 	   if(null== car2){
-		   System.out.print("不存在该id");
+		   System.out.print("未找到此ID:"+id);
 		   return new ResponseEntity<Car_inf>(HttpStatus.NOT_FOUND);
 	   }
 	   if(car1.getBrand()!=null){
@@ -135,9 +146,6 @@ public class Car_manage_Controller {
 	   if(car1.getDated()!=null){
 		   car2.setDated(car1.getDated());
 	   }
-	   if(car1.getLicense()!=null){
-		   car2.setLicense(car1.getLicense());
-	   }
 	   if(car1.getD_license()!=null){
 		   car2.setD_license(car1.getD_license());
 	   }
@@ -149,7 +157,12 @@ public class Car_manage_Controller {
 	   return  new ResponseEntity<Car_inf>(HttpStatus.INTERNAL_SERVER_ERROR);
    }
    
-	/*导出excel*/
+	/**
+	 * 输入carlist型数据，导入到车辆信息excel表格
+	 * @param carlist
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(value = "/api/Excel/car_inf", method = RequestMethod.POST)
 	public ResponseEntity<String> addStaToExcel(@RequestBody List<Car_inf> carlist,HttpServletRequest request) {
 		 System.out.print("生成excel\n");
@@ -159,7 +172,6 @@ public class Car_manage_Controller {
 			//System.out.print("成功\n");
 			return new ResponseEntity<String>("/excel/车辆信息",HttpStatus.OK);
 		}
-		
 		// 如果出现异常，将状态码设为 internal server error(寻找更好的解决方案中……)
 		return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
