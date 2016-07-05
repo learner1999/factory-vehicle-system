@@ -260,16 +260,15 @@ public class Car_dao {
 	 * @return 是否创建成功
 	 */
 	public boolean createcar(Car_inf car1){
-		String proc="{call increasecar(?,?,?,?,?,?)}";
+		String proc="{call increasecar(?,?,?,?,?)}";
 		try{
 			conn = JdbcUtil.getConnection();
 			cs = (CallableStatement) conn.prepareCall(proc);
-			cs.setInt(1, car1.getId());
-			cs.setString(2, car1.getBrand());
-			cs.setInt(3,car1.getSeat());
-			cs.setDate(4, car1.getLogon());
-			cs.setDate(5, car1.getDated());
-			cs.setString(6, car1.getD_license());
+			cs.setString(1, car1.getBrand());
+			cs.setInt(2,car1.getSeat());
+			cs.setDate(3, car1.getLogon());
+			cs.setDate(4, car1.getDated());
+			cs.setString(5, car1.getD_license());
 			if(cs.executeUpdate()==1){
 				return true;
 			}		
@@ -293,7 +292,7 @@ public class Car_dao {
 		try{
 			conn = JdbcUtil.getConnection();
 			cs = (CallableStatement) conn.prepareCall(proc);
-			cs.setInt(1, car1.getId());
+			cs.setInt(1, id);
 			cs.setString(2, car1.getBrand());
 			cs.setInt(3,car1.getSeat());
 			cs.setDate(4, car1.getLogon());

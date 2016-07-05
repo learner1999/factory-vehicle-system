@@ -25,17 +25,12 @@ public class Car_manage_Controller {
 	
 	/**
 	 * 新增一辆车的信息
-	 * 主键ID不能为空或已存在，驾驶证行驶证都不能已存在
+	 * 驾驶证行驶证都不能已存在
 	 * @param car1
 	 * @return
 	 */
 	@RequestMapping(value ="/api/car_inf", method = RequestMethod.POST)
 	public ResponseEntity<Car_inf> createcar(@RequestBody Car_inf car1){
-		if(car1.getId() == 0 ||car.is_id(car1.getId())){//判断主键id是不是为空或已存在
-			System.out.print("c_id不能为空或已存在");
-			return new ResponseEntity<Car_inf>(HttpStatus.BAD_REQUEST);
-		}
-		
 		if(car.is_Dlicense(car1.getD_license())){//判断行驶证是否存在
 			System.out.print("行驶证已存在");
 			return new ResponseEntity<Car_inf>(HttpStatus.CONFLICT);
