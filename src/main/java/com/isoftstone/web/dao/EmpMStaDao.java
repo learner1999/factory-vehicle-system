@@ -105,6 +105,7 @@ public class EmpMStaDao {
 				emlop.setEpart(result.getString("epart"));
 				emlop.setEgroup(result.getInt("egroup"));
 				emlop.setEtime(result.getInt("etime"));
+				emlop.setEaddress(result.getString("eaddress"));
 				emlop.setEx(result.getInt("ex"));
 				emlop.setEy(result.getInt("ey"));
 				emlopList.add(emlop);

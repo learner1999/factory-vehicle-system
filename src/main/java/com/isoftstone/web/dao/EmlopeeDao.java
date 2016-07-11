@@ -36,6 +36,7 @@ public class EmlopeeDao {
 				emlop.setEpart(result.getString("epart"));
 				emlop.setEgroup(result.getInt("egroup"));
 				emlop.setEtime(result.getInt("etime"));
+				emlop.setEaddress(result.getString("EAddress"));
 				emlop.setEx(result.getDouble("ex"));
 				emlop.setEy(result.getDouble("ey"));
 			}
@@ -46,4 +47,5 @@ public class EmlopeeDao {
 		}
 		return emlop;
 	}
+	
 }

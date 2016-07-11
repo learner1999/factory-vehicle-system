@@ -3,20 +3,10 @@ package com.isoftstone.web.pojo;
 public class EmpMatchSta {
 	private int e_id;
 	private int s_id;
+	private String e_address;
 	private double e_x;
 	private double e_y;
-	public double getE_x() {
-		return e_x;
-	}
-	public void setE_x(double e_x) {
-		this.e_x = e_x;
-	}
-	public double getE_y() {
-		return e_y;
-	}
-	public void setE_y(double e_y) {
-		this.e_y = e_y;
-	}
+	
 	public int getE_id() {
 		return e_id;
 	}
@@ -28,6 +18,24 @@ public class EmpMatchSta {
 	}
 	public void setS_id(int s_id) {
 		this.s_id = s_id;
+	}
+	public String getE_address() {
+		return e_address;
+	}
+	public void setE_address(String e_address) {
+		this.e_address = e_address;
+	}
+	public double getE_x() {
+		return e_x;
+	}
+	public void setE_x(double e_x) {
+		this.e_x = e_x;
+	}
+	public double getE_y() {
+		return e_y;
+	}
+	public void setE_y(double e_y) {
+		this.e_y = e_y;
 	}
 	
 }
