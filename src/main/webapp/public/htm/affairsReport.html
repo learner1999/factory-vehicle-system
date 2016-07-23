@@ -1,0 +1,47 @@
+<div id="bus-rate-report">
+	<div class="header">
+		<form class="row">
+			<div class="input-field col s2 m2 offset-m1">
+				<input type="date" value="2016-07-10" class="datepicker">
+			</div>
+			<div class="input-field col s6 m6 row">
+				<p class="col s4">
+					<input type="radio" name="style" id="_day">
+					<label for="_day">按日查询乘坐率</label>
+				</p>
+				<p class="col s4">
+					<input type="radio" name="style" id="_week">
+					<label for="_week">按周查询乘坐率</label>
+				</p>
+				<p class="col s4">
+					<input type="radio" name="style" id="_mouth">
+					<label for="_mouth">按月查询乘坐率</label>
+				</p>
+			</div>
+			<div class="input-field col s2 m2">
+				<button class="btn waves-effect waves-light" type="submit" name="action" ng-click="getChartData()">Submit
+					<i class="mdi-content-send right"></i>
+				</button>
+			</div>
+		</form>
+	</div>
+	<div class="body">
+		<div id="body-chart"></div>
+	</div>
+	<div class="fixed-action-btn" style="right:1%;bottom:3%;">
+		<a class="btn-floating btn-large red tooltipped" data-position="left" data-delay="50" data-tooltip="导出报表">
+			<i class="material-icons">assessment</i>
+		</a>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(function(){		
+	  $('.datepicker').pickadate({
+	    selectMonths: true, // Creates a dropdown to control month
+	    selectYears: 15 // Creates a dropdown of 15 years to control year
+	  }); 
+	  $('.collapsible').collapsible();
+	  $('.tooltipped').tooltip({delay:50});
+	});
+</script>

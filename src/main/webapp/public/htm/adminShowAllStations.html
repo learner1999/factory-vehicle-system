@@ -1,0 +1,145 @@
+<div id="map-stations"></div>
+<div id="station-table">
+	<div class="search-station">
+		<input type="text" placeholder="请输入要查询的站点信息" ng-model="searchCondition">
+		<div class="search-action" ng-click="searchStation()">
+			<i class="material-icons md-light md-36">search</i>
+		</div>
+	</div>
+	<div class="search-result">
+		<ul class="collapsible" data-collapsible="accordion">
+			<li class="search-station-result" style="display:none;">
+				<div class="collapsible-header">
+					<a href="javascript:void(0)">共找到<strong>0</strong>个搜索结果</a>
+				</div>
+				<div class="collapsible-body">
+					<ul class="collection">
+						<li class="collection-item" ng-repeat="station in searchResult" ng-bind="station.name" ng-click="reflectMarker(station.id)"></li>
+					</ul>
+				</div>
+			</li>
+			<li>
+				<div class="collapsible-header">
+					<a href="javascript:void(0)">查看所有站点</a>
+				</div>
+				<div class="collapsible-body">
+					<ul class="collection">
+						<li class="collection-item" ng-repeat="station in stations" ng-bind="station.name" ng-click="reflectMarker(station.id)"></li>
+					</ul>
+				</div>
+			</li>
+		</ul>
+	</div>
+</div>
+<div id="station-staff" style="display:none;">
+	<ul class="collapsible" data-collapsible="accordion">
+		<li>
+			<div class="collapsible-header">
+				<a href="javascript:void(0)">共找到<strong>0</strong>位员工</a>
+			</div>
+			<div class="collapsible-body">
+				<table>
+					<thead>
+						<tr>
+							<td style="text-align:center;">员工</td>
+							<td style="text-align:center;">住址</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="staff in staStaffList">
+							<td style="width:25%;text-align:center;" ng-bind="staff.name"></td>
+							<td class="truncate" style="width:90%" ng-bind="staff.eaddress"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</li>
+	</ul>
+</div>
+
+<div id="delete-station" class="modal" style="width:220px;">
+	<div class="modal-content">
+		<p>确认删除站点？</p>
+	</div>
+	<div class="modal-footer">
+      <a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">取消</a>
+      <a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat agree-delete-station">确认</a>
+    </div>
+</div>
+
+<div id="update-station" class="modal">
+	<div class="modal-content">
+		<form class="row">
+			<div class="input-field col s12">
+	          <input placeholder="请输入修改后的站点名称" id="update-station-name" type="text" class="validate" ng-model="updateStaInfo.name">
+	          <label for="update-station-name" class="active">站点名称</label>
+	        </div>
+	        <div class="input-field col s6">
+	          <input placeholder="请输入经度" id="update-station-lng" type="text" class="validate" ng-model="updateStaInfo.x">
+	          <label for="update-station-lng" class="active">经度</label>
+	        </div>
+	        <div class="input-field col s6">
+	          <input placeholder="请输入纬度" id="update-station-lat" type="text" class="validate" ng-model="updateStaInfo.y">
+	          <label for="update-station-lat" class="active">纬度</label>
+	        </div>
+		</form>
+	</div>
+	<div class="modal-footer">
+      <a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">取消</a>
+      <a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat agree-update-station">提交</a>
+    </div>
+</div>
+
+<div id="show-coordinates" class="modal" style="width:200px;">
+	<div class="modal-content">
+		<p class="lng"></p>
+		<p class="lat"></p>
+	</div>
+</div>
+
+<div id="add-stations" class="modal">
+	<div class="modal-content">
+		<form class="row">
+			<div class="input-field col s12">
+	          <input placeholder="请输入新的站点名称" id="add-station-name" type="text" class="validate" ng-model="addStaInfo.name">
+	          <label for="add-station-name" class="active">站点名称</label>
+	        </div>
+	        <div class="input-field col s6">
+	          <input placeholder="Placeholder" id="add-station-lng" type="text" class="validate" ng-model="addStaInfo.x">
+	          <label for="add-station-lng" class="active">经度</label>
+	        </div>
+	        <div class="input-field col s6">
+	          <input placeholder="Placeholder" id="add-station-lat" type="text" class="validate" ng-model="addStaInfo.y">
+	          <label for="add-station-lat" class="active">纬度</label>
+	        </div>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat ">取消</a>
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat agree-add-station">确认</a>
+	</div>
+</div>
+
+<div id="sta-staff-date" class="modal" style="width:200px;">
+	<div class="modal-content">
+		<form class="row">
+			<div class="input-field col s12">
+				<input type="date" class="datepicker">
+			</div>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat ">取消</a>
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat agree-get-sta-staff">确认</a>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(function(){
+		$('.collapsible').collapsible();
+		$('.datepicker').pickadate({
+			selectMonths: true,
+			selectYears: 15
+		});
+	})
+</script>

@@ -1,0 +1,42 @@
+<div id="map-routes"></div>
+
+<div id="showRoutes">
+	<ul class="collapsible" data-collapsible="accordion">
+		<li>
+			<div class="collapsible-header">
+				<a href="javascript:void(0)">&nbsp&nbsp&nbsp&nbsp目前，共有<strong>30</strong>条线路</a>
+			</div>
+			<div class="collapsible-body">
+				<table>
+					<thead>
+						<tr>
+							<td>线路名称</td>
+							<td>人数</td>
+							<td>乘坐率</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="route in routes">
+							<td ng-bind="route.name"></td>
+							<td ng-bind="route.number"></td>
+							<td ng-bind="route.rate"></td>
+							<!-- <td class="update-route"></td>
+							<td class="delete-route"></td> -->
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</li>
+	</ul>
+
+	<div id="add-route" class="tooltipped" data-position="right" data-delay="50" data-tooltip="新增路线">
+		<i class="material-icons center">add_circle_outline</i>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(function(){
+		$('.collapsible').collapsible();
+		$('.tooltipped').tooltip({delay: 50});
+	});
+</script>

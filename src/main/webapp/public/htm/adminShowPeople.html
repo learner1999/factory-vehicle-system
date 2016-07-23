@@ -1,0 +1,84 @@
+<div id="map-people"></div>
+
+<div id="people-table">
+	<ul class="collapsible popout" data-collapsible="accordion">
+		<li>
+			<div class="collapsible-header">
+				<a href="javascript:void(0)">更新情况汇总<span class="new badge">60</span></a>
+			</div>
+			<div class="collapsible-body">
+				<div id="people-chart-all"></div>
+			</div>
+		</li>
+		<li>
+			<div class="collapsible-header">
+				<a href="javascript:void(0)">新增加人员<span class="new badge">20</span></a>
+			</div>
+			<div class="collapsible-body">
+				<table class="bordered hoverable">
+					<thead>
+						<tr>
+							<td>员工</td>
+							<td>已匹配站点</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="people in addpeoples" ng-click="showEmployeeSta(1,2)">
+							<td ng-bind="people.id"></td>
+							<td ng-bind="people.name"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</li>
+		<li>
+			<div class="collapsible-header">
+				<a href="javascript:void(0)">已修改人员<span class="new badge">10</span></a>
+			</div>
+			<div class="collapsible-body">
+				<table>
+					<thead>
+						<tr>
+							<td>员工</td>
+							<td>已匹配站点</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="people in addpeoples" ng-click="showEmployeeSta(1,2)">
+							<td ng-bind="people.id"></td>
+							<td ng-bind="people.name"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</li>
+		<li>
+			<div class="collapsible-header">
+				<a href="javascript:void(0)">已删除人员<span class="new badge">5</span></a>
+			</div>
+			<div class="collapsible-body">
+				<table>
+					<thead>
+						<tr>
+							<td>员工</td>
+							<td>已匹配站点</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="people in addpeoples" ng-click="showEmployeeSta(1,2)">
+							<td ng-bind="people.id"></td>
+							<td ng-bind="people.name"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</li>
+	</ul>
+</div>
+
+<script type="text/javascript">
+	$(function(){
+		$('.collapsible').collapsible();
+		$('.dropdown-button').dropdown();
+	});
+</script>
