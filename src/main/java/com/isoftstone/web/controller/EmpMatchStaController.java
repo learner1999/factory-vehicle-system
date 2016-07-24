@@ -77,7 +77,7 @@ public class EmpMatchStaController {
 	}
 	
 	/*修改部分*/
-	@RequestMapping(value = "/api/EmpMatchSta/{e_id}", method = RequestMethod.PUT)
+	/*@RequestMapping(value = "/api/EmpMatchSta/{e_id}", method = RequestMethod.PUT)
 	public ResponseEntity<EmpMatchSta> updateUser(@PathVariable("e_id") int e_id, @RequestBody EmpMatchSta ems) {
 		System.out.println("更新站点信息，e_id=" + e_id);
 		
@@ -98,7 +98,7 @@ public class EmpMatchStaController {
 		
 		// 如果出现异常，将状态码设为 internal server error(寻找更好的解决方案中……)
 		return new ResponseEntity<EmpMatchSta>(HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+	}*/
 	
 	/*删除部分*/
 	/*根据站点的id删除掉一个站点*/

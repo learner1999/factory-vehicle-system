@@ -3,9 +3,11 @@ package com.isoftstone.web.pojo;
 public class Station {
 	private int s_id;
 	private String s_name;
+	private String s_address;
 	private double longitude;
 	private double latitude;
 	private String s_car;
+	private int s_is_used;
 	
 	public int getS_id() {
 		return s_id;
@@ -18,6 +20,12 @@ public class Station {
 	}
 	public void setS_name(String s_name) {
 		this.s_name = s_name;
+	}
+	public String getS_address() {
+		return s_address;
+	}
+	public void setS_address(String s_address) {
+		this.s_address = s_address;
 	}
 	public double getLongitude() {
 		return longitude;
@@ -37,5 +45,10 @@ public class Station {
 	public void setS_car(String s_car) {
 		this.s_car = s_car;
 	}
-	
+	public int getS_is_used() {
+		return s_is_used;
+	}
+	public void setS_is_used(int s_is_used) {
+		this.s_is_used = s_is_used;
+	}
 }

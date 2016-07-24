@@ -6,10 +6,22 @@ public class Emlopee {
 	private String epart;
 	private int egroup;
 	private int etime;
-	private String eaddress;
-	private double ex;
-	private double ey;
+	private String EAddress;
+	private String Eiden;
 	
+	
+	public String getEAddress() {
+		return EAddress;
+	}
+	public void setEAddress(String eAddress) {
+		EAddress = eAddress;
+	}
+	public String getEiden() {
+		return Eiden;
+	}
+	public void setEiden(String eiden) {
+		Eiden = eiden;
+	}
 	public int getEid() {
 		return eid;
 	}
@@ -40,22 +52,5 @@ public class Emlopee {
 	public void setEtime(int etime) {
 		this.etime = etime;
 	}
-	public String getEaddress() {
-		return eaddress;
-	}
-	public void setEaddress(String eaddress) {
-		this.eaddress = eaddress;
-	}
-	public double getEx() {
-		return ex;
-	}
-	public void setEx(double ex) {
-		this.ex = ex;
-	}
-	public double getEy() {
-		return ey;
-	}
-	public void setEy(double ey) {
-		this.ey = ey;
-	}
+	
 }

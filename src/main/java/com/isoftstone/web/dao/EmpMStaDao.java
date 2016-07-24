@@ -1,5 +1,6 @@
 package com.isoftstone.web.dao;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,6 +12,8 @@ import com.isoftstone.web.pojo.Emlopee;
 import com.isoftstone.web.pojo.EmpMatchSta;
 import com.isoftstone.web.pojo.Station;
 import com.isoftstone.web.util.JdbcUtil;
+import com.routematrix.pojo.Coordinate;
+import com.webapi.ApiOp;
 
 public class EmpMStaDao {
 	
@@ -20,10 +23,65 @@ public class EmpMStaDao {
 	
 	private EmlopeeDao emlopDao=new EmlopeeDao();
 	
-	//获得所有的(不包括需要处理的)
-	//根据员工名模糊查询获得的（也不包括需要处理的）（由于主要的功能和员工没什么关系，所以员工就做这些）
+	/***
+	 * 查询数据库中所有的站点对应信息。为计算做准备
+	 * 
+	 * @return 所有站点对应信息
+	 */
+	public List<EmpMatchSta> showAllnew(){
+		List<EmpMatchSta> emsList=new ArrayList<EmpMatchSta>();
+		String sql="select * from employee_station_copy where s_id is null order by e_y";
+		try{
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(sql);
+			result = stmt.executeQuery();
+			while (result.next()) {
+				EmpMatchSta ems = new EmpMatchSta();
+				ems.setE_id(result.getInt("e_id"));
+				ems.setS_id(result.getInt("s_id"));
+				ems.setE_address(result.getString("e_address"));
+				ems.setE_x(result.getDouble("e_x"));
+				ems.setE_y(result.getDouble("e_y"));
+				ems.setUsed(0);
+				emsList.add(ems);
+			}
+		}catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+		}
+		return emsList;
+	}
 	
-	//
+	/***
+	 * 查询数据库中所有的站点对应信息
+	 * 
+	 * @return 所有站点对应信息
+	 */
+	public List<EmpMatchSta> showAll(){
+		List<EmpMatchSta> emsList=new ArrayList<EmpMatchSta>();
+		String sql="select * from employee_station_copy";
+		try{
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(sql);
+			result = stmt.executeQuery();
+			while (result.next()) {
+				EmpMatchSta ems = new EmpMatchSta();
+				ems.setE_id(result.getInt("e_id"));
+				ems.setS_id(result.getInt("s_id"));
+				ems.setE_address(result.getString("e_address"));
+				ems.setE_x(result.getDouble("e_x"));
+				ems.setE_y(result.getDouble("e_y"));
+				emsList.add(ems);
+			}
+		}catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+		}
+		return emsList;
+	}
+	
 	/***
 	 * 通过站点id查看此站点的员工
 	 * 
@@ -34,7 +92,7 @@ public class EmpMStaDao {
 	public List<Emlopee> getEmlopBySta(int s_id)
 	{
 		List<Emlopee> emlopList=new ArrayList<Emlopee>();
-		String sql = "select e_id from employee_station where s_id=?";
+		String sql = "select e_id from employee_station_copy where s_id=?";
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
@@ -42,7 +100,6 @@ public class EmpMStaDao {
 			result = stmt.executeQuery();
 			while (result.next()) {
 				Emlopee emlop=new Emlopee();
-				//获得emlop
 				emlop=emlopDao.getEmlopById(result.getInt("e_id"));
 				emlopList.add(emlop);
 			}
@@ -64,7 +121,7 @@ public class EmpMStaDao {
 	public EmpMatchSta getEmsByEid(int e_id)
 	{
 		EmpMatchSta ems=new EmpMatchSta();
-		String sql = "select * from employee_station where e_id=?";
+		String sql = "select * from employee_station_copy where e_id=?";
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
@@ -73,6 +130,7 @@ public class EmpMStaDao {
 			while (result.next()) {
 				ems.setE_id(result.getInt("e_id"));
 				ems.setS_id(result.getInt("s_id"));
+				ems.setE_address(result.getString("e_address"));
 				ems.setE_x(result.getDouble("e_x"));
 				ems.setE_y(result.getDouble("e_y"));
 			}
@@ -85,29 +143,27 @@ public class EmpMStaDao {
 	}
 	
 	/***
-	 * 找到新增但还没有为其建造站点的员工
+	 * 同步员工
 	 * 
-	 * @return 这类员工信息集
+	 * @return 新增的员工集合
 	 */
 	public List<Emlopee> matchEAndS()
 	{
 		List<Emlopee> emlopList=new ArrayList<Emlopee>();
-		String sql="select * from employee_infor where Eid not in(select e_id from employee_station)";
+		String sql="select * from employee_infor_copy where Eid in(select e_id from employee_station_copy)";
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
 			result = stmt.executeQuery();
 			while (result.next()) {
 				Emlopee emlop=new Emlopee();
-				//获得emlop
 				emlop.setEid(result.getInt("eid"));
 				emlop.setEname(result.getString("ename"));
 				emlop.setEpart(result.getString("epart"));
 				emlop.setEgroup(result.getInt("egroup"));
 				emlop.setEtime(result.getInt("etime"));
-				emlop.setEaddress(result.getString("eaddress"));
-				emlop.setEx(result.getInt("ex"));
-				emlop.setEy(result.getInt("ey"));
+				emlop.setEAddress(result.getString("EAddress"));
+				emlop.setEiden(result.getString("Eiden"));
 				emlopList.add(emlop);
 			}
 		} catch (SQLException e) {
@@ -117,6 +173,7 @@ public class EmpMStaDao {
 		}
 		return emlopList;
 	}
+
 	
 	/***
 	 * 新增员工站点对应表信息
@@ -127,12 +184,12 @@ public class EmpMStaDao {
 	 */
 	public boolean creatEMS(EmpMatchSta ems)
 	{
-		String sql="insert into employee_station(e_id,s_id,e_x,e_y) values (?,?,?,?)";
+		String sql="insert into employee_station_copy(e_id,e_address,e_x,e_y) values (?,?,?,?)";
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
 			stmt.setInt(1, ems.getE_id());
-			stmt.setInt(2, ems.getS_id());
+			stmt.setString(2, ems.getE_address());
 			stmt.setDouble(3,ems.getE_x());
 			stmt.setDouble(4, ems.getE_y());
 			int counter = stmt.executeUpdate();
@@ -157,13 +214,13 @@ public class EmpMStaDao {
 	 *            员工id,员工站点对应信息
 	 * @return 是否修改成功
 	 */
-	public boolean updateEMSByEid(int e_id, EmpMatchSta ems) {
-		String sql = "update  employee_station set s_id=? where e_id=?";
+	public boolean updateEMSByEid(int e_id, int s_id) {
+		String sql = "update  employee_station_copy set s_id=? where e_id=?";
 
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, ems.getS_id());
+			stmt.setInt(1, s_id);
 			stmt.setInt(2, e_id);
 			int counter = stmt.executeUpdate();
 			if (1 == counter) {
@@ -188,16 +245,17 @@ public class EmpMStaDao {
 	public List<EmpMatchSta> matchSAndE()
 	{
 		List<EmpMatchSta> emsList=new ArrayList<EmpMatchSta>();
-		String sql="select * from employee_station where e_id not in(select Eid from employee_infor)";
+		String sql="select * from employee_station_copy where e_id not in(select Eid from employee_infor_copy)";
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
 			result = stmt.executeQuery();
 			while (result.next()) {
 				EmpMatchSta ems=new EmpMatchSta();
-				//获得emlop
+				//鑾峰緱emlop
 				ems.setE_id(result.getInt("e_id"));
 				ems.setS_id(result.getInt("s_id"));
+				ems.setE_address(result.getString("e_address"));
 				ems.setE_x(result.getDouble("e_x"));
 				ems.setE_y(result.getDouble("e_y"));
 				emsList.add(ems);
@@ -218,7 +276,7 @@ public class EmpMStaDao {
 	 * @return 是否删除成功
 	 */
 	public boolean deleteEms(int e_id) {
-		String sql = "delete from employee_station where e_id=?";
+		String sql = "delete from employee_station_copy where e_id=?";
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
@@ -236,5 +294,187 @@ public class EmpMStaDao {
 		}
 
 		return false;
+	}
+	
+	/***
+	 * 通过员工地址搜索员工站点对应信息
+	 * 
+	 * @param addPrat
+	 * 				员工住址的部分字段
+	 * @return 此类员工站点对应信息
+	 */
+	public List<EmpMatchSta> search(String addPart)
+	{
+		List<EmpMatchSta> emsList=new ArrayList<EmpMatchSta>();
+		String sql="select * from employee_station_copy where e_address like ?";
+		try{
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(sql);
+			stmt.setString(1, "%" + addPart + "%");
+			result = stmt.executeQuery();
+			while (result.next()) {
+				EmpMatchSta ems=new EmpMatchSta();
+				//鑾峰緱emlop
+				ems.setE_id(result.getInt("e_id"));
+				ems.setS_id(result.getInt("s_id"));
+				ems.setE_address(result.getString("e_address"));
+				ems.setE_x(result.getDouble("e_x"));
+				ems.setE_y(result.getDouble("e_y"));
+				emsList.add(ems);
+			}
+		}catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+		}
+		return emsList;
+	}
+	
+	/***
+	 * 找到新增但还没有为其建造站点的员工
+	 * 
+	 * @return 这类员工信息集
+	 */
+	
+	public List<EmpMatchSta> getAllnew(){
+		List<EmpMatchSta> emsList=new ArrayList<EmpMatchSta>();
+		String sql="select * from employee_station_copy where s_id is null";
+		try{
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(sql);
+			result = stmt.executeQuery();
+			while (result.next()) {
+				EmpMatchSta ems = new EmpMatchSta();
+				ems.setE_id(result.getInt("e_id"));
+				ems.setS_id(result.getInt("s_id"));
+				ems.setE_address(result.getString("e_address"));
+				ems.setE_x(result.getDouble("e_x"));
+				ems.setE_y(result.getDouble("e_y"));
+				ems.setUsed(0);
+				emsList.add(ems);
+			}
+		}catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+		}
+		return emsList;
+	}	
+	
+	/***
+	 * 找到修改了地址但未为其重新匹配站点的员工
+	 * 
+	 * @return 此类员工集合
+	 */
+	public List<Emlopee> getAllchange(){
+		List<Emlopee> emlopList=new ArrayList<Emlopee>();
+		String sql="select y.eid,y.EAddress from"
+				+ " employee_station_copy as x,employee_infor_copy as y where x.e_id=y.eid"
+				+ " and x.e_address <> y.EAddress";
+		try{
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(sql);
+			result = stmt.executeQuery();
+			while (result.next()) {
+				Emlopee e = new Emlopee();
+				e.setEid(result.getInt("y.eid"));
+				e.setEAddress(result.getString("y.EAddress"));
+				emlopList.add(e);
+			}
+		}catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+		}
+		return emlopList;
+	}	
+
+	/***
+	 * 修改员工对应的站点表
+	 * 
+	 * @param ems
+	 *            员工站点对应信息
+	 * @return 是否修改成功
+	 */
+	public boolean updateEMSForAdd(EmpMatchSta ems) {
+		String sql = "update  employee_station_copy set s_id=null,e_address=?,e_x=?,e_y=? where e_id=?";
+
+		try {
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(sql);
+			stmt.setString(1, ems.getE_address());
+			stmt.setDouble(2, ems.getE_x());
+			stmt.setDouble(3, ems.getE_y());
+			stmt.setInt(4, ems.getE_id());
+			int counter = stmt.executeUpdate();
+			if (1 == counter) {
+				JdbcUtil.close(null, stmt, conn);
+				return true;
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			JdbcUtil.close(null, stmt, conn);
+		}
+
+		return false;
+	}
+	
+	/***
+	 * 通过员工住址获得x，y
+	 */
+	public EmpMatchSta getXYByAdd(Emlopee e)
+	{
+		EmpMatchSta ems=new EmpMatchSta();
+		Coordinate c=new Coordinate();
+		try {
+			c = ApiOp.getXYByAddress(e.getEAddress());
+		} catch (IOException e1) {
+			// TODO 自动生成的 catch 块
+			e1.printStackTrace();
+		}
+		ems.setE_id(e.getEid());
+		ems.setE_address(e.getEAddress());
+		ems.setE_x(c.getLng());
+		ems.setE_y(c.getLat());
+		return ems;
+	}
+
+	//关于附近的能不能默认先显示10个，如果用户点击查看更多，再显示其余的
+	/***
+	 * 查看此站点/停车点附近的员工
+	 * 
+	 * @param sta
+	 * 			操作的站点
+	 * @return 这类员工集合
+	 */
+	public List<EmpMatchSta> getNear(Station sta)
+	{
+		List<EmpMatchSta> emsList=new ArrayList<EmpMatchSta>();
+		String sql="select * from employee_station_copy order by (e_x-?)*(e_x-?)+(e_y-?)*(e_y-?) limit 10";
+		try {
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(sql);
+			stmt.setDouble(1, sta.getLongitude());
+			stmt.setDouble(2, sta.getLongitude());
+			stmt.setDouble(3, sta.getLatitude());
+			stmt.setDouble(4, sta.getLatitude());
+			result = stmt.executeQuery();
+			while (result.next()) {
+				EmpMatchSta ems = new EmpMatchSta();
+				ems.setE_id(result.getInt("e_id"));
+				ems.setS_id(result.getInt("s_id"));
+				ems.setE_address(result.getString("e_address"));
+				ems.setE_x(result.getDouble("e_x"));
+				ems.setE_y(result.getDouble("e_y"));
+				emsList.add(ems);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+		}
+		return emsList;
 	}
 }

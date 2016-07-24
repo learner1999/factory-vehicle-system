@@ -24,7 +24,7 @@ public class EmlopeeDao {
 	public Emlopee getEmlopById(int e_id)
 	{
 		Emlopee emlop=new Emlopee();
-		String sql = "select * from employee_infor where eid=?";
+		String sql = "select * from employee_infor_copy where eid=?";
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
@@ -36,9 +36,8 @@ public class EmlopeeDao {
 				emlop.setEpart(result.getString("epart"));
 				emlop.setEgroup(result.getInt("egroup"));
 				emlop.setEtime(result.getInt("etime"));
-				emlop.setEaddress(result.getString("EAddress"));
-				emlop.setEx(result.getDouble("ex"));
-				emlop.setEy(result.getDouble("ey"));
+				emlop.setEAddress(result.getString("EAddress"));
+				emlop.setEiden(result.getString("Eiden"));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -47,5 +46,4 @@ public class EmlopeeDao {
 		}
 		return emlop;
 	}
-	
 }
