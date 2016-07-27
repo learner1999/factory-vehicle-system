@@ -5,6 +5,13 @@ import java.util.List;
 public class Route {
 	private int carId;
 	private List<Station> stations;
+	private List<Integer> times;
+	public List<Integer> getTimes() {
+		return times;
+	}
+	public void setTimes(List<Integer> times) {
+		this.times = times;
+	}
 	public int getCarId() {
 		return carId;
 	}

@@ -48,12 +48,15 @@ public class RouteDao {
 			stmt = conn.prepareStatement(strSql);
 			result = stmt.executeQuery();
 
-			List<Station> listStation = new ArrayList<>();
+			List<Station> stationList = new ArrayList<>();
+			List<Integer> timeList = new ArrayList<>();
 			while (result.next()) {
 				Station sta = fetchStaData(result);
-				listStation.add(sta);
+				stationList.add(sta);
+				timeList.add(result.getInt("time"));
 			}
-			route.setStations(listStation);
+			route.setStations(stationList);
+			route.setTimes(timeList);
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -124,9 +127,9 @@ public class RouteDao {
 	public boolean updateRoute(int carId, Route curRoute) {
 		// 先将路线原来的状态保存
 		Route oldRoute = findById(carId);
-		
+
 		// 路线不存在
-		if(null == oldRoute) {
+		if (null == oldRoute) {
 			return createRoute(carId, curRoute);
 		}
 
@@ -148,9 +151,10 @@ public class RouteDao {
 				Station curStation = listStation.get(i);
 
 				// 判断站点是否已经存在，不存在则创建
-//				if (!staDao.isxyExist(curStation.getLongitude(), curStation.getLatitude())) {
-//					staDao.createStation(curStation);
-//				}
+				// if (!staDao.isxyExist(curStation.getLongitude(),
+				// curStation.getLatitude())) {
+				// staDao.createStation(curStation);
+				// }
 
 				// 将站点插入当前线路
 				stmt.setInt(1, curStation.getS_id());
@@ -171,6 +175,12 @@ public class RouteDao {
 
 		// 更新当前路线删除站点的所属路线字段
 		delCarIdFromSta(carId, oldRoute, curRoute);
+
+		// 更新time字段
+		updateRouteTime(carId);
+		
+		// 更新站点 s_car 数据
+		// updateStationSCar();
 
 		return true;
 	}
@@ -214,10 +224,14 @@ public class RouteDao {
 		StationDao staDao = new StationDao();
 
 		List<Integer> oldStation = fetchStationId(oldRoute.getStations());
-		List<Integer> curStation = fetchStationId(curRoute.getStations());
+
+		List<Integer> curStation = null;
+		if (null != curRoute) {
+			curStation = fetchStationId(curRoute.getStations());
+		}
 
 		// 找出路线中删除的站点，oldStation 中留下的站点就是更新路线删除的站点
-		if (!oldStation.removeAll(curStation)) {
+		if (curStation != null && !oldStation.removeAll(curStation)) {
 			return false;
 		}
 
@@ -246,7 +260,7 @@ public class RouteDao {
 		StationDao staDao = new StationDao();
 
 		List<Integer> oldStation = null;
-		if(null != oldRoute) {
+		if (null != oldRoute) {
 			oldStation = fetchStationId(oldRoute.getStations());
 		}
 		List<Integer> curStation = fetchStationId(curRoute.getStations());
@@ -313,9 +327,10 @@ public class RouteDao {
 				Station curStation = listStation.get(i);
 
 				// 判断站点是否已经存在，不存在则创建
-//				if (!staDao.isxyExist(curStation.getLongitude(), curStation.getLatitude())) {
-//					staDao.createStation(curStation);
-//				}
+				// if (!staDao.isxyExist(curStation.getLongitude(),
+				// curStation.getLatitude())) {
+				// staDao.createStation(curStation);
+				// }
 
 				// 将站点插入当前线路
 				stmt.setInt(1, curStation.getS_id());
@@ -334,6 +349,9 @@ public class RouteDao {
 		// 更新当前路线新增站点的所属路线字段
 		addCarIdToSta(carId, null, curRoute);
 
+		// 更新路线表time字段
+		updateRouteTime(carId);
+
 		return true;
 	}
 
@@ -345,11 +363,11 @@ public class RouteDao {
 	 * @return 创建路线表是否成功
 	 */
 	public boolean createRouteTable(int carId) {
-		
+
 		String sql = "CREATE TABLE `car" + carId + "` (`order` int(11) NOT NULL AUTO_INCREMENT,"
 				+ "`s_id` int(11) DEFAULT NULL," + "`time` int(11) DEFAULT NULL," + "PRIMARY KEY (`order`)"
 				+ ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
-		
+
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
@@ -362,17 +380,22 @@ public class RouteDao {
 
 		return true;
 	}
-	
-	
+
+	/**
+	 * 更新路线表time字段
+	 * 
+	 * @param carId
+	 * @return
+	 */
 	public boolean updateRouteTime(int carId) {
-		
+
 		// 获取公司坐标
 		StationDao staDao = new StationDao();
 		Station company = staDao.getStaById(1);
-		
+
 		// 获取路线信息
 		Route route = findById(carId);
-		
+
 		// 获取站点数据
 		List<Station> staList = route.getStations();
 		Station staFirst = staList.get(0);
@@ -380,49 +403,49 @@ public class RouteDao {
 			// 更新第一站点到公司之间的耗时
 			Result result = ApiOp.getDistance(new Coordinate(company.getLatitude(), company.getLongitude()),
 					new Coordinate(staFirst.getLatitude(), staFirst.getLongitude()));
-			int minute = (int)(result.getDuration().getValue() / 60);
+			int minute = (int) (result.getDuration().getValue() / 60);
 			// System.out.println(carId + " " + 1 + " " + minute);
-			if(!updateRouteTimeOne(carId, 1, minute)) {
+			if (!updateRouteTimeOne(carId, 1, minute)) {
 				return false;
 			}
-			
+
 			// 更新其他站点之间的耗时
-			for(int i = 1, len = staList.size(); i < len; i++) {
+			for (int i = 1, len = staList.size(); i < len; i++) {
 				result = ApiOp.getDistance(
 						new Coordinate(staList.get(i - 1).getLatitude(), staList.get(i - 1).getLongitude()),
 						new Coordinate(staList.get(i).getLatitude(), staList.get(i).getLongitude()));
-				minute = (int)(result.getDuration().getValue() / 60);
+				minute = (int) (result.getDuration().getValue() / 60);
 				// System.out.println(carId + " " + (i + 1) + " " + minute);
-				if(!updateRouteTimeOne(carId, i + 1, minute)) {
+				if (!updateRouteTimeOne(carId, i + 1, minute)) {
 					return false;
 				}
 			}
-			
+
 		} catch (IOException e) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
-	
+
 	/**
 	 * 更新某一条路线的某一条记录的 time 字段
+	 * 
 	 * @param carId
 	 * @param order
 	 * @param time
 	 * @return
 	 */
 	public boolean updateRouteTimeOne(int carId, int order, int time) {
-		
+
 		String strSql = "UPDATE `car" + carId + "` SET `time`=? WHERE (`order`=?) LIMIT 1";
-		
+
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(strSql);
 			stmt.setInt(1, time);
 			stmt.setInt(2, order);
-			if(1 == stmt.executeUpdate()) {
+			if (1 == stmt.executeUpdate()) {
 				return true;
 			}
 		} catch (SQLException e) {
@@ -430,41 +453,218 @@ public class RouteDao {
 		} finally {
 			JdbcUtil.close(result, stmt, conn);
 		}
-		
+
 		return false;
 	}
 
-	
+	/**
+	 * 查询所有路线表的表名
+	 * 
+	 * @return 路线表表名组成的list
+	 */
+	public List<String> getRouteTableName() {
+
+		List<String> tableNameList = new ArrayList<>();
+
+		String strSql = "SELECT * FROM information_schema.TABLES WHERE TABLE_NAME LIKE 'car%' AND TABLE_NAME <> 'car_information'";
+
+		try {
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(strSql);
+			result = stmt.executeQuery();
+			while (result.next()) {
+				String tableName = result.getString("TABLE_NAME");
+				tableNameList.add(tableName);
+			}
+		} catch (SQLException e) {
+			System.out.println("获取路线表名出错！");
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+		}
+
+		return tableNameList;
+	}
+
+	/**
+	 * 查询所有存在的路线
+	 * 
+	 * @return 路线构成的list
+	 */
+	public List<Route> findAll() {
+
+		List<Route> routeList = new ArrayList<>();
+
+		List<String> routeNameList = getRouteTableName();
+
+		for (String routeName : routeNameList) {
+			Route route = findById(Integer.valueOf(routeName.split("car")[1]));
+			routeList.add(route);
+		}
+
+		return routeList;
+	}
+
+	/**
+	 * 改变指定路线使用的车辆
+	 * 
+	 * @param routeId
+	 *            路线id
+	 * @param carId
+	 *            车辆id
+	 * @return
+	 */
+	public boolean changeCar(int routeId, int carId) {
+
+		// 修改路线中涉及到的站点对应记录
+		addCarIdToSta(carId, null, findById(routeId));
+		delCarIdFromSta(routeId, findById(routeId), null);
+
+		// 改变表名
+		String strSql = "RENAME TABLE car" + routeId + " TO car" + carId;
+
+		try {
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(strSql);
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			System.out.println("路线改变车辆失败！");
+			return false;
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+		}
+
+		// updateStationSCar();
+
+		return true;
+	}
+
 	public static void main(String[] args) {
-		
+
 		RouteDao routeDao = new RouteDao();
-		
-		double x=120.1541,y=30.2778;
+
+		double x = 120.1541, y = 30.2778;
 		Cal cal = new Cal();
 		Plan plan = cal.calplan(x, y);
-		
+
 		int[] cars = plan.getCar();
 		List<int[]> routeList = plan.getRoute();
-		
-		for(int i = 0; i < cars.length; i++) {
+
+		for (int i = 0; i < cars.length; i++) {
 			int carId = cars[i];
 			int[] staIds = routeList.get(i);
-			if(null == staIds || 0 == staIds.length) {
+			if (null == staIds || 0 == staIds.length) {
 				continue;
 			}
-			
+
 			Route route = new Route();
 			List<Station> staList = new ArrayList<>();
 			route.setStations(staList);
-			for(int j = 0; j < staIds.length; j++) {
+			for (int j = 0; j < staIds.length; j++) {
 				Station sta = new Station();
 				sta.setS_id(staIds[j]);
 				staList.add(sta);
 			}
-			
+
 			routeDao.updateRoute(carId, route);
-			routeDao.updateRouteTime(carId);
 		}
+	}
+
+	/**
+	 * 查询站点对应的路线
+	 * 
+	 * @param staId
+	 *            站点id
+	 * @return 路线list
+	 */
+	public List<Route> findByStaId(int staId) {
+
+		// 根据站点id查询经过站点的路线id
+		StationDao staDao = new StationDao();
+		Station sta = staDao.getStaById(staId);
+		String strCarIds = sta.getS_car();
+		String[] arrCarIds = strCarIds.split(",");
+
+		// 根据路线id的列表取出所有路线
+		List<Route> routeList = new ArrayList<>();
+		for (String carId : arrCarIds) {
+			Route route = findById(Integer.valueOf(carId));
+			routeList.add(route);
+		}
+
+		return routeList;
+	}
+
+	/**
+	 * 删除指定id路线
+	 * 
+	 * @param carId
+	 *            路线id
+	 * @return
+	 */
+	public boolean deleteById(int carId) {
+
+		// 修改删除的站点的s_car数据
+		if (!delCarIdFromSta(carId, findById(carId), null)) {
+			return false;
+		}
+
+		// 删除路线表
+		if (!deleteTableById(carId)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * 更新站点表s_car信息
+	 * 
+	 * @return
+	 */
+	@SuppressWarnings("unused")
+	private boolean updateStationSCar() {
+
+		String strSql = "UPDATE `station_information_copy` SET `s_is_used`='0' WHERE (`s_car`='')";
+		String strSql2 = "UPDATE `station_information_copy` SET `s_is_used`='1' WHERE (`s_car`<>'')";
+
+		try {
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(strSql);
+			stmt.executeUpdate();
+			stmt = conn.prepareStatement(strSql2);
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			System.out.println("更新站点表s_car信息出错！");
+			return false;
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+		}
+
+		return true;
+	}
+
+	/**
+	 * 删除指定id路线表
+	 * 
+	 * @param carId
+	 * @return
+	 */
+	public boolean deleteTableById(int carId) {
+
+		String strSql = "DROP TABLE `car" + carId + "`";
+
+		try {
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(strSql);
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			System.out.println("删除路线表出错！");
+			return false;
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+		}
+
+		return true;
 	}
 
 }
