@@ -9,15 +9,15 @@ import java.sql.Statement;
 import com.mysql.jdbc.CallableStatement;
   
 public class JdbcUtil {  
-//    private static String url = "jdbc:mysql://115.159.45.39:3306/factory_vehicle_system?useUnicode=true&characterEncoding=UTF-8";  
-//    private static String username = "factory_vehicle";  
-//    private static String password = "MfPwtdHpycq3BXtV";  
-//    private static String driverName = "com.mysql.jdbc.Driver";  
-    
-    private static String url = "jdbc:mysql://localhost:3306/factory_vehicle_system?useUnicode=true&characterEncoding=UTF-8";  
-    private static String username = "root";  
-    private static String password = "";  
+    private static String url = "jdbc:mysql://115.159.45.39:3306/factory_vehicle_system?useUnicode=true&characterEncoding=UTF-8";  
+    private static String username = "factory_vehicle";  
+    private static String password = "MfPwtdHpycq3BXtV";  
     private static String driverName = "com.mysql.jdbc.Driver";  
+    
+//    private static String url = "jdbc:mysql://localhost:3306/factory_vehicle_system?useUnicode=true&characterEncoding=UTF-8";  
+//    private static String username = "root";  
+//    private static String password = "";  
+//    private static String driverName = "com.mysql.jdbc.Driver";  
   
     public JdbcUtil() {  
         super();  
