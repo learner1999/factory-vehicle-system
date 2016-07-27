@@ -1,79 +1,165 @@
 <div id="map-people"></div>
 
 <div id="people-table">
-	<ul class="collapsible popout" data-collapsible="accordion">
-		<li>
-			<div class="collapsible-header">
-				<a href="javascript:void(0)">更新情况汇总<span class="new badge">60</span></a>
+	<div class="search-staff">
+		<input type="text" placeholder="请输入要查询的员工信息">
+		<div class="search-action">
+			<i class="material-icons md-light md-36">search</i>
+		</div>
+	</div>
+
+	<div id="panel-level01" class="panel">
+		<div class="goback" ng-click="showLevel05()">
+			<i class="material-icons center">keyboard_arrow_left</i>
+			<a href="javascript:void(0)">进行员工站点智能匹配</a>
+		</div>
+		<ul class="collapsible" data-collapsible="accordion">
+			<li>
+				<div class="collapsible-header">
+					<a href="javascript:void(0)">目前，共有<strong>165</strong>名员工</a>
+				</div>
+				<div class="collapsible-body">
+					<table class="bordered">
+						<thead>
+							<tr>
+								<td>员工</td>
+								<td>已匹配站点</td>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="people in addpeoples" ng-click="showEmployeeSta(1,2)">
+								<td ng-bind="people.id"></td>
+								<td ng-bind="people.name"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</li>
+		</ul>
+	</div>
+
+	<div id="panel-level02" class="panel" style="display:none;">
+		<div class="goback" ng-click="showLevel01()">
+			<i class="material-icons center">keyboard_arrow_left</i>
+			<a href="javascript:void(0)">返回查看全部员工信息</a>
+		</div>
+		<ul class="collapsible" data-collapsible="accordion">
+			<li>
+				<div class="collapsible-header">
+					<a href="javascript:void(0)">共有<strong>165</strong>条搜索结果</a>
+				</div>
+				<div class="collapsible-body">
+					<table class="bordered">
+						<thead>
+							<tr>
+								<td>员工</td>
+								<td>已匹配站点</td>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="people in addpeoples" ng-click="showEmployeeSta(1,2)">
+								<td ng-bind="people.id"></td>
+								<td ng-bind="people.name"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</li>
+		</ul>
+	</div>
+
+	<div id="panel-level03" class="panel" style="display:none;">
+		<div class="goback" ng-click="showLevel01()">
+			<i class="material-icons center">keyboard_arrow_left</i>
+			<a href="javascript:void(0)">返回查看全部员工信息</a>
+		</div>
+		<div class="card blue-grey darken-1">
+			<div class="card-content white-text">
+				<span class="card-title">莱奥梅西</span><br>
+				<span class="col row">编号：<strong>14051339</strong></span>
+				<span class="col row">部门：<strong>总务部</strong></span>
+				<span class="col row">住址：<strong>杭州电子科技大学生活区21号楼</strong></span>
+				<span class="col row">站点：<strong>下沙杭电站</strong></span>
+				<span class="col row">距离：<strong>210m</strong></span>
 			</div>
-			<div class="collapsible-body">
-				<div id="people-chart-all"></div>
+			<div class="card-action">
+				<a href="javascript:void(0)">修改站点</a>
+				<a href="javascript:void(0)">查看附近站点</a>
 			</div>
-		</li>
-		<li>
-			<div class="collapsible-header">
-				<a href="javascript:void(0)">新增加人员<span class="new badge">20</span></a>
+		</div>
+	</div>
+
+	<div id="panel-level04" class="panel" style="display:none;">
+		<div class="goback" ng-click="showLevel02()">
+			<i class="material-icons center">keyboard_arrow_left</i>
+			<a href="javascript:void(0)">返回查看搜索信息</a>
+		</div>
+		<div class="card blue-grey darken-1">
+			<div class="card-content white-text">
+				<span class="card-title">莱奥梅西</span><br>
+				<span class="col row">编号：<strong>14051339</strong></span>
+				<span class="col row">部门：<strong>总务部</strong></span>
+				<span class="col row">住址：<strong>杭州电子科技大学生活区21号楼</strong></span>
+				<span class="col row">站点：<strong>下沙杭电站</strong></span>
+				<span class="col row">距离：<strong>210m</strong></span>
 			</div>
-			<div class="collapsible-body">
-				<table class="bordered hoverable">
-					<thead>
-						<tr>
-							<td>员工</td>
-							<td>已匹配站点</td>
-						</tr>
-					</thead>
-					<tbody>
-						<tr ng-repeat="people in addpeoples" ng-click="showEmployeeSta(1,2)">
-							<td ng-bind="people.id"></td>
-							<td ng-bind="people.name"></td>
-						</tr>
-					</tbody>
-				</table>
+			<div class="card-action">
+				<a href="javascript:void(0)">修改站点</a>
+				<a href="javascript:void(0)">查看附近站点</a>
 			</div>
-		</li>
-		<li>
-			<div class="collapsible-header">
-				<a href="javascript:void(0)">已修改人员<span class="new badge">10</span></a>
-			</div>
-			<div class="collapsible-body">
-				<table>
-					<thead>
-						<tr>
-							<td>员工</td>
-							<td>已匹配站点</td>
-						</tr>
-					</thead>
-					<tbody>
-						<tr ng-repeat="people in addpeoples" ng-click="showEmployeeSta(1,2)">
-							<td ng-bind="people.id"></td>
-							<td ng-bind="people.name"></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</li>
-		<li>
-			<div class="collapsible-header">
-				<a href="javascript:void(0)">已删除人员<span class="new badge">5</span></a>
-			</div>
-			<div class="collapsible-body">
-				<table>
-					<thead>
-						<tr>
-							<td>员工</td>
-							<td>已匹配站点</td>
-						</tr>
-					</thead>
-					<tbody>
-						<tr ng-repeat="people in addpeoples" ng-click="showEmployeeSta(1,2)">
-							<td ng-bind="people.id"></td>
-							<td ng-bind="people.name"></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</li>
-	</ul>
+		</div>
+	</div>
+
+	<div id="panel-level05" class="panel" style="display:none;">
+		<div class="goback" ng-click="showLevel01()">
+			<i class="material-icons center">keyboard_arrow_left</i>
+			<a href="javascript:void(0)">返回查看全部员工信息</a>
+		</div>
+		<ul class="collapsible" data-collapsible="accordion">
+			<li>
+				<div class="collapsible-header">
+					<a href="javascript:void(0)">新增员工</a>
+				</div>
+				<div class="collapsible-body">
+					<table class="bordered hoverable">
+						<thead>
+							<tr>
+								<td>员工</td>
+								<td>已匹配站点</td>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="people in addpeoples" ng-click="showEmployeeSta(1,2)">
+								<td ng-bind="people.id"></td>
+								<td ng-bind="people.name"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</li>
+			<li>
+				<div class="collapsible-header">
+					<a href="javascript:void(0)">已修改员工</a>
+				</div>
+				<div class="collapsible-body">
+					<table class="bordered hoverable">
+						<thead>
+							<tr>
+								<td>员工</td>
+								<td>已匹配站点</td>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="people in addpeoples" ng-click="showEmployeeSta(1,2)">
+								<td ng-bind="people.id"></td>
+								<td ng-bind="people.name"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</li>
+		</ul>
+	</div>
 </div>
 
 <script type="text/javascript">

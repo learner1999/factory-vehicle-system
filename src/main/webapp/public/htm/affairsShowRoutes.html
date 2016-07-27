@@ -1,37 +1,219 @@
 <div id="map-routes"></div>
 
-<div id="showRoutes">
-	<ul class="collapsible" data-collapsible="accordion">
-		<li>
-			<div class="collapsible-header">
-				<a href="javascript:void(0)">&nbsp&nbsp&nbsp&nbsp目前，共有<strong>30</strong>条线路</a>
-			</div>
-			<div class="collapsible-body">
-				<table>
-					<thead>
-						<tr>
-							<td>线路名称</td>
-							<td>人数</td>
-							<td>乘坐率</td>
-						</tr>
-					</thead>
-					<tbody>
-						<tr ng-repeat="route in routes">
-							<td ng-bind="route.name"></td>
-							<td ng-bind="route.number"></td>
-							<td ng-bind="route.rate"></td>
-							<!-- <td class="update-route"></td>
-							<td class="delete-route"></td> -->
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</li>
-	</ul>
-
-	<div id="add-route" class="tooltipped" data-position="right" data-delay="50" data-tooltip="新增路线">
-		<i class="material-icons center">add_circle_outline</i>
+<div id="show-routes">
+	<div class="search-route">
+		<input type="text" placeholder="请输入要查询的路线信息">
+		<div class="search-action" ng-click="showLevel02()">
+			<i class="material-icons md-light md-36">search</i>
+		</div>
 	</div>
+
+	<div id="panel-level01" class="panel" style="display:block;">
+		<ul class="collapsible" data-collapsible="accordion">
+			<li>
+				<div class="collapsible-header">
+					<a href="javascript:void(0)">&nbsp&nbsp&nbsp&nbsp目前，共有<strong>30</strong>条线路</a>
+				</div>
+				<div class="collapsible-body">
+					<table>
+						<thead>
+							<tr>
+								<td>线路名称</td>
+								<td>人数</td>
+								<td>乘坐率</td>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="route in routes" ng-click="showLevel03()" style="cursor:pointer;">
+								<td ng-bind="route.name"></td>
+								<td ng-bind="route.number"></td>
+								<td ng-bind="route.rate"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</li>
+		</ul>
+	</div>
+	
+	<div id="panel-level02" class="panel" style="display:none;">
+		<div class="back-all-routes" ng-click="showLevel01()">
+			<i class="material-icons center">keyboard_arrow_left</i>
+			<a href="javascript:void(0)">返回全部路线列表</a>
+		</div>
+		<ul class="collapsible" data-collapsible="accordion">
+			<li>
+				<div class="collapsible-header">
+					<a href="javascript:void(0)">&nbsp&nbsp&nbsp&nbsp共找到<strong>13</strong>条符合条件的线路</a>
+				</div>
+				<div class="collapsible-body">
+					<table>
+						<thead>
+							<tr>
+								<td>线路名称</td>
+								<td>人数</td>
+								<td>乘坐率</td>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="route in routes" ng-click="showLevel04()" style="cursor:pointer;">
+								<td ng-bind="route.name"></td>
+								<td ng-bind="route.number"></td>
+								<td ng-bind="route.rate"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</li>
+		</ul>
+	</div>
+
+	<div id="panel-level03" class="panel" style="display:none;">
+		<div class="back-all-routes" ng-click="showLevel01()">
+			<i class="material-icons center">keyboard_arrow_left</i>
+			<a href="javascript:void(0)">返回全部路线列表</a>
+		</div>
+		<ul class="collapsible" data-collapsible="accordion">
+			<li class="active">
+				<div class="collapsible-header">
+					<a href="javascript:void(0)">该路线的车辆详情</a>
+				</div>
+				<div class="collapsible-body">
+					<div class="card blue-grey darken-1">
+				        <div class="card-content white-text">
+				        	<span style="display:inline-block;width:135px;">车牌号：<strong>浙A12345</strong></span>
+				        	<span style="display:inline-block;width:135px;">驾驶员：<strong>张水峰</strong></span>
+				        	<br>
+				        	<span style="display:inline-block;width:135px;">车辆品牌：<strong>金龙</strong></span>
+				        	<span style="display:inline-block;width:135px;">座位数：<strong>30</strong></span>
+				        	<span style="display:inline-block;width:100%;">注册日期：2010-10-25</span>
+				        	<span style="display:inline-block;width:100%;">保险日期：2018-04-13</span>
+							<span style="display:inline-block;width:100%;">驾驶证：123456789456123456</span>
+				        </div>
+				        <div class="card-action">
+				            <a href="javascript:void(0)">修改车辆信息</a>
+				        </div>
+				    </div>
+				</div>
+			</li>
+			<li>
+				<div class="collapsible-header">
+					<a href="javascript:void(0)">该路线所经过的站点详情</a>
+				</div>
+				<div class="collapsible-body">
+					<ul class="collection">
+						<li class="collection-item" ng-click="showLevel05()" style="cursor:pointer;">杭州东张</li>
+						<li class="collection-item">杭州东张</li>
+						<li class="collection-item">杭州东张</li>
+						<li class="collection-item">杭州东张</li>
+						<li class="collection-item">杭州东张</li>
+					</ul>
+				</div>
+			</li>
+		</ul>
+	</div>
+
+	<div id="panel-level04" class="panel" style="display:none;">
+		<div class="back-search-routes" ng-click="showLevel02()">
+			<i class="material-icons center">keyboard_arrow_left</i>
+			<a href="javascript:void(0)">返回查询结果列表</a>
+		</div>
+		<ul class="collapsible" data-collapsible="accordion">
+			<li class="active">
+				<div class="collapsible-header">
+					<a href="javascript:void(0)">该路线的车辆详情</a>
+				</div>
+				<div class="collapsible-body">
+					<div class="card blue-grey darken-1">
+				        <div class="card-content white-text">
+				        	<span style="display:inline-block;width:135px;">车牌号：<strong>浙A12345</strong></span>
+				        	<span style="display:inline-block;width:135px;">驾驶员：<strong>张水峰</strong></span>
+				        	<br>
+				        	<span style="display:inline-block;width:135px;">车辆品牌：<strong>金龙</strong></span>
+				        	<span style="display:inline-block;width:135px;">座位数：<strong>30</strong></span>
+				        	<span style="display:inline-block;width:100%;">注册日期：2010-10-25</span>
+				        	<span style="display:inline-block;width:100%;">保险日期：2018-04-13</span>
+							<span style="display:inline-block;width:100%;">驾驶证：123456789456123456</span>
+				        </div>
+				        <div class="card-action">
+				            <a href="javascript:void(0)">修改车辆信息</a>
+				        </div>
+				    </div>
+				</div>
+			</li>
+			<li>
+				<div class="collapsible-header">
+					<a href="javascript:void(0)">该路线所经过的站点详情</a>
+				</div>
+				<div class="collapsible-body">
+					<ul class="collection">
+						<li class="collection-item" ng-click="showLevel06()" style="cursor:pointer;">杭州东张</li>
+						<li class="collection-item">杭州东张</li>
+						<li class="collection-item">杭州东张</li>
+						<li class="collection-item">杭州东张</li>
+						<li class="collection-item">杭州东张</li>
+					</ul>
+				</div>
+			</li>
+		</ul>
+	</div>
+	
+	<div id="panel-level05" class="panel" style="display:none;">
+		<div class="back-routes-info" ng-click="showLevel03()">
+			<i class="material-icons center">keyboard_arrow_left</i>
+			<a href="javascript:void(0)">返回路线详情页</a>
+		</div>
+		<div class="card blue-grey darken-1">
+			<div class="card-content white-text">
+				<span class="card-title">杭州东站</span>
+				<br>
+				<span style="display:inline-block;width:135px;">乘车人数：<strong>11</strong></span>
+				<span style="display:inline-block;width:135px;">到站时间：<strong>8:14</strong></span>
+			</div>
+			<div class="card-action">
+				<a href="javascript:void(0)" class="btn">删除</a>
+			<!-- 	<a href="javascript:void(0)" class="btn dropdown-button" data-activates="change-sta-list">更换</a> -->
+				<a href="javascript:void(0)" class="btn">新增</a>
+				<!-- <ul id="change-sta-list" class="dropdown-content">
+					<li class="collection-item">kjkldsafj</li>
+					<li class="collection-item">dklja;s</li>
+					<li class="collection-item">fkld;aj</li>
+					<li class="collection-item">qioerio</li>
+					<li class="collection-item">lfkdjsl</li>
+				</ul> -->
+			</div>
+		</div>
+	</div>
+
+	<div id="panel-level06" class="panel" style="display:none;">
+		<div class="back-routes-info" ng-click="showLevel04()">
+			<i class="material-icons center">keyboard_arrow_left</i>
+			<a href="javascript:void(0)">返回路线详情页</a>
+		</div>
+		<div class="card blue-grey darken-1">
+			<div class="card-content white-text">
+				<span class="card-title">杭州东站</span>
+				<br>
+				<span style="display:inline-block;width:135px;">乘车人数：<strong>11</strong></span>
+				<span style="display:inline-block;width:135px;">到站时间：<strong>8:14</strong></span>
+			</div>
+			<div class="card-action">
+				<a href="javascript:void(0)" class="btn">删除</a>
+			<!-- 	<a href="javascript:void(0)" class="btn dropdown-button" data-activates="change-sta-list">更换</a> -->
+				<a href="javascript:void(0)" class="btn">新增</a>
+				<!-- <ul id="change-sta-list" class="dropdown-content">
+					<li class="collection-item">kjkldsafj</li>
+					<li class="collection-item">dklja;s</li>
+					<li class="collection-item">fkld;aj</li>
+					<li class="collection-item">qioerio</li>
+					<li class="collection-item">lfkdjsl</li>
+				</ul> -->
+			</div>
+		</div>
+	</div>
+	<!-- <div id="add-route" class="tooltipped" data-position="right" data-delay="50" data-tooltip="新增路线">
+		<i class="material-icons center">add_circle_outline</i>
+	</div> -->
 </div>
 
 <script type="text/javascript">
@@ -39,4 +221,10 @@
 		$('.collapsible').collapsible();
 		$('.tooltipped').tooltip({delay: 50});
 	});
+
+	function hidenAll(){
+		$('#show-routes').find('.panel').each(function(){
+			console.log(this,$(this));
+		})
+	}
 </script>

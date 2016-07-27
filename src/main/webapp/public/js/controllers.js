@@ -18,6 +18,7 @@ factoryVehicle.controller('topbarManager',function($scope){
 
 factoryVehicle.controller('adminManager',function($scope,$http){
 	$scope.stations = [];	//保存从后台取得的所有站点
+	$scope.altermativeStations = [];		//保存从后台取得的所有备用站点
 	$scope.deleteStaInfo = {
 		'marker': null,
 		'id': ''
@@ -38,6 +39,7 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 	$scope.searchResult = [];			//保存搜索结果
 	$scope.map;		//界面地图控制对象
 	$scope.markers = [];		//地图上所有站点marker的集合
+	$scope.staffMarkers = [];		//地图上所有员工marker的集合
 	$scope.staStaffList = [{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003}];
 
 
@@ -231,6 +233,7 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 			url: url,
 			method: 'DELETE'
 		}).success(function(){
+			$('#success-delete').openModal();
 			console.log('删除站点成功');
 		}).error(function(){
 			console.log('删除站点失败');
@@ -254,6 +257,7 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 				'latitude': $scope.updateStaInfo.y
 			}
 		}).success(function(){
+			$('#success-update').openModal();
 			console.log('修改站点成功');
 		}).error(function(){
 			console.log('修改站点失败');
@@ -286,6 +290,7 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 				'latitude': $scope.addStaInfo.y
 			}
 		}).success(function(){
+			$('#success-add').openModal();
 			console.log('新增站点成功');
 			$scope.map.clearOverlays();
 			getStations();
@@ -295,6 +300,11 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 
 	};
 
+	/**
+	 * 以动画的效果标识站点名单和站点的marker
+	 * @param  {[type]} id [description]
+	 * @return {[type]}    [description]
+	 */
 	$scope.reflectMarker = function(id){
 		console.log($scope.stations,$scope.markers);
 		for(var i=0;i<$scope.markers.length;i++){
@@ -308,8 +318,12 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 		}
 		console.log($scope.stations.length,$scope.markers.length,i);
 		$scope.markers[i].setAnimation(BMAP_ANIMATION_BOUNCE);
-	};
+	};	
 
+	/**
+	 * 查询站点信息
+	 * @return {[type]} [description]
+	 */
 	$scope.searchStation = function(){
 		$scope.searchResult = [];
 		var url;
@@ -353,10 +367,122 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 		}).error(function(){
 			console.log('查询失败');
 		});
+
+		showLevel02();
 	};
 
+	/**
+	 * 获取在某个站点乘车的员工名单
+	 * @return {[type]} [description]
+	 */
 	var getStaStaffList = function(){
+		// $scope.staStaffList = [];
+		var url = '';
+
+		$http.get(url).success(function(data){
+			$('#station-staff').show();
+		}).error(function(){
+			console.log('查询乘车员工失败');
+		});
 		$('#station-staff').show();
+	};
+
+	/**
+	 * 在地图上添加员工的marker
+	 */
+	var addStaffMarker = function(){
+		clearStaffMarkers();
+		var point;
+		var staffIcon = new BMap.Icon('./images/sta1.png', new BMap.Size(19,25));
+		for(var i=0;i<$scope.staStaffList.length;i++){
+			point = new BMap.Point($scope.staStaffList[i].lng,$scope.staStaffList[i].lat);
+			var marker = new BMap.Marker(point,{icon: staffIcon});
+			$scope.staffMarkers.push(marker);
+			$scope.map.addOverlay(marker);
+			addEvent(marker,$scope.staStaffList[i].address);
+		}
+	};
+
+	/**
+	 * 清除上一次的员工marker
+	 * @return {[type]} [description]
+	 */
+	var clearStaffMarkers = function(){
+		for(var i=0;i<$scope.staffMarkers.length;i++){
+			$scope.map.removeOverlay($scope.staffMarkers[i]);
+		}
+		$scope.staffMarkers = [];
+	};
+
+	/**
+	 * 隐藏该页面下的所有level
+	 * @return {[type]} [description]
+	 */
+	var hideLevel = function(){
+		$('#station-table').find('.panel').each(function(){
+			$(this).hide();
+		});
+	};
+
+	/**
+	 * 展示panel-level01
+	 * @return {[type]} [description]
+	 */
+	$scope.showLevel01 = function(){
+		hideLevel();
+		$('#station-table').find('#panel-level01').show('normal');
+	};/**
+	 * 展示panel-level02
+	 * @return {[type]} [description]
+	 */
+	$scope.showLevel02 = function(){
+		hideLevel();
+		$('#station-table').find('#panel-level02').show('normal');
+	};
+
+	/**
+	 * 展示panel-level03
+	 * @return {[type]} [description]
+	 */
+	$scope.showLevel03 = function(){
+		hideLevel();
+		$('#station-table').find('#panel-level03').show('normal');
+	};
+
+	/**
+	 * 展示panel-level04
+	 * @return {[type]} [description]
+	 */
+	$scope.showLevel04 = function(){
+		hideLevel();
+		$('#station-table').find('#panel-level04').show('normal');
+	};
+
+	/**
+	 * 展示panel-level05
+	 * @return {[type]} [description]
+	 */
+	$scope.showLevel05 = function(){
+		hideLevel();
+		$('#station-table').find('#panel-level05').show('normal');
+	};
+
+	/**
+	 * 展示panel-level06
+	 * @return {[type]} [description]
+	 */
+	$scope.showLevel06 = function(){
+		hideLevel();
+		$('#station-table').find('#panel-level06').show('normal');
+	};
+
+	/**
+	 * 展示panel-level07
+	 * @return {[type]} [description]
+	 */
+	$scope.showLevel07 = function(){
+		hideLevel();
+		$('#station-table').find('#panel-level07').show('normal');
 	};
 });
 
@@ -543,7 +669,7 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 		$scope.updateStaffSta.s_id = s_id;
 
 		var ePoint = new BMap.Point(120.198086,30.25777);
-		var homeIcon = new BMap.Icon('./images/station1.png',new BMap.Size(19,25));
+		var homeIcon = new BMap.Icon('./images/sta1.png',new BMap.Size(19,25));
 		var eMarker = new BMap.Marker(ePoint,{icon: homeIcon});
 		$scope.map.addOverlay(eMarker);
 		addEvent(eMarker,'这里是员工的家');
@@ -559,7 +685,40 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 		var sPoint = sMarker.point;
 		var walking = new BMap.WalkingRoute($scope.map, {renderOptions:{map: $scope.map, autoViewport: true}});
 		walking.search(ePoint,sPoint);
-	}
+	};
+
+	/**
+	 * 隐藏所有Level
+	 * @return {[type]} [description]
+	 */
+	var hideLevel = function(){
+		$('#people-table').find('.panel').hide();
+	};
+
+	$scope.showLevel01 = function(){
+		hideLevel();
+		$('#people-table').find('#panel-level01').show('normal');
+	};
+
+	$scope.showLevel02 = function(){
+		hideLevel();
+		$('#people-table').find('#panel-level02').show('normal');
+	};
+
+	$scope.showLevel03 = function(){
+		hideLevel();
+		$('#people-table').find('#panel-level03').show('normal');
+	};
+
+	$scope.showLevel04 = function(){
+		hideLevel();
+		$('#people-table').find('#panel-level04').show('normal');
+	};
+
+	$scope.showLevel05 = function(){
+		hideLevel();
+		$('#people-table').find('#panel-level05').show('normal');
+	};
 });
 
 
@@ -934,6 +1093,70 @@ factoryVehicle.controller('affairsRoutesManager', function($scope){
 		// var lushu1 = BMapLib.LuShu($scope.map,paths[0],)
 		// 
 	}
+
+	/**
+	 * 隐藏该页面下所有的panel
+	 * @return {[type]} [description]
+	 */
+	var hideLevel = function(){
+		$('#show-routes').find('.panel').each(function(){
+			$(this).hide();
+		});
+	};
+
+	/**
+	 * 展示panel-level01
+	 * @return {[type]} [description]
+	 */
+	$scope.showLevel01 = function(){
+		hideLevel();
+		$('#panel-level01').show("normal");
+	};
+
+	/**
+	 * 展示panel-level02
+	 * @return {[type]} [description]
+	 */
+	$scope.showLevel02 = function(){
+		hideLevel();
+		$('#panel-level02').show("normal");
+	};
+
+	/**
+	 * 展示panel-level03
+	 * @return {[type]} [description]
+	 */
+	$scope.showLevel03 = function(){
+		hideLevel();
+		$('#panel-level03').show("normal");
+	};
+
+	/**
+	 * 展示panel-level04
+	 * @return {[type]} [description]
+	 */
+	$scope.showLevel04 = function(){
+		hideLevel();
+		$('#panel-level04').show("normal");
+	};
+
+	/**
+	 * 展示panel-level05
+	 * @return {[type]} [description]
+	 */
+	$scope.showLevel05 = function(){
+		hideLevel();
+		$('#panel-level05').show("normal");
+	};
+
+	/**
+	 * 展示panel-level06
+	 * @return {[type]} [description]
+	 */
+	$scope.showLevel06 = function(){
+		hideLevel();
+		$('#panel-level06').show("normal");
+	};
 });
 
 
