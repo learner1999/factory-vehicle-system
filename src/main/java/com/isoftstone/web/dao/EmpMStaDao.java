@@ -162,8 +162,8 @@ public class EmpMStaDao {
 				emlop.setEpart(result.getString("epart"));
 				emlop.setEgroup(result.getInt("egroup"));
 				emlop.setEtime(result.getInt("etime"));
-				emlop.setEAddress(result.getString("EAddress"));
-				emlop.setEiden(result.getString("Eiden"));
+				emlop.setAddress(result.getString("EAddress"));
+				emlop.setEid(result.getInt("Eiden"));
 				emlopList.add(emlop);
 			}
 		} catch (SQLException e) {
@@ -378,7 +378,7 @@ public class EmpMStaDao {
 			while (result.next()) {
 				Emlopee e = new Emlopee();
 				e.setEid(result.getInt("y.eid"));
-				e.setEAddress(result.getString("y.EAddress"));
+				e.setAddress(result.getString("y.EAddress"));
 				emlopList.add(e);
 			}
 		}catch (SQLException e) {
@@ -429,13 +429,13 @@ public class EmpMStaDao {
 		EmpMatchSta ems=new EmpMatchSta();
 		Coordinate c=new Coordinate();
 		try {
-			c = ApiOp.getXYByAddress(e.getEAddress());
+			c = ApiOp.getXYByAddress(e.getAddress());
 		} catch (IOException e1) {
 			// TODO 自动生成的 catch 块
 			e1.printStackTrace();
 		}
 		ems.setE_id(e.getEid());
-		ems.setE_address(e.getEAddress());
+		ems.setE_address(e.getAddress());
 		ems.setE_x(c.getLng());
 		ems.setE_y(c.getLat());
 		return ems;

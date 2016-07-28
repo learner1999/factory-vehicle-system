@@ -1,27 +1,29 @@
 package com.isoftstone.web.pojo;
 
+import java.sql.Date;
+import java.sql.Time;
+
 public class Emlopee {
 	private int eid;
 	private String ename;
 	private String epart;
 	private int egroup;
 	private int etime;
-	private String EAddress;
-	private String Eiden;
+	private String station;
+	public String getStation() {
+		return station;
+	}
+	public void setStation(String station) {
+		this.station = station;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	private String address;
 	
-	
-	public String getEAddress() {
-		return EAddress;
-	}
-	public void setEAddress(String eAddress) {
-		EAddress = eAddress;
-	}
-	public String getEiden() {
-		return Eiden;
-	}
-	public void setEiden(String eiden) {
-		Eiden = eiden;
-	}
 	public int getEid() {
 		return eid;
 	}

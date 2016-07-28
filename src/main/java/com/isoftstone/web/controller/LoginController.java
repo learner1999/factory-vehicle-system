@@ -11,23 +11,46 @@ import com.isoftstone.web.dao.LoginDao;
 
 @RestController
 public class LoginController {
-
-	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	public String login(@RequestParam(value = "username") String username,
-			@RequestParam(value = "password") String password, HttpSession session) {
-		
+	LoginDao loginDao = new LoginDao();
+	@RequestMapping(value = "/api/login", method = RequestMethod.POST)
+	public int login(@RequestParam(value = "username") String username,
+			@RequestParam(value = "password") String password , HttpSession session) {
 		if(session.getAttribute("userId") != null) {
-			return "已经登录";
+			return 3; //已经登录了
 		}
-		
 		int id = 0;
-		LoginDao loginDao = new LoginDao();
-		id = loginDao.login(username, password);
-		if (0 == id) {
-			return "账号或密码错误";
-		} else {
+		if(loginDao.is_exist(username, password))
+		{
+			id = loginDao.login(username, password);
+			if (0 == id) {
+				System.out.println(" 0代表普通员工");
+			} else if(1==id){
+				System.out.println("1代表总务部");
+			}
+			else{
+				System.out.println("2代表行政部");
+			}
 			session.setAttribute("userId", id);
-			return "登录成功";
+			return id;
 		}
+		else
+		{
+			if(loginDao.is_username(username)){
+				System.out.println("密码出错");
+				return 4;
+			}
+			else{
+				System.out.println("用户名不存在");
+				return 5;
+			}
+			}
+		}	
+		
 	}
-}
+/*
+ *
+ * 
+		
+ * 
+ * */
+

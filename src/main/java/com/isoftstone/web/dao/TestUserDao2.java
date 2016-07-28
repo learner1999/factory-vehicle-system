@@ -31,7 +31,10 @@ public class TestUserDao2 {
 		try {
 			if(part==1)
 				p="总务部";
-			else p="行政部";
+			else if(part==2)
+				p="行政部";
+			else 
+				p="";
 			conn = JdbcUtil.getConnection();
 			cs = (CallableStatement) conn.prepareCall(prco); // 这个地方用了
 	   									// prepareStatement，主要目的是防止
@@ -40,6 +43,10 @@ public class TestUserDao2 {
 			while (result.next()) {
 				Emlopee user = new Emlopee();
 				user.setEid(result.getInt("EId"));
+				user.setEname(result.getString("EName"));
+				user.setEpart(result.getString("EPart"));
+				user.setEgroup(result.getInt("EGroup"));
+				user.setEtime(result.getInt("ETime"));
 				userList.add(user);
 			}
 		} catch (SQLException e) {
@@ -88,7 +95,7 @@ public class TestUserDao2 {
 	 *            查询的用户对象
 	 * @return 是否存在
 	 */
-	public boolean isUserExist(TestUser2 user) {
+	public boolean isUserExist(int user) {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet result = null;
@@ -96,7 +103,8 @@ public class TestUserDao2 {
 		try {
 			conn = JdbcUtil.getConnection();
 			cs = (CallableStatement) conn.prepareCall(prco);
-			cs.setString(1, user.getUsername());
+			String a=String.valueOf(user);
+			cs.setString(1, a);
 			result = cs.executeQuery();
 			if (result.next()) {
 				return true;
@@ -165,26 +173,29 @@ public class TestUserDao2 {
 	 *            用户信息
 	 * @return 成功返回 true，失败返回 false
 	 */
-	public boolean createUser(TestUser2 user) {
+	public boolean createUser(Emlopee user) {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		// 3 个占位符，分别对应位置为 1,2,3
 		String prco = "call createUser(?,?)";
-		String prco1 = "call createUser1(?,?,?)";
 		try {
 			conn = JdbcUtil.getConnection();
 			// 替换占位符位置的值
-			if(null==user.getPassword()){
+			String a=String.valueOf(user.getEid());
+			if(a!=null){
 			 cs = (CallableStatement) conn.prepareCall(prco);
-			 cs.setString(1, user.getUsername());
-			cs.setInt(2, user.getAuthority());
+			 cs.setString(1, a);
+			if(user.getEpart().equals("总务部")){
+				cs.setInt(2, 1);
+			}
+			else if(user.getEpart().equals("行政部")){
+				cs.setInt(2, 2);
 			}
 			else{
-				 cs = (CallableStatement) conn.prepareCall(prco1);
-				 cs.setString(1, user.getUsername());
-				cs.setString(2, user.getPassword());
-				 cs.setInt(3, user.getAuthority());
+              cs.setInt(2, 0);				
 			}
+			}
+
 			
 			int counter = cs.executeUpdate();
 			if (1 == counter) {
@@ -296,4 +307,7 @@ public class TestUserDao2 {
 
 	}
 
+	
+		
+	
 }

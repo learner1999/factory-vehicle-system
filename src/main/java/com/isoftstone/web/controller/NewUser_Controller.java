@@ -16,13 +16,12 @@ import com.isoftstone.web.pojo.TestUser2;
 @RestController
 public class NewUser_Controller {
 	private TestUserDao2 userDao = new TestUserDao2();
-	
 	/**
-	 * 传入参数1(总务部)或者2(行政部)，返回员工信息
+	 * 传入参数0(全部员工)或1(总务部)或者2(行政部),返回员工信息
 	 * @param part
 	 * @return
 	 */
-	@RequestMapping(value = "/api/Newuser/{part}", method = RequestMethod.GET)
+	@RequestMapping(value = "/api/newuser/{part}", method = RequestMethod.GET)
 	public ResponseEntity<List<Emlopee>> getuseridBypart(@PathVariable("part") int part) 
 	{
 		System.out.print("查询"+part+"部门的员工信息");
@@ -39,32 +38,29 @@ public class NewUser_Controller {
 	 * @param user
 	 * @return
 	 */
-		@RequestMapping(value = "/api/Newuser", method = RequestMethod.POST)
+		@RequestMapping(value = "/api/newuser", method = RequestMethod.POST)
 		// 下面一行 RequestBody 这个注解表示全哥会传一个 json对象过来，对应 TestUser2，框架会自动将信息提取到参数 user 中，测试方法在 coding
-		public ResponseEntity<TestUser2> createUser(@RequestBody TestUser2 user) { 
-			System.out.println("创建新用户 " + user.getUsername());
+		public ResponseEntity<Emlopee> createUser(@RequestBody Emlopee user) { 
+			System.out.println("创建新用户 " + user.getEid());
 			// 检查提交的数据是否完整，如果不完整，将状态码设置为 BAD_REQUEST
-			if(null == user.getUsername() || 0 == user.getAuthority()) {
-				return new ResponseEntity<TestUser2>(HttpStatus.BAD_REQUEST);
-			}
-			//检测是否是行政部或者总务部
+			/*测是否是行政部或者总务部
 			if(userDao.isUserTrue(user)){
 				System.out.println("用户 " + user.getUsername() + "不是行政部或者总务部人员");
 				return new ResponseEntity<TestUser2>(HttpStatus.CONFLICT);
-			}
+			}*/
 			// 检测用户名是否冲突
-			if(userDao.isUserExist(user)) {
-				System.out.println("用户 " + user.getUsername() + "已存在");
-				return new ResponseEntity<TestUser2>(HttpStatus.CONFLICT);
+			if(userDao.isUserExist(user.getEid())) {
+				System.out.println("用户 " + user.getEid() + "已存在");
+				return new ResponseEntity<Emlopee>(HttpStatus.CONFLICT);
 			}
 		
 			// 创建用户
 			if(userDao.createUser(user)) {
-				System.out.println("创建用户"+user.getUsername()+"成功");
-				return new ResponseEntity<TestUser2>(user, HttpStatus.CREATED);
+				System.out.println("创建用户"+user.getEid()+"成功");
+				return new ResponseEntity<Emlopee>(user, HttpStatus.CREATED);
 			}
 			// 如果出现异常，将状态码设为 internal server error(寻找更好的解决方案中……)
-			return new ResponseEntity<TestUser2>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<Emlopee>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
       /**
        * 更新账户信息
@@ -72,7 +68,7 @@ public class NewUser_Controller {
        * @return
        */
 		// 修改对应 id 用户的信息，可以只修改部分……我们不用 PATCH 了
-		@RequestMapping(value = "/api/Newuser", method = RequestMethod.PUT)
+		@RequestMapping(value = "/api/newuser", method = RequestMethod.PUT)
 		public ResponseEntity<TestUser2> updateUser(@RequestBody TestUser2 user) {
 			System.out.println("更新用户名为=" + user.getUsername()+"的信息");
 			
@@ -98,7 +94,7 @@ public class NewUser_Controller {
 	 * @param id
 	 * @return
 	 */
-		@RequestMapping(value = "/api/Newuser/{username}", method = RequestMethod.DELETE)
+		@RequestMapping(value = "/api/newuser/{username}", method = RequestMethod.DELETE)
 		public ResponseEntity<TestUser2> deleteUser(@PathVariable("username") String username) {
 			System.out.println("删除一个用户名=" + username);
 			// 检测对应 id 用户是否存在，不存在将状态码设为 NOT_FOUND
@@ -114,4 +110,6 @@ public class NewUser_Controller {
 			
 			return  new ResponseEntity<TestUser2>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+		
+			
 }
