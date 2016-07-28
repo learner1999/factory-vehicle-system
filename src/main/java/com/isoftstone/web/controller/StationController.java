@@ -68,7 +68,7 @@ public class StationController {
 	/***
 	 * 目前站点是否合适
 	 * 
-	 * @return 合适代码。1是人员站点不匹配，建议重新同步。2是有人数为0的站点，建议删除。0是合适
+	 * @return 合适代码。1是人员站点不匹配，建议重新同步。2是有人数为0的站点，建议删除。3是上面情况都有。0是合适
 	 */
 	@RequestMapping(value="/api/Station/isOk",method=RequestMethod.GET)
 	public ResponseEntity<Integer> getStationById()

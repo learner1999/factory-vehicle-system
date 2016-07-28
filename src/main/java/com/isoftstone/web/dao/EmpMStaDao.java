@@ -15,6 +15,7 @@ import com.isoftstone.web.util.JdbcUtil;
 import com.routematrix.pojo.Coordinate;
 import com.webapi.ApiOp;
 
+
 public class EmpMStaDao {
 	
 	private Connection conn = null;
@@ -150,7 +151,7 @@ public class EmpMStaDao {
 	public List<Emlopee> matchEAndS()
 	{
 		List<Emlopee> emlopList=new ArrayList<Emlopee>();
-		String sql="select * from employee_infor_copy where Eid in(select e_id from employee_station_copy)";
+		String sql="select * from employee_infor_copy where Eid not in(select e_id from employee_station_copy)";
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
@@ -438,6 +439,7 @@ public class EmpMStaDao {
 		ems.setE_address(e.getAddress());
 		ems.setE_x(c.getLng());
 		ems.setE_y(c.getLat());
+		System.out.println(c.getLng()+"  "+c.getLat());
 		return ems;
 	}
 

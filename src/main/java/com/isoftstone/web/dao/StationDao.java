@@ -705,15 +705,22 @@ public class StationDao {
 	public int isOk()
 	{
 		EmpMStaDao emsDao=new EmpMStaDao();
+		int i=0;
 		if(emsDao.getAllchange().size()>0||emsDao.getAllnew().size()>0)
 		{
-			return 1;
+			i=1;
 		}
 		if(isStationZero().size()>0)
 		{
-			return 2;
+			if(i==0)
+			{
+				i=2;
+			}else
+			{
+				i=3;
+			}
 		}
-		return 0;
+		return i;
 	}
 	
 	/***

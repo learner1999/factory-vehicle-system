@@ -11,8 +11,9 @@ public class CalForStaDao {
 	private EmpMStaDao emsDao=new EmpMStaDao();
 	
 	//专门新建的，还要修改的设一个
-	public List<CalForSta> cal(List<EmpMatchSta> emsList)
+	public List<CalForSta> cal()
 	{
+		List<EmpMatchSta> emsList=emsDao.getAllnew();
 		List<CalForSta> calList=new ArrayList<CalForSta>();
 		for(int i=0;i<emsList.size();i++)	 
 		{
@@ -53,7 +54,7 @@ public class CalForStaDao {
 		return calList;
 	}
 	
-	public void addToDb(List<CalForSta> calList)
+	public int addToDb(List<CalForSta> calList)
 	{
 		for(int i=0;i<calList.size();i++)
 		{
@@ -75,6 +76,13 @@ public class CalForStaDao {
 				//System.out.print(ems.getE_id()+"  ");
 			}
 		}
+		List<Station> staList=stadao.isStationZero();
+		for(int i=0;i<staList.size();i++)
+		{
+			Station sta=staList.get(i);
+			stadao.changeStaToPo(sta.getS_id());
+		}
+		return calList.size();
 	}
 	
 	public void show(List<CalForSta> calList)
