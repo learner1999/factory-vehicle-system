@@ -94,13 +94,13 @@ public class RouteController {
 
 		// 检测对应编号的车辆是否存在
 		Car_inf carInf;
-		carInf = new Car_dao().getcarByid(route.getCarId());
+		carInf = new Car_dao().getcarByid(route.getCar().getId());
 		if (null == carInf) {
 			return new ResponseEntity<Route>(HttpStatus.NOT_FOUND);
 		}
 
 		// 创建路线
-		if (routeDao.createRoute(route.getCarId(), route)) {
+		if (routeDao.createRoute(route.getCar().getId(), route)) {
 			return new ResponseEntity<Route>(route, HttpStatus.OK);
 		}
 

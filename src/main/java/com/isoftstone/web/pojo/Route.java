@@ -3,25 +3,21 @@ package com.isoftstone.web.pojo;
 import java.util.List;
 
 public class Route {
-	private int carId;
-	private List<Station> stations;
-	private List<Integer> times;
-	public List<Integer> getTimes() {
-		return times;
+	private Car_inf car;
+	private List<RouteStation> stations;
+	
+	public Car_inf getCar() {
+		return car;
 	}
-	public void setTimes(List<Integer> times) {
-		this.times = times;
+	public void setCar(Car_inf car) {
+		this.car = car;
 	}
-	public int getCarId() {
-		return carId;
-	}
-	public void setCarId(int carId) {
-		this.carId = carId;
-	}
-	public List<Station> getStations() {
+	public List<RouteStation> getStations() {
 		return stations;
 	}
-	public void setStations(List<Station> stations) {
+	public void setStations(List<RouteStation> stations) {
 		this.stations = stations;
 	}
+	
+	
 }

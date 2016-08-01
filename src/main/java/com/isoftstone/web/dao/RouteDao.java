@@ -10,7 +10,9 @@ import java.util.List;
 
 import com.isoftstone.web.algorithm.Cal;
 import com.isoftstone.web.algorithm.Plan;
+import com.isoftstone.web.pojo.Car_inf;
 import com.isoftstone.web.pojo.Route;
+import com.isoftstone.web.pojo.RouteStation;
 import com.isoftstone.web.pojo.Station;
 import com.isoftstone.web.util.JdbcUtil;
 import com.routematrix.pojo.Coordinate;
@@ -41,22 +43,20 @@ public class RouteDao {
 			return null;
 		}
 
-		// 存在对应 carId 的表，则获取表中内容
-		route.setCarId(carId);
+		// 获取车辆信息
+		Car_inf carInf = new Car_dao().getcarByid(carId);
+		route.setCar(carInf);
+		
+		// 获取站点信息
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(strSql);
 			result = stmt.executeQuery();
 
-			List<Station> stationList = new ArrayList<>();
-			List<Integer> timeList = new ArrayList<>();
-			while (result.next()) {
-				Station sta = fetchStaData(result);
-				stationList.add(sta);
-				timeList.add(result.getInt("time"));
-			}
+			List<RouteStation> stationList = fetchStaData(result);
+			calculateArrivalTime(stationList);
+			
 			route.setStations(stationList);
-			route.setTimes(timeList);
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -65,6 +65,50 @@ public class RouteDao {
 		}
 
 		return route;
+	}
+
+	/**
+	 * 计算站点的到站时间
+	 * @param stationList
+	 */
+	private void calculateArrivalTime(List<RouteStation> stationList) {
+		
+		for (int i = 0, len = stationList.size(); i < len; i++) {
+			List<String> arrival_time = new ArrayList<>();
+			stationList.get(i).setArrival_time(arrival_time);
+		}
+		
+		// 计算上班去公司时的到站时间，假设上班（到公司）时间9:00
+		int curTime = 9 * 60;  // 把时间转成分钟
+		int stopTime = 3;  // 假设每站停留的时间
+		for (int i = 0, len = stationList.size(); i < len; i++) {
+			RouteStation sta = stationList.get(i);
+			List<String> arrival_time = sta.getArrival_time();
+			int usedTime = sta.getUsed_time();
+			int arrivalTime = curTime - usedTime - stopTime;
+			arrival_time.add(timeToString(arrivalTime));
+		}
+		
+		// 假设下班（离开公司）时间17:00
+		curTime = 17 * 60;
+		for (int i = stationList.size() - 1; i >= 0; i--) {
+			RouteStation sta = stationList.get(i);
+			List<String> arrival_time = sta.getArrival_time();
+			int usedTime = sta.getUsed_time();
+			int arrivalTime = curTime + usedTime + stopTime;
+			arrival_time.add(timeToString(arrivalTime));
+		}
+		
+	}
+
+	/**
+	 * 将时间转换成字符串（9 * 60  --->  9:00）
+	 * @param time
+	 * @return
+	 */
+	private String timeToString(int time) {
+		
+		return time / 60 + ":" + time % 60;
 	}
 
 	/**
@@ -103,18 +147,43 @@ public class RouteDao {
 	 * @param result
 	 * @return
 	 */
-	private Station fetchStaData(ResultSet result) {
+	private List<RouteStation> fetchStaData(ResultSet result) {
 
 		StationDao staDao = new StationDao();
+		List<RouteStation> routeStationList = new ArrayList<>();
 
 		try {
-			int staId = result.getInt("s_id");
-			return staDao.getStaById(staId);
+			while(result.next()) {
+				RouteStation routeSta = new RouteStation();
+				
+				// 获取站点信息
+				int staId = result.getInt("s_id");
+				Station sta = staDao.getStaById(staId);
+				int usedTime = result.getInt("time");
+				
+				// 获取站点人数
+				int numOfEmp = getNumOfEmpByStaId(staId);
+				
+				routeSta.setS_id(sta.getS_id());
+				routeSta.setS_name(sta.getS_name());
+				routeSta.setNum_of_emp(numOfEmp);
+				routeSta.setUsed_time(usedTime);
+				
+				routeStationList.add(routeSta);
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		
 
 		return null;
+	}
+
+	private int getNumOfEmpByStaId(int staId) {
+		
+		
+		
+		return 0;
 	}
 
 	/**
@@ -146,9 +215,9 @@ public class RouteDao {
 			stmt = conn.prepareStatement(strSql);
 
 			// 遍历提交的站点信息
-			List<Station> listStation = curRoute.getStations();
+			List<RouteStation> listStation = curRoute.getStations();
 			for (int i = 0; i < listStation.size(); i++) {
-				Station curStation = listStation.get(i);
+				RouteStation curStation = listStation.get(i);
 
 				// 判断站点是否已经存在，不存在则创建
 				// if (!staDao.isxyExist(curStation.getLongitude(),
@@ -285,7 +354,7 @@ public class RouteDao {
 	 * @param listSta
 	 * @return
 	 */
-	public List<Integer> fetchStationId(List<Station> listSta) {
+	public List<Integer> fetchStationId(List<RouteStation> listSta) {
 		List<Integer> listStaId = new ArrayList<>();
 
 		for (int i = 0, length = listSta.size(); i < length; i++) {
@@ -322,9 +391,9 @@ public class RouteDao {
 			stmt = conn.prepareStatement(strSql);
 
 			// 遍历提交的站点信息
-			List<Station> listStation = curRoute.getStations();
+			List<RouteStation> listStation = curRoute.getStations();
 			for (int i = 0; i < listStation.size(); i++) {
-				Station curStation = listStation.get(i);
+				RouteStation curStation = listStation.get(i);
 
 				// 判断站点是否已经存在，不存在则创建
 				// if (!staDao.isxyExist(curStation.getLongitude(),
@@ -397,7 +466,8 @@ public class RouteDao {
 		Route route = findById(carId);
 
 		// 获取站点数据
-		List<Station> staList = route.getStations();
+		List<RouteStation> routeStationList = route.getStations();
+		List<Station> staList = fetchStation(routeStationList);
 		Station staFirst = staList.get(0);
 		try {
 			// 更新第一站点到公司之间的耗时
@@ -426,6 +496,24 @@ public class RouteDao {
 		}
 
 		return true;
+	}
+
+	/**
+	 * 根据提供的 RouteStationList 返回对应的 StationList
+	 * @param routeStationList
+	 * @return
+	 */
+	private List<Station> fetchStation(List<RouteStation> routeStationList) {
+		StationDao staDao = new StationDao();
+		List<Station> staList = new ArrayList<>();
+		
+		for (int i = 0, len = routeStationList.size(); i < len; i++) {
+			int staId = routeStationList.get(i).getS_id();
+			Station sta = staDao.getStaById(staId);
+			staList.add(sta);
+		}
+		
+		return staList;
 	}
 
 	/**
@@ -557,10 +645,10 @@ public class RouteDao {
 			}
 
 			Route route = new Route();
-			List<Station> staList = new ArrayList<>();
+			List<RouteStation> staList = new ArrayList<>();
 			route.setStations(staList);
 			for (int j = 0; j < staIds.length; j++) {
-				Station sta = new Station();
+				RouteStation sta = new RouteStation();
 				sta.setS_id(staIds[j]);
 				staList.add(sta);
 			}
