@@ -85,18 +85,18 @@ public class RouteDao {
 			RouteStation sta = stationList.get(i);
 			List<String> arrival_time = sta.getArrival_time();
 			int usedTime = sta.getUsed_time();
-			int arrivalTime = curTime - usedTime - stopTime;
-			arrival_time.add(timeToString(arrivalTime));
+			curTime = curTime - usedTime - stopTime;
+			arrival_time.add(timeToString(curTime));
 		}
 		
 		// 假设下班（离开公司）时间17:00
 		curTime = 17 * 60;
-		for (int i = stationList.size() - 1; i >= 0; i--) {
+		for (int i = 0, len = stationList.size(); i < len; i++) {
 			RouteStation sta = stationList.get(i);
 			List<String> arrival_time = sta.getArrival_time();
 			int usedTime = sta.getUsed_time();
-			int arrivalTime = curTime + usedTime + stopTime;
-			arrival_time.add(timeToString(arrivalTime));
+			curTime = curTime + usedTime + stopTime;
+			arrival_time.add(timeToString(curTime));
 		}
 		
 	}
@@ -176,12 +176,35 @@ public class RouteDao {
 		}
 		
 
-		return null;
+		return routeStationList;
 	}
 
+	
+	/**
+	 * 获取站点对应的人数
+	 * @param staId
+	 * @return
+	 */
 	private int getNumOfEmpByStaId(int staId) {
-		
-		
+
+		String strSql = "SELECT COUNT(e_id) AS counter FROM employee_station_copy WHERE s_id=" + staId;
+
+		try {
+			// 删除路线表
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(strSql);
+			result = stmt.executeQuery();
+			
+			if(result.next()) {
+				int counter = result.getInt("counter");
+				return counter;
+			}
+		} catch (SQLException e) {
+			System.out.println("查询站点人数失败！");
+			return 0;
+		} finally {
+			JdbcUtil.close(null, stmt, conn);
+		}
 		
 		return 0;
 	}
