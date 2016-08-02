@@ -2,7 +2,9 @@ package com.isoftstone.web.pojo;
 
 public class EmpMatchSta {
 	private int e_id;
+	private String e_name;
 	private int s_id;
+	private String s_name;
 	private String e_address;
 	private double e_x;
 	private double e_y;
@@ -10,6 +12,18 @@ public class EmpMatchSta {
 	
 	
 	
+	public String getE_name() {
+		return e_name;
+	}
+	public void setE_name(String e_name) {
+		this.e_name = e_name;
+	}
+	public String getS_name() {
+		return s_name;
+	}
+	public void setS_name(String s_name) {
+		this.s_name = s_name;
+	}
 	public int getUsed() {
 		return used;
 	}

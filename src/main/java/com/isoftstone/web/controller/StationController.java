@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.isoftstone.web.pojo.Emlopee;
 import com.isoftstone.web.pojo.EmpMatchSta;
+import com.isoftstone.web.dao.EmlopeeDao;
 import com.isoftstone.web.dao.EmpMStaDao;
 import com.isoftstone.web.dao.StationDao;
 import com.isoftstone.web.pojo.Station;
@@ -63,6 +65,19 @@ public class StationController {
 			return new ResponseEntity<Station>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<Station>(sta, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value="/api/Emlop/{eid}",method=RequestMethod.GET)
+	public ResponseEntity<Emlopee> getEmlopById(@PathVariable("eid") int eid)
+	{
+		EmlopeeDao emlopDao=new EmlopeeDao();
+		System.out.println(eid);
+		Emlopee emlop=emlopDao.getEmlopById(eid);
+		if(emlop.getEname()==null)
+		{
+			return new ResponseEntity<Emlopee>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<Emlopee>(emlop, HttpStatus.OK);
 	}
 	
 	/***

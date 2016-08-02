@@ -77,9 +77,10 @@ public class EmpMatchStaController {
 	 *            员工id
 	 * @return 员工站点对应信息
 	 */
-	@RequestMapping(value="/api/EmpMatchSta/{eid}",method=RequestMethod.GET)
+	@RequestMapping(value="/api/EmpMatchById/{eid}",method=RequestMethod.GET)
 	public ResponseEntity<EmpMatchSta> findEmsByEid(@PathVariable("eid") int eid)
 	{
+		System.out.println(eid);
 		EmpMatchSta ems=emsDao.getEmsByEid(eid);
 		if(ems==null)
 		{
@@ -98,14 +99,17 @@ public class EmpMatchStaController {
 		Integer count=0;
 		List<Emlopee> emloplist=emsDao.matchEAndS();
 		count+=emloplist.size();
+		//System.out.println("add");
 		for(int i=0;i<emloplist.size();i++)
 		{
 			Emlopee e=emloplist.get(i);
 			EmpMatchSta ems=emsDao.getXYByAdd(e);
 			//System.out.println(ems.getE_id()+"  "+ems.getE_address()+"  "+ems.getE_x()+"  "+ems.getE_y());
 			emsDao.creatEMS(ems);
-			System.out.println(ems.getE_id());
+			//System.out.println(ems.getE_id());
+			//System.out.println(e.getEid());
 		}
+		//System.out.println("change");
 		emloplist=emsDao.getAllchange();
 		count+=emloplist.size();
 		for(int i=0;i<emloplist.size();i++)
@@ -113,15 +117,17 @@ public class EmpMatchStaController {
 			Emlopee e=emloplist.get(i);
 			EmpMatchSta ems=emsDao.getXYByAdd(e);
 			emsDao.updateEMSForAdd(ems);
-			System.out.println(ems.getE_id());
+			//System.out.println(ems.getE_id());
+			//System.out.println(e.getEid());
 		}
 		List<EmpMatchSta> emsList=emsDao.matchSAndE();
 		count+=emsList.size();
+		//System.out.println("delete");
 		for(int i=0;i<emsList.size();i++)
 		{
 			EmpMatchSta ems=emsList.get(i);
 			emsDao.deleteEms(ems.getE_id());
-			System.out.println(ems.getE_id());
+			//System.out.println(ems.getE_id());
 		}
 		if(0==count)
 		{

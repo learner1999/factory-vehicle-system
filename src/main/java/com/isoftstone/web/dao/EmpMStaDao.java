@@ -31,18 +31,21 @@ public class EmpMStaDao {
 	 */
 	public List<EmpMatchSta> showAllnew(){
 		List<EmpMatchSta> emsList=new ArrayList<EmpMatchSta>();
-		String sql="select * from employee_station_copy where s_id is null order by e_y";
+		String sql="select x.e_id,x.s_id,x.e_address,x.e_x,x.e_y,y.ename from "
+				+ "employee_station_copy as x,employee_infor_copy as y,"
+				+ "where x.e_id=y.eid and x.s_id is null order by x.e_y";
 		try{
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
 			result = stmt.executeQuery();
 			while (result.next()) {
 				EmpMatchSta ems = new EmpMatchSta();
-				ems.setE_id(result.getInt("e_id"));
-				ems.setS_id(result.getInt("s_id"));
-				ems.setE_address(result.getString("e_address"));
-				ems.setE_x(result.getDouble("e_x"));
-				ems.setE_y(result.getDouble("e_y"));
+				ems.setE_id(result.getInt("x.e_id"));
+				ems.setS_id(result.getInt("x.s_id"));
+				ems.setE_address(result.getString("x.e_address"));
+				ems.setE_x(result.getDouble("x.e_x"));
+				ems.setE_y(result.getDouble("x.e_y"));
+				ems.setE_name(result.getString("y.ename"));
 				ems.setUsed(0);
 				emsList.add(ems);
 			}
@@ -61,18 +64,23 @@ public class EmpMStaDao {
 	 */
 	public List<EmpMatchSta> showAll(){
 		List<EmpMatchSta> emsList=new ArrayList<EmpMatchSta>();
-		String sql="select * from employee_station_copy";
+		String sql="select x.e_id,x.s_id,x.e_address,x.e_x,x.e_y,y.ename,z.s_name from "
+				+ "employee_station_copy as x,employee_infor_copy as y,"
+				+ "station_information_copy as z where x.e_id=y.eid and x.s_id=z.s_id";
+		//"select * from employee_station_copy";
 		try{
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
 			result = stmt.executeQuery();
 			while (result.next()) {
 				EmpMatchSta ems = new EmpMatchSta();
-				ems.setE_id(result.getInt("e_id"));
-				ems.setS_id(result.getInt("s_id"));
-				ems.setE_address(result.getString("e_address"));
-				ems.setE_x(result.getDouble("e_x"));
-				ems.setE_y(result.getDouble("e_y"));
+				ems.setE_id(result.getInt("x.e_id"));
+				ems.setS_id(result.getInt("x.s_id"));
+				ems.setE_address(result.getString("x.e_address"));
+				ems.setE_x(result.getDouble("x.e_x"));
+				ems.setE_y(result.getDouble("x.e_y"));
+				ems.setE_name(result.getString("y.ename"));
+				ems.setS_name(result.getString("z.s_name"));
 				emsList.add(ems);
 			}
 		}catch (SQLException e) {
@@ -122,18 +130,22 @@ public class EmpMStaDao {
 	public EmpMatchSta getEmsByEid(int e_id)
 	{
 		EmpMatchSta ems=new EmpMatchSta();
-		String sql = "select * from employee_station_copy where e_id=?";
+		String sql = "select x.e_id,x.s_id,x.e_address,x.e_x,x.e_y,y.ename,z.s_name from "
+				+ "employee_station_copy as x,employee_infor_copy as y,"
+				+ "station_information_copy as z where x.e_id=? and x.e_id=y.eid and x.s_id=z.s_id";
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
 			stmt.setInt(1, e_id);
 			result = stmt.executeQuery();
 			while (result.next()) {
-				ems.setE_id(result.getInt("e_id"));
-				ems.setS_id(result.getInt("s_id"));
-				ems.setE_address(result.getString("e_address"));
-				ems.setE_x(result.getDouble("e_x"));
-				ems.setE_y(result.getDouble("e_y"));
+				ems.setE_id(result.getInt("x.e_id"));
+				ems.setS_id(result.getInt("x.s_id"));
+				ems.setE_address(result.getString("x.e_address"));
+				ems.setE_x(result.getDouble("x.e_x"));
+				ems.setE_y(result.getDouble("x.e_y"));
+				ems.setE_name(result.getString("y.ename"));
+				ems.setS_name(result.getString("z.s_name"));  
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -164,7 +176,7 @@ public class EmpMStaDao {
 				emlop.setEgroup(result.getInt("egroup"));
 				emlop.setEtime(result.getInt("etime"));
 				emlop.setAddress(result.getString("EAddress"));
-				emlop.setEid(result.getInt("Eiden"));
+				emlop.setEiden(result.getString("Eiden"));
 				emlopList.add(emlop);
 			}
 		} catch (SQLException e) {
@@ -246,19 +258,22 @@ public class EmpMStaDao {
 	public List<EmpMatchSta> matchSAndE()
 	{
 		List<EmpMatchSta> emsList=new ArrayList<EmpMatchSta>();
-		String sql="select * from employee_station_copy where e_id not in(select Eid from employee_infor_copy)";
+		String sql="select x.e_id,x.s_id,x.e_address,x.e_x,x.e_y,y.ename,z.s_name from "
+				+ "employee_station_copy as x,employee_infor_copy as y,"
+				+ "station_information_copy as z where x.e_id=y.eid and x.s_id=z.s_id and x.e_id not in(select Eid from employee_infor_copy)";
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
 			result = stmt.executeQuery();
 			while (result.next()) {
 				EmpMatchSta ems=new EmpMatchSta();
-				//鑾峰緱emlop
-				ems.setE_id(result.getInt("e_id"));
-				ems.setS_id(result.getInt("s_id"));
-				ems.setE_address(result.getString("e_address"));
-				ems.setE_x(result.getDouble("e_x"));
-				ems.setE_y(result.getDouble("e_y"));
+				ems.setE_id(result.getInt("x.e_id"));
+				ems.setS_id(result.getInt("x.s_id"));
+				ems.setE_address(result.getString("x.e_address"));
+				ems.setE_x(result.getDouble("x.e_x"));
+				ems.setE_y(result.getDouble("x.e_y"));
+				ems.setE_name(result.getString("y.ename"));
+				ems.setS_name(result.getString("z.s_name"));
 				emsList.add(ems);
 			}
 		} catch (SQLException e) {
@@ -307,7 +322,9 @@ public class EmpMStaDao {
 	public List<EmpMatchSta> search(String addPart)
 	{
 		List<EmpMatchSta> emsList=new ArrayList<EmpMatchSta>();
-		String sql="select * from employee_station_copy where e_address like ?";
+		String sql="select x.e_id,x.s_id,x.e_address,x.e_x,x.e_y,y.ename,z.s_name from "
+				+ "employee_station_copy as x,employee_infor_copy as y,"
+				+ "station_information_copy as z where x.e_id=y.eid and x.s_id=z.s_id and x.e_address like ?";
 		try{
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
@@ -315,12 +332,13 @@ public class EmpMStaDao {
 			result = stmt.executeQuery();
 			while (result.next()) {
 				EmpMatchSta ems=new EmpMatchSta();
-				//鑾峰緱emlop
-				ems.setE_id(result.getInt("e_id"));
-				ems.setS_id(result.getInt("s_id"));
-				ems.setE_address(result.getString("e_address"));
-				ems.setE_x(result.getDouble("e_x"));
-				ems.setE_y(result.getDouble("e_y"));
+				ems.setE_id(result.getInt("x.e_id"));
+				ems.setS_id(result.getInt("x.s_id"));
+				ems.setE_address(result.getString("x.e_address"));
+				ems.setE_x(result.getDouble("x.e_x"));
+				ems.setE_y(result.getDouble("x.e_y"));
+				ems.setE_name(result.getString("y.ename"));
+				ems.setS_name(result.getString("z.s_name"));
 				emsList.add(ems);
 			}
 		}catch (SQLException e) {
@@ -336,21 +354,23 @@ public class EmpMStaDao {
 	 * 
 	 * @return 这类员工信息集
 	 */
-	
 	public List<EmpMatchSta> getAllnew(){
 		List<EmpMatchSta> emsList=new ArrayList<EmpMatchSta>();
-		String sql="select * from employee_station_copy where s_id is null";
+		String sql="select x.e_id,x.s_id,x.e_address,x.e_x,x.e_y,y.ename from "
+				+ "employee_station_copy as x,employee_infor_copy as y"
+				+ " where x.e_id=y.eid and x.s_id is null";
 		try{
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
 			result = stmt.executeQuery();
 			while (result.next()) {
 				EmpMatchSta ems = new EmpMatchSta();
-				ems.setE_id(result.getInt("e_id"));
-				ems.setS_id(result.getInt("s_id"));
-				ems.setE_address(result.getString("e_address"));
-				ems.setE_x(result.getDouble("e_x"));
-				ems.setE_y(result.getDouble("e_y"));
+				ems.setE_id(result.getInt("x.e_id"));
+				ems.setS_id(result.getInt("x.s_id"));
+				ems.setE_address(result.getString("x.e_address"));
+				ems.setE_x(result.getDouble("x.e_x"));
+				ems.setE_y(result.getDouble("x.e_y"));
+				ems.setE_name(result.getString("y.ename"));
 				ems.setUsed(0);
 				emsList.add(ems);
 			}
@@ -439,7 +459,7 @@ public class EmpMStaDao {
 		ems.setE_address(e.getAddress());
 		ems.setE_x(c.getLng());
 		ems.setE_y(c.getLat());
-		System.out.println(c.getLng()+"  "+c.getLat());
+		//System.out.println(c.getLng()+"  "+c.getLat());
 		return ems;
 	}
 
@@ -454,7 +474,9 @@ public class EmpMStaDao {
 	public List<EmpMatchSta> getNear(Station sta)
 	{
 		List<EmpMatchSta> emsList=new ArrayList<EmpMatchSta>();
-		String sql="select * from employee_station_copy order by (e_x-?)*(e_x-?)+(e_y-?)*(e_y-?) limit 10";
+		String sql="select x.e_id,x.s_id,x.e_address,x.e_x,x.e_y,y.ename,z.s_name from "
+				+ "employee_station_copy as x,employee_infor_copy as y,"
+				+ "station_information_copy as z where x.e_id=y.eid and x.s_id=z.s_id order by (x.e_x-?)*(x.e_x-?)+(x.e_y-?)*(x.e_y-?) limit 10";
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(sql);
@@ -465,11 +487,13 @@ public class EmpMStaDao {
 			result = stmt.executeQuery();
 			while (result.next()) {
 				EmpMatchSta ems = new EmpMatchSta();
-				ems.setE_id(result.getInt("e_id"));
-				ems.setS_id(result.getInt("s_id"));
-				ems.setE_address(result.getString("e_address"));
-				ems.setE_x(result.getDouble("e_x"));
-				ems.setE_y(result.getDouble("e_y"));
+				ems.setE_id(result.getInt("x.e_id"));
+				ems.setS_id(result.getInt("x.s_id"));
+				ems.setE_address(result.getString("x.e_address"));
+				ems.setE_x(result.getDouble("x.e_x"));
+				ems.setE_y(result.getDouble("x.e_y"));
+				ems.setE_name(result.getString("y.ename"));
+				ems.setS_name(result.getString("z.s_name"));
 				emsList.add(ems);
 			}
 		} catch (SQLException e) {
