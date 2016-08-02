@@ -1,5 +1,6 @@
 ﻿package com.isoftstone.web.controller;
 import java.util.ArrayList;
+import java.sql.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.isoftstone.web.dao.Car_dao;
+import com.isoftstone.web.pojo.Arrangement;
 import com.isoftstone.web.pojo.Station;
 import com.isoftstone.web.pojo.Car_inf;
 
@@ -114,7 +116,42 @@ public class Car_manage_Controller {
 
         return new ResponseEntity<List<Car_inf>>(carlist, HttpStatus.OK);
     }
-
+	
+	
+     /**
+      * 根据车牌和日期确定当天驾驶员的信息（姓名，驾驶证）
+      * @param d_license
+      * @param date
+      * @return
+      */
+	@RequestMapping(value ="/api/car_infs", method = RequestMethod.GET)
+	public ResponseEntity<List<Arrangement>> getdriver_inf(
+			@RequestParam(value = "d_license",required = false) String d_license,
+			@RequestParam(value = "date",required = false) Date date) 
+	{
+		 
+		if(d_license!=null && date!=null){
+			return getinf(d_license,date);
+		}
+		else{
+			System.out.print("查询失败");
+			return new ResponseEntity<List<Arrangement>>(HttpStatus.NO_CONTENT);
+		}
+	}	
+	/**
+	 * 查询驾驶员信息
+	 * @param dlicense
+	 * @param date
+	 * @return
+	 */
+	public ResponseEntity<List<Arrangement>> getinf(String dlicense,Date date) {
+        List<Arrangement> d_inf = car.getd_inf(dlicense, date);
+        if(d_inf.isEmpty()) {
+            return new ResponseEntity<List<Arrangement>>(HttpStatus.NO_CONTENT);
+        }else{
+        return new ResponseEntity<List<Arrangement>>(d_inf, HttpStatus.OK);
+    }   
+	}
 	
 /**
  * 根据车辆id，修改并更新车辆信息

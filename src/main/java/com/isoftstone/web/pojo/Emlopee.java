@@ -9,6 +9,13 @@ public class Emlopee {
 	private String epart;
 	private int egroup;
 	private int etime;
+	private String eiden;
+	public String getEiden() {
+		return eiden;
+	}
+	public void setEiden(String eiden) {
+		this.eiden = eiden;
+	}
 	private String station;
 	public String getStation() {
 		return station;

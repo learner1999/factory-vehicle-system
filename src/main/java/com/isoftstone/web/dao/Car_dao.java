@@ -2,6 +2,7 @@ package com.isoftstone.web.dao;
 
 import java.io.FileOutputStream;
 import java.sql.Connection;
+import java.util.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,6 +16,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import com.isoftstone.web.dao.Car_dao;
+import com.isoftstone.web.pojo.Arrangement;
 import com.isoftstone.web.pojo.Station;
 import com.isoftstone.web.pojo.Car_inf;
 import com.isoftstone.web.pojo.TestUser2;
@@ -151,6 +153,37 @@ public class Car_dao {
 		}
 		return carList;
 	}
+	/**
+	 * 查询驾驶员姓名和驾驶证
+	 * @param dlicense
+	 * @param date
+	 * @return
+	 */
+	public List getd_inf(String dlicense,Date date)
+	{
+		List<Arrangement> ag = new ArrayList<>();
+		String proc="{call selectd_inf(?,?)}";
+		try {
+			conn = JdbcUtil.getConnection();
+			cs = (CallableStatement) conn.prepareCall(proc);
+			cs.setString(1, dlicense);
+			cs.setDate(2, (java.sql.Date) date);
+			result = cs.executeQuery();
+			while (result.next()) {
+				Arrangement a=new Arrangement();
+				a.setEname(result.getString(1));
+				a.setEiden(result.getString(2));
+				ag.add(a);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+			JdbcUtil.closecs(cs);
+		}
+		return ag;
+	}
+	
 	/**
 	 * 判断此驾驶证是否已经存在
 	 * @param c_license

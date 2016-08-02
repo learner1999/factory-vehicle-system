@@ -43,11 +43,13 @@ public class EmlopeeDao {
 		}
 		return emlop;
 	}
-	
+/**
+ * 根据id获取员工的地址和站点
+ * @param id
+ * @return
+ */
 	public List getemp_inf(int id)
 	{
-		
-		
 		List<Emlopee> emp = new ArrayList<>();
 		String proc="{call selectByeid(?)}";
 		try {
@@ -69,7 +71,12 @@ public class EmlopeeDao {
 		}
 		return emp;
 	}
-	
+	/**
+	 * 更新员工的地址
+	 * @param id
+	 * @param address
+	 * @return
+	 */
 	public boolean updateaddress(int id,String address)
 	{
 		String proc="{call updateaddress(?,?)}";

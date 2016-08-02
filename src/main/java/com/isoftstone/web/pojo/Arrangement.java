@@ -40,4 +40,11 @@ public class Arrangement {
 	private int cid;
 	private String c_license;
 	private Date date;
+	private String eiden;
+	public String getEiden() {
+		return eiden;
+	}
+	public void setEiden(String eiden) {
+		this.eiden = eiden;
+	}
 }

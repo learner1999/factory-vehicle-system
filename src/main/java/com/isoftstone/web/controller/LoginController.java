@@ -12,6 +12,13 @@ import com.isoftstone.web.dao.LoginDao;
 @RestController
 public class LoginController {
 	LoginDao loginDao = new LoginDao();
+	/**
+	 * 判断用户登录
+	 * @param username
+	 * @param password
+	 * @param session
+	 * @return
+	 */
 	@RequestMapping(value = "/api/login", method = RequestMethod.POST)
 	public int login(@RequestParam(value = "username") String username,
 			@RequestParam(value = "password") String password , HttpSession session) {

@@ -38,6 +38,13 @@ public class Arrangementdao {
 	
 	//有多少工人决定了多少辆车，车的数量决定了司机的数量,
 	//公司决定了司机的出勤率（一个月打30天算，休息几天（一般为4-6），上几天班）.
+	/**
+	 * 车辆的数量（c）,司机休息的上下限（默认4-6）
+	 * @param c
+	 * @param m
+	 * @param n
+	 * @return
+	 */
 	public ArrayList driver(int c,int m,int n){
 	ArrayList List = new ArrayList();
 	int i,j;
@@ -62,6 +69,12 @@ public class Arrangementdao {
 	//System.out.printf("执行了");
 	return List;
 	}
+	/**
+	 * 给出数字和循环天数,得到该组的循环的人的编号
+	 * @param a
+	 * @param b
+	 * @return
+	 */
 	int tiban(int a,int b){
 	 int c=0;
 		for(int i=a;i<=a+b;i++){
@@ -73,6 +86,13 @@ public class Arrangementdao {
 		return c;
 	}
 	//days-从开始上班后的多少天     drivers-多少位司机    circulation-循环天数
+	/**
+	 * 排班
+	 * @param days
+	 * @param drivers
+	 * @param circulation
+	 * @return
+	 */
 	public ArrayList arrange(long days,int drivers,int circulation){
 		ArrayList list = new ArrayList();
 		int a=(int) (days%circulation);//每组的第几位司机轮休
@@ -104,19 +124,29 @@ public class Arrangementdao {
 		
 	}
 	
-	
-	public boolean updatearrange(int d_id,String d_name,int c_id,String license,Date date)
+	/**
+	 * 更新排班表
+	 * @param d_id
+	 * @param d_name
+	 * @param d_eiden
+	 * @param c_id
+	 * @param license
+	 * @param date
+	 * @return
+	 */
+	public boolean updatearrange(int d_id,String d_name,String d_eiden,int c_id,String license,Date date)
 	{         
 		
-		String proc="{call updatearrange(?,?,?,?,?)}";
+		String proc="{call updatearrange(?,?,?,?,?,?)}";
 		try{
 			conn =JdbcUtil.getConnection();
 			cs = (CallableStatement) conn.prepareCall(proc);
 			cs.setInt(1, d_id);
 			cs.setString(2,d_name);
-			cs.setInt(3, c_id);
-			cs.setString(4, license);
-			cs.setDate(5, (java.sql.Date) date);
+			cs.setString(3, d_eiden);
+			cs.setInt(4, c_id);
+			cs.setString(5, license);
+			cs.setDate(6, (java.sql.Date) date);
 			if(cs.executeUpdate()==1){
 				return true;
 			}		
@@ -132,6 +162,10 @@ public class Arrangementdao {
 		return false;
 	}
 	
+	/**
+	 * 从数据库中得到司机的信息
+	 * @return
+	 */
 	public ArrayList drivers(){
 		ArrayList em=new ArrayList();
 		String proc="{call selectDrivers()}";
@@ -143,6 +177,7 @@ public class Arrangementdao {
 			Emlopee emp=new Emlopee();
 			emp.setEid(result.getInt(1));
 			emp.setEname(result.getString(2));
+			emp.setEiden(result.getString(3));
 			em.add(emp);
 			}		
 		}catch (SQLException e) {
@@ -155,6 +190,10 @@ public class Arrangementdao {
 		
 		return em;
 	}
+	/**
+	 * 从数据库中得到车辆信息
+	 * @return
+	 */
 	public ArrayList cars(){
 		ArrayList car=new ArrayList();
 		String proc="{call selectCars()}";
@@ -178,7 +217,12 @@ public class Arrangementdao {
 		
 		return car;
 	}
-	
+	/**
+	 * 将排班的信息添加至数据库 
+	 * @param ar
+	 * @param date
+	 * @return
+	 */
 	public ArrayList arrangement(List<Arrange> ar,Date date){
 		ArrayList ag=new ArrayList();
 		ArrayList driver=drivers();  //从数据库获取司机的列表
@@ -192,14 +236,22 @@ public class Arrangementdao {
 			 //ad.updatearrange(eml.getEid(), eml.getEname(),cars.getId(),cars.getD_license(), date);
 		     agm.setEid(eml.getEid());
 		     agm.setEname(eml.getEname());
+		     agm.setEiden(eml.getEiden());
 		     agm.setCid(cars.getId());
 		     agm.setC_license(cars.getD_license());
 		     agm.setDate((java.sql.Date) date);
-		     updatearrange(eml.getEid(), eml.getEname(),cars.getId(),cars.getD_license(), date);
+		     updatearrange(eml.getEid(), eml.getEname(),eml.getEiden(),cars.getId(),cars.getD_license(), date);
 		     ag.add(agm);
 		}
        return ag;
 	}
+	
+	/**
+	 * 获取日期差的天数
+	 * @param time1
+	 * @param time2
+	 * @return
+	 */
 	 public static long getQuot(String time1, String time2){
 		  long quot = 0;
 		  SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd");

@@ -44,7 +44,12 @@ public class LoginDao {
 			return id;
 	
 }
-	
+	/**
+	 * 判断密码是否正确
+	 * @param username
+	 * @param password
+	 * @return
+	 */
 	public boolean is_exist(String username, String password) {
 		
 			String prco = "{call userlogin(?,?)}";
@@ -67,7 +72,11 @@ public class LoginDao {
 			return false;
 	
 }
-	
+	/**
+	 * 判断账号是否存在
+	 * @param username
+	 * @return
+	 */
 	public boolean is_username(String username) {
 		
 		String prco = "{call is_username(?)}";
