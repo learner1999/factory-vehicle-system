@@ -25,8 +25,7 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 	};		//保存要删除的站点信息
 	$scope.updateStaInfo = {
 		'name': '',
-		'x': '',
-		'y': '',
+		'address': '',
 		'id': '',
 		'marker': null
 	};		//保存要修改的站点信息
@@ -39,9 +38,17 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 	$scope.searchResult = [];			//保存搜索结果
 	$scope.map;		//界面地图控制对象
 	$scope.markers = [];		//地图上所有站点marker的集合
+	$scope.stopMarkers = [];	//地图上所有停车点marker的集合
 	$scope.staffMarkers = [];		//地图上所有员工marker的集合
 	$scope.staStaffList = [{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003},{'name': '帅全','eaddress': '杭州电子科技大学生活区','e_id':2015003}];
-
+	$scope.stationInfo = {
+		'name': '',
+		'id': 0000000,
+		'address': '',
+		'num': 0,
+		'passengers': []
+	};	//要展示的站点信息
+	$scope.stopStationInfo = null;		//要展示的停车点信息
 
 	//页面加载完成执行的函数
 	$scope.$watch('$viewContentLoaded',function(){
@@ -67,6 +74,8 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 
 		//获取站点数据
 		getStations();
+		//获取停车点数据
+		getAlterMativeStations();
 		//给地图添加右键菜单
 		addMapMenu();
 	}
@@ -131,7 +140,8 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 					'name': data[i].s_name,
 					'id': data[i].s_id,
 					'x': data[i].longitude,
-					'y': data[i].latitude
+					'y': data[i].latitude,
+					'address': data[i].s_address
 				}
 
 				$scope.stations.push(station);
@@ -141,6 +151,34 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 			addMarker();
 		}).error(function(){
 			console.log('从后台获得站点数据失败');
+		});
+	}
+
+	/**
+	 * 从后台获取停车点数据
+	 * @return {[type]} [description]
+	 */
+	var getAlterMativeStations = function(){
+		var url = '/factory_vehicle/api/Point';
+
+		$http.get(url).success(function(data){
+			// console.log(data.length);
+			$scope.altermativeStations = [];
+			for(var i=0;i<data.length;i++){
+				var station = {
+					'name': data[i].s_name,
+					'id': data[i].s_id,
+					'x': data[i].longitude,
+					'y': data[i].latitude,
+					'address': data[i].s_address
+				}
+
+				$scope.altermativeStations.push(station);
+			}
+
+			addStopMarker();
+		}).error(function(){
+			console.log('获取停车点失败');
 		});
 	}
 
@@ -161,6 +199,23 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 			addEvent(marker,$scope.stations[i].name);
 			//给marker添加右键菜单
 			addMarkerMenu(marker,$scope.stations[i].id);
+		}
+	}
+
+	/**
+	 * 添加停车点marker
+	 */
+	var addStopMarker = function(){
+		var point = null;
+		var icon = new BMap.Icon('./images/sta6.png', new BMap.Size(12, 22));
+		for(var i=0;i<200;i++){
+			point = new BMap.Point($scope.altermativeStations[i].x, $scope.altermativeStations[i].y);
+			var marker = new BMap.Marker(point, {icon: icon});
+			$scope.map.addOverlay(marker);
+
+			$scope.stopMarkers.push(marker);
+
+			addEvent(marker,$scope.altermativeStations[i].name);
 		}
 	}
 
@@ -206,7 +261,7 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 
 		marker.addContextMenu(markerMenu);
 	};
-	
+
 	/**
 	 * 删除站点
 	 * @param marker 
@@ -301,11 +356,74 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 	};
 
 	/**
+	 * 查询站点的乘车人员
+	 * @param  {[type]} id [车辆ID]
+	 * @return {[type]}    [乘车人员数组]
+	 */
+	var getStaPassengers = function(id){
+		var url = '/factory_vehicle/api/StaMatchEmp/'+id;
+
+		$http.get(url).success(function(data){
+			if(data != undefined){
+				$scope.stationInfo.passengers = data;
+				$scope.stationInfo.num = data.length;
+			}
+		}).error(function(){
+			console.log('查询站点乘车人员失败');
+		})
+	};
+
+	/**
+	 * 展示站点卡片
+	 * @param  {[type]} index [description]
+	 * @return {[type]}       [description]
+	 */
+	$scope.showStation = function(index){
+		getStaPassengers($scope.stations[index].id);
+		// console.log($scope.stationInfo);
+		$scope.stationInfo.name = $scope.stations[index].name;
+		$scope.stationInfo.id = $scope.stations[index].id;
+		$scope.stationInfo.address = $scope.stations[index].address;
+
+		reflectMarker($scope.stations[index].id);
+		$scope.showLevel03();
+	}
+
+	/**
+	 * 展示停车点卡片
+	 * @param  {[type]} index [description]
+	 * @return {[type]}       [description]
+	 */
+	$scope.showStopStation = function(index){
+		$scope.stopStationInfo = $scope.altermativeStations[index];
+
+		reflectStopMarker($scope.altermativeStations[index].id);
+		$scope.showLevel05();
+	}
+
+	$scope.showStation2 = function(index){
+		getStaPassengers($scope.searchResult[index].id);
+		$scope.stationInfo.name = $scope.searchResult[index].name;
+		$scope.stationInfo.id = $scope.searchResult[index].id;
+		$scope.stationInfo.address = $scope.searchResult[index].address;
+
+		reflectMarker($scope.searchResult[index].id);
+		$scope.showLevel04();
+	}
+
+	$scope.showStopStation2 = function(index){
+		$scope.stopStationInfo = $scope.altermativeStations[index];
+
+		reflectStopMarker($scope.altermativeStations[i].id);
+		$scope.showLevel06();
+	}
+
+	/**
 	 * 以动画的效果标识站点名单和站点的marker
 	 * @param  {[type]} id [description]
 	 * @return {[type]}    [description]
 	 */
-	$scope.reflectMarker = function(id){
+	var reflectMarker = function(id){
 		console.log($scope.stations,$scope.markers);
 		for(var i=0;i<$scope.markers.length;i++){
 			$scope.markers[i].setAnimation(null);
@@ -318,6 +436,26 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 		}
 		console.log($scope.stations.length,$scope.markers.length,i);
 		$scope.markers[i].setAnimation(BMAP_ANIMATION_BOUNCE);
+	};
+
+	/**
+	 * 以动画的效果标识停车点名单和停车点的marker
+	 * @param  {[type]} id [description]
+	 * @return {[type]}    [description]
+	 */
+	var reflectStopMarker = function(id){
+		// console.log($scope.stations,$scope.markers);
+		for(var i=0;i<$scope.stopMarkers.length;i++){
+			$scope.stopMarkers[i].setAnimation(null);
+		}
+		// console.log(id);
+		for(i=0;i<$scope.altermativeStations.length;i++){
+			if($scope.altermativeStations[i].id == id){
+				break;
+			}
+		}
+		// console.log($scope.stopMarkers.length,i);
+		$scope.stopMarkers[i].setAnimation(BMAP_ANIMATION_BOUNCE);
 	};	
 
 	/**
@@ -340,35 +478,37 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 		$http.get(url).success(function(data){
 			// console.log(data);
 			if(!isNaN(condition)){
-				$('#station-table').find('.search-result').find('.search-station-result').find('strong').text(1);
+				// $('#station-table').find('.search-result').find('.search-station-result').find('strong').text(1);
 				var station = {
 					'name': data.s_name,
 					'id': data.s_id,
 					'x': data.longitude,
-					'y': data.latitude
+					'y': data.latitude,
+					'address': data.s_address
 				}
 
 				$scope.searchResult.push(station);
 			}else{
-				$('#station-table').find('.search-result').find('.search-station-result').find('strong').text(data.length);
+				// $('#station-table').find('.search-result').find('.search-station-result').find('strong').text(data.length);
 				for(var i=0;i<data.length;i++){
 					var station = {
 						'name': data[i].s_name,
 						'id': data[i].s_id,
 						'x': data[i].longitude,
-						'y': data[i].latitude
+						'y': data[i].latitude,
+						'address': data[i].s_address
 					}
 
 					$scope.searchResult.push(station);
 				}
 			}
 			// console.log($scope.searchResult);
-			$('#station-table').find('.search-result').find('.search-station-result').show();
+			// $('#station-table').find('.search-result').find('.search-station-result').show();
 		}).error(function(){
 			console.log('查询失败');
 		});
 
-		showLevel02();
+		$scope.showLevel02();
 	};
 
 	/**
@@ -483,6 +623,16 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 	$scope.showLevel07 = function(){
 		hideLevel();
 		$('#station-table').find('#panel-level07').show('normal');
+	};
+
+	$scope.showLevel08 = function(){
+		hideLevel();
+		$('#station-table').find('#panel-level08').show('normal');
+	};
+
+	$scope.showLevel09 = function(){
+		hideLevel();
+		$('#station-table').find('#panel-level09').show('normal');
 	};
 });
 
@@ -724,26 +874,132 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 
 
 factoryVehicle.controller('adminReportManager',function($scope){
-	$scope.stations;
-	$scope.peoples;
+	var month = ['','一月,','二月,','三月,','四月,','五月,','六月,','七月,','八月,','九月,','十月,','十一月,','十二月,'];
+	$scope.date = '2016-08-01';		//查询日期
+	$scope.style = '2';			//查询方式
+	$scope.mychart = null;
+	$scope.xAxis;
+	$scope.num;
 
-	$scope.$watch('$viewContentLoaded', function(){
-		getStation();
+	//页面加载完成执行的函数
+	$scope.$watch('$viewContentLoaded',function(){
+		initChart();
 	});
-
-	var getStation = function(){
-		$scope.stations = [{"name":"石大路华中路路口二","x":120.209603,"y":30.338951,"id":3211},{"name":"采荷新村","x":120.198086,"y":30.25777,"id":3212},{"name":"采荷小区芙蓉邨","x":120.202036,"y":30.259711,"id":3216},{"name":"采荷小区翠柳邨","x":120.202275,"y":30.261458,"id":3217},{"name":"丁桥农贸市场","x":120.230507,"y":30.354838,"id":3221},{"name":"大农港路环丁路口","x":120.245056,"y":30.363813,"id":3222},{"name":"大农港路勤丰路口","x":120.243476,"y":30.362785,"id":3223},{"name":"长睦家园南门","x":120.241218,"y":30.362504,"id":3226},{"name":"大农港路惠兰雅路口一","x":120.236396,"y":30.360775,"id":3228},{"name":"大农港路惠兰雅路口二","x":120.237563,"y":30.360791,"id":3229},{"name":"富春路清江路口","x":120.211621,"y":30.243216,"id":3232},{"name":"解放路口富春路西","x":120.217008,"y":30.250142,"id":3234},{"name":"民心路富春路东","x":120.224265,"y":30.258144,"id":3236},{"name":"钱潮路口富春路东","x":120.227674,"y":30.262152,"id":3237},{"name":"四季花园","x":120.224959,"y":30.254166,"id":3241},{"name":"钱江路庆春路口","x":120.221491,"y":30.262293,"id":3242},{"name":"解放东路四季青儿童精装市场","x":120.202618,"y":30.254338,"id":3089},{"name":"太平门直街双菱路口","x":120.201891,"y":30.265724,"id":3100},{"name":"临丁路北一八一电杆","x":120.221833,"y":30.364577,"id":3140},{"name":"河坊街四七二号","x":120.167178,"y":30.245548,"id":1247},{"name":"复兴南街三三七号","x":120.167139,"y":30.21184,"id":1137},{"name":"石祥一号码头","x":120.17596,"y":30.329721,"id":2155},{"name":"香樟公寓","x":120.113125,"y":30.282644,"id":5017},{"name":"枫桦西路龙王沙路口","x":120.10646,"y":30.167887,"id":5178},{"name":"苏堤南口","x":120.161051,"y":30.235962,"id":8012},{"name":"沈半路一六七号","x":120.169035,"y":30.325922,"id":4084},{"name":"莫干山路石祥路口东南角","x":120.114838,"y":30.327995,"id":4133},{"name":"广电集团","x":120.183576,"y":30.279611,"id":2114},{"name":"凯西社区","x":120.197036,"y":30.268617,"id":3098},{"name":"河坊街五五四号","x":120.179093,"y":30.245895,"id":1263},{"name":"德胜东路九环路口一","x":120.260516,"y":30.315627,"id":3281},{"name":"长生路五四号","x":120.166881,"y":30.262722,"id":1284},{"name":"ES一十-十一墩","x":120.150422,"y":30.338562,"id":4168},{"name":"祥园路乐富智慧园","x":120.11744,"y":30.341032,"id":4256},{"name":"水印康庭","x":120.173917,"y":30.322049,"id":2091},{"name":"枫桦路","x":120.110025,"y":30.170447,"id":5123},{"name":"德胜路东新路口","x":120.184338,"y":30.307731,"id":2187},{"name":"石桥路石祥路口99路公交站","x":120.199761,"y":30.337362,"id":2261},{"name":"凯旋路电杆二","x":120.197945,"y":30.275619,"id":3117},{"name":"储鑫路一一号南","x":120.168223,"y":30.340915,"id":4221},{"name":"龙王沙路","x":120.102404,"y":30.17385,"id":5190},{"name":"金渡北路","x":120.066864,"y":30.3323002,"id":7305},{"name":"城市学院西（二）","x":120.161333,"y":30.331541,"id":4104},{"name":"江城路一九九号","x":120.17977,"y":30.229807,"id":1135},{"name":"石贯子巷","x":120.175826,"y":30.261408,"id":1205},{"name":"朝晖二号码头","x":120.178444,"y":30.293388,"id":2153},{"name":"西湖文化广场","x":120.170138,"y":30.279596,"id":2217}];
-		// $('select').material_select();
-	};
-
-	$scope.getNameList = function(){
-		$scope.peoples = [{name:'帅全'},{name:'帅全'},{name:'帅全'},{name:'帅全'},{name:'帅全'},{name:'帅全'},{name:'帅全'},{name:'帅全'},{name:'帅全'},{name:'帅全'},{name:'帅全'}];
-
-	};
 
 	$scope.getChartData = function(){
 		createChart();
+		var date = translateDate();
+		console.log(date,$scope.style);
 	};
+
+	/**
+	 * 初始化图表
+	 * @return {[type]} [description]
+	 */
+	var initChart = function(){
+		var mychart = echarts.init(document.getElementById('body-chart'));
+		$scope.mychart = mychart;
+
+		option = {
+		    title: {
+		        text: '各站点乘车人数图'
+		    },
+		    tooltip: {
+		        trigger: 'axis'
+		    },
+		    legend: {
+		        data:[
+		        	{
+		        		name: '乘车人数',
+		        		icon: 'circle'
+		        	}
+		        ]
+		    },
+		    grid: {
+		        left: '3%',
+		        right: '4%',
+		        bottom: '8%',
+		        containLabel: true
+		    },
+		    toolbox: {
+		        feature: {
+		            saveAsImage: {},
+		            dataView: {},
+		            magicType: {
+		            	show: true,
+		            	type: ['line', 'bar']
+		            }
+		        }
+		    },
+		    dataZoom: [
+		    	{
+		    		type: 'slider',
+		    		start: 0,
+		    		end: 100,
+		    		xAxisIndex: 0,
+		    		bottom: '1%'
+		    	},
+		    	{
+		    		type: 'inside',
+		    		start: 0,
+		    		end: 100,
+		    		xAxisIndex: 0
+		    	}
+		    ],
+		    xAxis: {
+		        type: 'category',
+		        boundaryGap: false,
+		        data: ['周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日']
+		    },
+		    yAxis: {
+		        type: 'value'
+		    },
+		    series: [
+		        {
+		            name:'乘车人数',
+		            type:'line',
+		            stack: '总量',
+		            data:[120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210]
+		        }
+		    ]
+		}
+
+		$scope.mychart.setOption(option);
+	}
+
+	/**
+	 * 更新数据
+	 */
+	var setOption = function(){
+		var option = {
+			xAxis: {
+				type: 'category',
+				boundaryGap: false,
+				data: $scope.xAxis
+			},
+			series: [
+				{
+					name: '乘车人数',
+					type: 'line',
+					stack: '总量',
+					data: $scope.num
+				}
+			]
+		};
+
+		$scope.mychart.setOption(option);
+	}
+
+	/**
+	 * 日期格式转化
+	 * @return {[type]} [description]
+	 */
+	var translateDate = function(){
+		var dateArr = $scope.date.split(' ');
+		var m = month.indexOf(dateArr[1]);
+		var dateStr = ''+dateArr[2]+'-'+m+'-'+dateArr[0];
+		return dateStr;
+	}
 
 	var createChart = function(){
 		var mychart = echarts.init(document.getElementById('body-chart'));
@@ -1012,14 +1268,30 @@ factoryVehicle.controller('affairsBusManager',function($scope,$http){
 	};
 });
 
-factoryVehicle.controller('affairsRoutesManager', function($scope){
-	$scope.stations;
-	$scope.routes;
+factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
+	$scope.stations;	//保存站点信息
+	$scope.routes;		//保存路线信息
+	$scope.theBus = {
+		'license': '',
+		'driver': '',
+		'brand': '',
+		'seat': '',
+		'logon': '',
+		'dated': '',
+		'driver_license': ''
+	};	//保存当前线路的车辆信息
+	$scope.theStations = [];	//保存当前线路的站点信息
+	$scope.theSta = {
+		'num': 0,
+		'date': ''
+	};		//保存当前产看站点的详情
+	$scope.paths = [];		//保存地图上要展示的路线信息
+
 
 	//页面加载完成执行的函数
 	$scope.$watch('$viewContentLoaded',function(){
 		initMap('map-routes');
-		getRoutes();
+		// getRoutes();
 	});
 
 	/**
@@ -1037,8 +1309,10 @@ factoryVehicle.controller('affairsRoutesManager', function($scope){
 		map.addControl(new BMap.OverviewMapControl());
 		$scope.map = map;
 
-		//展示数据
+		//展示站点
 		showStations();
+		//获取路线信息
+		getRoutes();
 	}
 
 	/**
@@ -1046,12 +1320,16 @@ factoryVehicle.controller('affairsRoutesManager', function($scope){
 	 * @return {[type]} [description]
 	 */
 	var showStations = function(){
-		//数据后期异步获取，存入stations中
-		$scope.stations = [{"name":"石大路华中路路口二","x":120.209603,"y":30.338951,"id":3211},{"name":"采荷新村","x":120.198086,"y":30.25777,"id":3212},{"name":"采荷小区芙蓉邨","x":120.202036,"y":30.259711,"id":3216},{"name":"采荷小区翠柳邨","x":120.202275,"y":30.261458,"id":3217},{"name":"丁桥农贸市场","x":120.230507,"y":30.354838,"id":3221},{"name":"大农港路环丁路口","x":120.245056,"y":30.363813,"id":3222},{"name":"大农港路勤丰路口","x":120.243476,"y":30.362785,"id":3223},{"name":"长睦家园南门","x":120.241218,"y":30.362504,"id":3226},{"name":"大农港路惠兰雅路口一","x":120.236396,"y":30.360775,"id":3228},{"name":"大农港路惠兰雅路口二","x":120.237563,"y":30.360791,"id":3229},{"name":"富春路清江路口","x":120.211621,"y":30.243216,"id":3232},{"name":"解放路口富春路西","x":120.217008,"y":30.250142,"id":3234},{"name":"民心路富春路东","x":120.224265,"y":30.258144,"id":3236},{"name":"钱潮路口富春路东","x":120.227674,"y":30.262152,"id":3237},{"name":"四季花园","x":120.224959,"y":30.254166,"id":3241},{"name":"钱江路庆春路口","x":120.221491,"y":30.262293,"id":3242},{"name":"解放东路四季青儿童精装市场","x":120.202618,"y":30.254338,"id":3089},{"name":"太平门直街双菱路口","x":120.201891,"y":30.265724,"id":3100},{"name":"临丁路北一八一电杆","x":120.221833,"y":30.364577,"id":3140},{"name":"河坊街四七二号","x":120.167178,"y":30.245548,"id":1247},{"name":"复兴南街三三七号","x":120.167139,"y":30.21184,"id":1137},{"name":"石祥一号码头","x":120.17596,"y":30.329721,"id":2155},{"name":"香樟公寓","x":120.113125,"y":30.282644,"id":5017},{"name":"枫桦西路龙王沙路口","x":120.10646,"y":30.167887,"id":5178},{"name":"苏堤南口","x":120.161051,"y":30.235962,"id":8012},{"name":"沈半路一六七号","x":120.169035,"y":30.325922,"id":4084},{"name":"莫干山路石祥路口东南角","x":120.114838,"y":30.327995,"id":4133},{"name":"广电集团","x":120.183576,"y":30.279611,"id":2114},{"name":"凯西社区","x":120.197036,"y":30.268617,"id":3098},{"name":"河坊街五五四号","x":120.179093,"y":30.245895,"id":1263},{"name":"德胜东路九环路口一","x":120.260516,"y":30.315627,"id":3281},{"name":"长生路五四号","x":120.166881,"y":30.262722,"id":1284},{"name":"ES一十-十一墩","x":120.150422,"y":30.338562,"id":4168},{"name":"祥园路乐富智慧园","x":120.11744,"y":30.341032,"id":4256},{"name":"水印康庭","x":120.173917,"y":30.322049,"id":2091},{"name":"枫桦路","x":120.110025,"y":30.170447,"id":5123},{"name":"德胜路东新路口","x":120.184338,"y":30.307731,"id":2187},{"name":"石桥路石祥路口99路公交站","x":120.199761,"y":30.337362,"id":2261},{"name":"凯旋路电杆二","x":120.197945,"y":30.275619,"id":3117},{"name":"储鑫路一一号南","x":120.168223,"y":30.340915,"id":4221},{"name":"龙王沙路","x":120.102404,"y":30.17385,"id":5190},{"name":"金渡北路","x":120.066864,"y":30.3323002,"id":7305},{"name":"城市学院西（二）","x":120.161333,"y":30.331541,"id":4104},{"name":"江城路一九九号","x":120.17977,"y":30.229807,"id":1135},{"name":"石贯子巷","x":120.175826,"y":30.261408,"id":1205},{"name":"朝晖二号码头","x":120.178444,"y":30.293388,"id":2153},{"name":"西湖文化广场","x":120.170138,"y":30.279596,"id":2217}];
-		
-		//添加站点marker
-		addMarker();
-	}
+		var url = '/factory_vehicle/api/Station';
+
+		$http.get(url).success(function(data){
+			$scope.stations = data;
+			//添加站点marker
+			addMarker();
+		}).error(function(){
+			console.log('获取站点信息出错');
+		});
+	};
 
 	/**
 	 * 添加站点marker
@@ -1059,40 +1337,61 @@ factoryVehicle.controller('affairsRoutesManager', function($scope){
 	var addMarker = function(){
 		var point = null;
 
-		var path1 = [];
-		var path2 = [];
-		var path3 = [];
-
 		for(var i=0;i<$scope.stations.length;i++){
-			point = new BMap.Point($scope.stations[i].x,$scope.stations[i].y);
+			point = new BMap.Point($scope.stations[i].longitude,$scope.stations[i].latitude);
 			var marker = new BMap.Marker(point);
 			$scope.map.addOverlay(marker);
-
-			if(i%3==0){
-				path3.push(point);
-			}else if(i%2==0){
-				path2.push(point);
-			}else{
-				path1.push(point);
-			}
 			//给marker添加事件
-			//addEvent(marker,$scope.stations[i].name);
+			addEvent(marker,$scope.stations[i].s_name);
 			//给marker添加右键菜单
 			//addMarkerMenu(marker,$scope.stations[i].id);
 		}
 
-		var paths = [path1,path2,path3];
-		showRoutes(paths);
+		// var paths = [path1,path2,path3];
+		// showRoutes(paths);
+	};
+
+	var addEvent = function(marker,name){
+		marker.addEventListener('click',function(){
+			marker.setAnimation(null);
+			Materialize.toast(name,4000);
+		});
 	};
 
 	var getRoutes = function(){
-		$scope.routes = [{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'},{'name': '线路'+Math.floor(Math.random()*100+1),'number': parseInt(Math.random()*100), 'rate': parseInt(Math.random()*90+10)+'%'}];
+		var url = '/factory_vehicle/api/route';
+
+		$http.get(url).success(function(data){
+			$scope.routes = data;
+			$scope.paths = [];
+			for(var i=0;i<data.length;i++){
+				var path = data[i].stations;
+				$scope.paths.push(path);
+			}
+		}).error(function(){
+			console.log('获取全部路线信息出错');
+		})
 	};
 
-	var showRoutes = function(paths){
-		// var lushu1 = BMapLib.LuShu($scope.map,paths[0],)
-		// 
+	var showRoutes = function(){
+		
 	}
+
+	var getRouteBus = function(id){
+		var url = '/factory_vehicle/api/car_inf/'+id;
+
+		$http.get(url).success(function(data){
+
+		}).error(function(){
+			console.log('获取当前路线的车辆信息出错')
+		});
+	}
+
+	$scope.showRouteInfo = function(index){
+		getRouteBus($scope.routes[index].carId);
+
+
+	};
 
 	/**
 	 * 隐藏该页面下所有的panel
@@ -1161,15 +1460,208 @@ factoryVehicle.controller('affairsRoutesManager', function($scope){
 
 
 factoryVehicle.controller('affairsSchedualManager',function($scope,$http){
+	var month = ['','一月,','二月,','三月,','四月,','五月,','六月,','七月,','八月,','九月,','十月,','十一月,','十二月,']	
+	var date = '';			//保存格式化后的查询时间
+	$scope.date = '';		//保存要查询的时间
+	$scope.week = '';		//保存当前查询的周
+
+	//页面加载完成执行的函数
+	$scope.$watch('$viewContentLoaded',function(){
+	});
+
+	/*
+	获取用户要查询的日期
+	 */
+	$scope.getDate = function(){
+		setTimeout(function(){
+			console.log($scope.date);
+			translateDate();
+		},4000);
+	};
+
+	/*
+	转化日期格式
+	 */
+	var translateDate = function(){
+		var dateArr = $scope.date.split(' ');
+		var m = month.indexOf(dateArr[1]);
+		var dateStr = ''+dateArr[2]+'-'+m+'-'+dateArr[0];
+		console.log(dateStr);
+		setWeek(dateStr);
+	}
+
+	/**
+	 * 更改当前周
+	 * @param {[type]} str [description]
+	 */
+	var setWeek = function(str){
+		var firstday = '';
+		var lastday = '';
+		var time = new Date(str);
+		var w = time.getDay();
+		if(w == 0){
+			lastday = str;
+			var first = new Date();
+			first.setTime(time.getTime()-6*24*60*60*1000);
+			var m = first.getMonth();
+			firstday = ''+first.getFullYear()+'-'+(++m)+'-'+first.getDate();
+		}else{
+			w--;
+			var first = new Date();
+			var last = new Date();
+			first.setTime(time.getTime()-w*24*60*60*1000);
+			last.setTime(time.getTime()+(6-w)*24*60*60*1000);
+			var m1 = first.getMonth();
+			var m2 = last.getMonth();
+			firstday = ''+first.getFullYear()+'-'+(++m1)+'-'+first.getDate();
+			lastday = ''+last.getFullYear()+'-'+(++m2)+'-'+last.getDate();
+		}
+
+		$scope.week = firstday+'~'+lastday;
+		$scope.$apply();
+		console.log($scope.week);
+	}
+
+	/**
+	 * 获取排版数据
+	 * @return {[type]} [description]
+	 */
+	var getArrange = function(monday){
+		var url = '';
+	}
 
 });
 
 
 factoryVehicle.controller('affairsReportManager', function($scope){
+	var month = ['','一月,','二月,','三月,','四月,','五月,','六月,','七月,','八月,','九月,','十月,','十一月,','十二月,'];
+	$scope.date = '2016-08-01';		//查询日期
+	$scope.style = '2';			//查询方式
+	$scope.mychart;
+	$scope.xAxis;
+	$scope.num;
+
+	//页面加载完成执行的函数
+	$scope.$watch('$viewContentLoaded',function(){
+		initChart();
+	});
+
 	$scope.getChartData = function(){
 		createChart();
+		var date = translateDate();
+		console.log(date,$scope.style);
 	};
 
+	/**
+	 * 初始化图表
+	 * @return {[type]} [description]
+	 */
+	var initChart = function(){
+		var mychart = echarts.init(document.getElementById('body-chart'));
+		$scope.mychart = mychart;
+
+		option = {
+		    title: {
+		        text: '各站点乘车人数图'
+		    },
+		    tooltip: {
+		        trigger: 'axis'
+		    },
+		    legend: {
+		        data:[
+		        	{
+		        		name: '乘车人数',
+		        		icon: 'circle'
+		        	}
+		        ]
+		    },
+		    grid: {
+		        left: '3%',
+		        right: '4%',
+		        bottom: '8%',
+		        containLabel: true
+		    },
+		    toolbox: {
+		        feature: {
+		            saveAsImage: {},
+		            dataView: {},
+		            magicType: {
+		            	show: true,
+		            	type: ['line', 'bar']
+		            }
+		        }
+		    },
+		    dataZoom: [
+		    	{
+		    		type: 'slider',
+		    		start: 0,
+		    		end: 100,
+		    		xAxisIndex: 0,
+		    		bottom: '1%'
+		    	},
+		    	{
+		    		type: 'inside',
+		    		start: 0,
+		    		end: 100,
+		    		xAxisIndex: 0
+		    	}
+		    ],
+		    xAxis: {
+		        type: 'category',
+		        boundaryGap: false,
+		        data: ['周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日']
+		    },
+		    yAxis: {
+		        type: 'value'
+		    },
+		    series: [
+		        {
+		            name:'乘车人数',
+		            type:'line',
+		            stack: '总量',
+		            data:[120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210]
+		        }
+		    ]
+		}
+		
+		$scope.mychart.setOption(option);
+	}
+
+	var setOption = function(){
+		var option = {
+			xAxis: {
+				type: 'category',
+				boundaryGap: false,
+				data: $scope.xAxis
+			},
+			series: [
+				{
+					name: '乘车人数',
+					type: 'line',
+					stack: '总量',
+					data: $scope.num
+				}
+			]
+		};
+
+		$scope.mychart.setOption(option);
+	}
+
+	/**
+	 * 日期格式转化
+	 * @return {[type]} [description]
+	 */
+	var translateDate = function(){
+		var dateArr = $scope.date.split(' ');
+		var m = month.indexOf(dateArr[1]);
+		var dateStr = ''+dateArr[2]+'-'+m+'-'+dateArr[0];
+		return dateStr;
+	}
+
+	/**
+	 * 创建图表
+	 * @return {[type]} [description]
+	 */
 	var createChart = function(){
 		var mychart = echarts.init(document.getElementById('body-chart'));
 

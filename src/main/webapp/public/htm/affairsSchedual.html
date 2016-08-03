@@ -1,40 +1,41 @@
 <div id="affairs-schedual">
 	<div class="heading">
-		<p>本周(2016.7.11~2016.7.17)排班表</p>
+		<p>当前周(<strong ng-bind="week"></strong>)排班表</p>
 		<div class="date-chose">
-			<div class="last-week week-btn">
+			<div class="last-week week-btn" style="margin-right:-3px;">
 				<i class="material-icons md-dark center">keyboard_arrow_left</i>
 			</div>
-			<div class="now-week week-btn">
+			<div class="now-week week-btn datepicker" ng-click="getDate()">
+				<input type="date" class="datepicker" ng-model="date" value="2016-08-02">
 				<i class="material-icons">event_note</i>
 			</div>
 			<div class="next-week week-btn">
-				<i class="material-icons">keyboard_arrow_right</i>
+				<i class="material-icons center">keyboard_arrow_right</i>
 			</div>
 		</div>
 	</div>
 	<div class="body">
 		<div class="schedual-title">
 			<ul class="collection collection1 center">
-				<li class="collection-item">7.11<br>星期一</li>
+				<li class="collection-item"><strong>2016-07-11</strong><br>星期一</li>
 			</ul>
 			<ul class="collection collection2 center">
-				<li class="collection-item">7.12<br>星期二</li>
+				<li class="collection-item"><strong>7.11</strong><br>星期二</li>
 			</ul>
 			<ul class="collection collection3 center">
-				<li class="collection-item">7.13<br>星期三</li>
+				<li class="collection-item"><strong>7.11</strong><br>星期三</li>
 			</ul>
 			<ul class="collection collection4 center">
-				<li class="collection-item">7.11<br>星期四</li>
+				<li class="collection-item"><strong>7.11</strong><br>星期四</li>
 			</ul>
 			<ul class="collection collection5 center">
-				<li class="collection-item">7.11<br>星期五</li>
+				<li class="collection-item"><strong>7.11</strong><br>星期五</li>
 			</ul>
 			<ul class="collection collection6 center">
-				<li class="collection-item">7.11<br>星期六</li>
+				<li class="collection-item"><strong>7.11</strong><br>星期六</li>
 			</ul>
 			<ul class="collection collection7 center">
-				<li class="collection-item">7.11<br>星期日</li>
+				<li class="collection-item"><strong>7.11</strong><br>星期日</li>
 			</ul>
 		</div>
 		<div class="schedual-content">
@@ -139,3 +140,13 @@
 		</div>
 	</div>
 </div>
+
+
+<script type="text/javascript">
+	$(function(){
+		$('.datepicker').pickadate({
+			selectMonths: true,
+			selectYears: 15
+		});
+	});
+</script>

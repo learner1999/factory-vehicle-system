@@ -354,6 +354,19 @@
 	border-left: 1px solid #eee;
 	border-right: 1px solid #eee;
 }
+#affairs-schedual .heading .date-chose .now-week input {
+	position: absolute;
+	top: 0;
+	left: 31px;
+
+	display: inline-block;
+	width: 30px;
+	height: 30px;
+	border-bottom: none;
+	margin: 0;
+	color: rgba(255, 255, 255, 0);
+	cursor: pointer;
+}
 #affairs-schedual .heading .date-chose .next-week {
 	position: absolute;
 	right: 0;
