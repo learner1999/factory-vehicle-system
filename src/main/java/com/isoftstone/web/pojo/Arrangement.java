@@ -1,6 +1,8 @@
 package com.isoftstone.web.pojo;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Arrangement {
 
@@ -36,6 +38,7 @@ public class Arrangement {
 	public void setDate(Date date) {
 		this.date = date;
 	}
+	
 	private String ename;
 	private int cid;
 	private String c_license;
@@ -47,4 +50,6 @@ public class Arrangement {
 	public void setEiden(String eiden) {
 		this.eiden = eiden;
 	}
+	
+	
 }

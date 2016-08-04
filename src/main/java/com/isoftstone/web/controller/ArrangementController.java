@@ -4,6 +4,8 @@ import com.isoftstone.web.pojo.Emlopee;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -17,9 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.isoftstone.web.dao.Arrangementdao;
 import com.isoftstone.web.pojo.Arrange;
 import com.isoftstone.web.pojo.Arrangement;
+import com.isoftstone.web.pojo.Arrangements;
 import com.isoftstone.web.pojo.Car_inf;
 @RestController
 public class ArrangementController {
+	
 	Arrangementdao ad=new Arrangementdao();
 	/**
 	 * 车辆数目，司机休息日数上下限可不输入
@@ -32,7 +36,7 @@ public class ArrangementController {
 	public ResponseEntity<List<Arrange>> get(
 			@PathVariable("carcount") int carcount,
 			@RequestParam(value = "upredays", defaultValue="6") int upredays,
-			@RequestParam(value = "dwredays", defaultValue="4") int dwredays) 
+			@RequestParam(value = "dwredays", defaultValue="2") int dwredays) 
 	{
 		if(upredays<0|| dwredays<0||upredays<dwredays){
 			 return new ResponseEntity<List<Arrange>>(HttpStatus.NO_CONTENT);
@@ -57,27 +61,21 @@ public class ArrangementController {
 	 * @return
 	 */
 	@RequestMapping(value ="/api/arrange", method = RequestMethod.GET)
-	public ResponseEntity<List<Arrangement>> getarrangement(
-			@RequestParam(value = "drivers",required = false) int drivers,
-			@RequestParam(value = "circulation", required = false) int circulation,
-			@RequestParam(value = "date", required = false) Date date) 
+	public ResponseEntity<ArrayList> getarrangement(
+			@RequestParam(value = "drivers",defaultValue="7") int drivers,
+			@RequestParam(value = "circulation", defaultValue="7") int circulation,
+			@RequestParam(value = "date", required = false) java.sql.Date date) 
 	{
+		
+		ArrayList a2=new ArrayList();
 		if(drivers<=0||circulation<=0||date==null){
-			 return new ResponseEntity<List<Arrangement>>(HttpStatus.NO_CONTENT);
+			 return new ResponseEntity<ArrayList>(HttpStatus.NO_CONTENT);
 		}
 		else{
-			long days=ad.getQuot(date.toString(),"2016-1-1");
-			System.out.println("\ndays="+days+"\n");
-			List<Arrange> ar=ad.arrange(days, drivers, circulation);//获取排班相关信息   
-			if(ar.isEmpty()){
-				return new ResponseEntity<List<Arrangement>>(HttpStatus.NO_CONTENT);
+			a2=ad.get_arr(date, drivers, circulation);
 			}
-			else{
-				
-				List<Arrangement> ag=ad.arrangement(ar,date);
-				return new ResponseEntity<List<Arrangement>>(ag,HttpStatus.OK);
-			}	
+			return  new ResponseEntity<ArrayList>(a2,HttpStatus.OK);
 		}
-		}
+		
 	
 }

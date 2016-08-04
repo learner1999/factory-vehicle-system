@@ -3,13 +3,15 @@ package com.isoftstone.web.dao;
 
 import java.io.FileOutputStream;
 import java.sql.Connection;
-import java.util.Date;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -17,10 +19,13 @@ import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import com.isoftstone.web.dao.Car_dao;
 import com.isoftstone.web.pojo.Arrange;
 import com.isoftstone.web.pojo.Arrangement;
+import com.isoftstone.web.pojo.Arrangements;
 import com.isoftstone.web.pojo.Emlopee;
 import com.isoftstone.web.pojo.Station;
 import com.isoftstone.web.pojo.Car_inf;
@@ -30,7 +35,7 @@ import com.mysql.jdbc.CallableStatement;
 
 public class Arrangementdao {
 	
-	
+	String [] mou={"Mon","Tues","Wed","Thus","Fri","Sat","Sun"};
 	private Connection conn = null;
 	private PreparedStatement stmt = null;
 	private ResultSet result = null;
@@ -232,10 +237,9 @@ public class Arrangementdao {
 			Arrange c=(Arrange)ar.get(j);
 			 Emlopee eml=(Emlopee)driver.get(c.getD_id());
 			 Car_inf cars=(Car_inf)car.get(j);
-			 System.out.print("d"+c.getD_id()+"-car"+(j+1)+"\t");
-			 //ad.updatearrange(eml.getEid(), eml.getEname(),cars.getId(),cars.getD_license(), date);
+			// System.out.print("d"+c.getD_id()+"-car"+(j+1)+"\t");
+			 agm.setEname(eml.getEname());
 		     agm.setEid(eml.getEid());
-		     agm.setEname(eml.getEname());
 		     agm.setEiden(eml.getEiden());
 		     agm.setCid(cars.getId());
 		     agm.setC_license(cars.getD_license());
@@ -256,8 +260,8 @@ public class Arrangementdao {
 		  long quot = 0;
 		  SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd");
 		  try {
-		   Date date1 = (Date) ft.parse( time1 );
-		   Date date2 = (Date) ft.parse( time2 );
+		   java.util.Date date1 = ft.parse( time1 );
+		   java.util.Date date2 =  ft.parse( time2 );
 		   quot = date1.getTime() - date2.getTime();
 		   quot = quot / 1000 / 60 / 60 / 24;
 		  } catch (ParseException e) {
@@ -265,5 +269,76 @@ public class Arrangementdao {
 		  }
 		  return quot;
 		 }
-	
+	 
+	 /**
+	  * 判断当天是否已排过班
+	  * @param date
+	  * @return
+	  */
+	 public ArrayList is_date(Date date){
+		 ArrayList ar=new ArrayList();
+		 String proc="{call is_date(?)}";
+			try{
+				conn =JdbcUtil.getConnection();
+				cs = (CallableStatement) conn.prepareCall(proc);
+				cs.setDate(1,date);
+				result = cs.executeQuery();
+				while(result.next())
+				{	
+					Arrangement a=new Arrangement();
+					a.setEid(result.getInt(1));
+					a.setEname(result.getString(2));
+					a.setEiden(result.getString(3));
+					a.setCid(result.getInt(4));
+					a.setC_license(result.getString(5));
+					a.setDate(result.getDate(6));
+					ar.add(a);
+				}
+			}catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				JdbcUtil.close(null, stmt, conn);
+				JdbcUtil.closecs(cs);
+			}
+		 return ar;
+	 }
+	 
+	 
+	 public java.util.Date dates(java.util.Date date){
+		 Calendar   calendar   =   new   GregorianCalendar(); 
+	     calendar.setTime(date); 
+	     calendar.add(calendar.DATE,1);//把日期往后增加一天.整数往后推,负数往前移动 
+	     date=calendar.getTime();   //这个时间就是日期往后推一天的结果
+		 return date;
+	 }
+	 
+	 public ArrayList get_arr(Date date,int drivers,int circulation){
+		 ArrayList a2=new ArrayList();
+		 for(int i=0;i<7;i++){
+			 Arrangements a1=new Arrangements();
+			if(i!=0){
+				 java.util.Date utildate=dates(date);   
+				  date   = new java.sql.Date (utildate.getTime());   
+			}
+         a1.setMon(mou[i]);
+         a1.setDate((java.sql.Date) date);
+         ArrayList al=is_date(date);//是否排过班
+		if(al.isEmpty()){
+		long days=getQuot(date.toString(),"2016-1-1");
+		List<Arrange> ar=arrange(days, drivers, circulation);//获取排班相关信息   
+		if(ar.isEmpty() == false){
+			ArrayList ag=arrangement(ar,date);
+			a1.setAg(ag);
+		}	
+	   }
+		else{
+			a1.setAg(al);
+		}
+		a2.add(a1);
+		 
+		 
+	 }
+	 return a2;
+	 }
 }
