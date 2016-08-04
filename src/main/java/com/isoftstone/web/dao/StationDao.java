@@ -733,7 +733,7 @@ public class StationDao {
 	public List<Station> getNearMan(EmpMatchSta ems)
 	{
 		List<Station> staList=new ArrayList<Station>();
-		String sql="select * from station_information_copy where s_id in(select s_id from employee_station_copy"
+		String sql="select * from station_information_copy where s_is_used=1 and s_id in(select s_id from employee_station_copy"
 				+ " order by (e_x-?)*(e_x-?)+(e_y-?)*(e_y-?)) limit 10";
 		try {
 			conn = JdbcUtil.getConnection();
