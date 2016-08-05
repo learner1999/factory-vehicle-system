@@ -8,7 +8,21 @@ public class RouteStation {
 	private int num_of_emp;
 	private int used_time;
 	private List<String> arrival_time;
+	private double longitude;
+	private double latitude;
 	
+	public double getLongitude() {
+		return longitude;
+	}
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+	public double getLatitude() {
+		return latitude;
+	}
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
 	public int getS_id() {
 		return s_id;
 	}

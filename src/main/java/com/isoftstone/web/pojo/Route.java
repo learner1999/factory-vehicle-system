@@ -3,13 +3,13 @@ package com.isoftstone.web.pojo;
 import java.util.List;
 
 public class Route {
-	private Car_inf car;
+	private RouteCar car;
 	private List<RouteStation> stations;
 	
-	public Car_inf getCar() {
+	public RouteCar getCar() {
 		return car;
 	}
-	public void setCar(Car_inf car) {
+	public void setCar(RouteCar car) {
 		this.car = car;
 	}
 	public List<RouteStation> getStations() {

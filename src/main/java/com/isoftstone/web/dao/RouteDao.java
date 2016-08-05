@@ -12,6 +12,7 @@ import com.isoftstone.web.algorithm.Cal;
 import com.isoftstone.web.algorithm.Plan;
 import com.isoftstone.web.pojo.Car_inf;
 import com.isoftstone.web.pojo.Route;
+import com.isoftstone.web.pojo.RouteCar;
 import com.isoftstone.web.pojo.RouteStation;
 import com.isoftstone.web.pojo.Station;
 import com.isoftstone.web.util.JdbcUtil;
@@ -45,7 +46,8 @@ public class RouteDao {
 
 		// 获取车辆信息
 		Car_inf carInf = new Car_dao().getcarByid(carId);
-		route.setCar(carInf);
+		RouteCar car = getRouteCarByCarInf(carInf);
+		route.setCar(car);
 		
 		// 获取站点信息
 		try {
@@ -65,6 +67,41 @@ public class RouteDao {
 		}
 
 		return route;
+	}
+
+	/**
+	 * 根据车辆信息对象（Car_inf）获取路线车辆对象（RouteCar），添加了当天的驾驶员信息
+	 * @param carInf
+	 * @return
+	 */
+	private RouteCar getRouteCarByCarInf(Car_inf carInf) {
+		
+		RouteCar routeCar = new RouteCar(carInf);
+		
+		String strSql = "SELECT * FROM `arrangement` WHERE Date=? AND c_id=?;";
+		java.sql.Date date = new java.sql.Date(new java.util.Date().getTime());
+		
+		try {
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(strSql);
+			stmt.setDate(1, date);
+			stmt.setInt(2, routeCar.getId());
+			result = stmt.executeQuery();
+
+			// 存在对应 carId 的表，返回 true
+			if (result.next()) {
+				routeCar.setEName(result.getString("Ename"));
+				routeCar.setEiden(result.getString("Eiden"));
+				return routeCar;
+			}
+		} catch (SQLException e) {
+			System.out.println("查询车辆当天驾驶员失败！");
+			return null;
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+		}
+		
+		return null;
 	}
 
 	/**
@@ -166,6 +203,8 @@ public class RouteDao {
 				
 				routeSta.setS_id(sta.getS_id());
 				routeSta.setS_name(sta.getS_name());
+				routeSta.setLatitude(sta.getLatitude());
+				routeSta.setLongitude(sta.getLongitude());
 				routeSta.setNum_of_emp(numOfEmp);
 				routeSta.setUsed_time(usedTime);
 				
