@@ -15,6 +15,7 @@ import com.isoftstone.web.dao.Car_dao;
 import com.isoftstone.web.dao.RouteDao;
 import com.isoftstone.web.pojo.Car_inf;
 import com.isoftstone.web.pojo.Route;
+import com.isoftstone.web.pojo.RouteFitRate;
 import com.isoftstone.web.pojo.RoutePlan;
 
 @RestController
@@ -178,6 +179,11 @@ public class RouteController {
 		return new ResponseEntity<Route>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
+	/**
+	 * 路线自动规划接口
+	 * 
+	 * @return
+	 */
 	@RequestMapping(value = "/api/route/plan", method = RequestMethod.GET)
 	public ResponseEntity<List<RoutePlan>> planRoute() {
 		
@@ -188,5 +194,21 @@ public class RouteController {
 		
 		// 如果出现异常，将状态码设为 internal server error(寻找更好的解决方案中……)
 		return new ResponseEntity<List<RoutePlan>>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	/**
+	 * 获取路线合适率接口
+	 * @return
+	 */
+	@RequestMapping(value = "/api/route/fitrate", method = RequestMethod.GET)
+	public ResponseEntity<RouteFitRate> getRouteFitRate() {
+		
+		RouteFitRate routeFitRate = routeDao.calculateRouteFitRate();
+		if (routeFitRate != null) {
+			return new ResponseEntity<RouteFitRate>(routeFitRate, HttpStatus.OK);
+		}
+		
+		// 如果出现异常，将状态码设为 internal server error(寻找更好的解决方案中……)
+		return new ResponseEntity<RouteFitRate>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }

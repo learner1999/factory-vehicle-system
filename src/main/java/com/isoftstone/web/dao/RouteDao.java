@@ -13,6 +13,7 @@ import com.isoftstone.web.algorithm.Plan;
 import com.isoftstone.web.pojo.Car_inf;
 import com.isoftstone.web.pojo.Route;
 import com.isoftstone.web.pojo.RouteCar;
+import com.isoftstone.web.pojo.RouteFitRate;
 import com.isoftstone.web.pojo.RoutePlan;
 import com.isoftstone.web.pojo.RouteStation;
 import com.isoftstone.web.pojo.Station;
@@ -881,6 +882,65 @@ public class RouteDao {
 		}
 
 		return true;
+	}
+	
+	
+	/**
+	 * 计算当前路线的合适率
+	 * 合适率考虑的因素如下：
+	 * 1、是否有站点没有被经过
+	 * 2、是否有车辆超载
+	 * 
+	 * @return 合适率（包含没有经过的站点数和超载的车辆数）
+	 */
+	public RouteFitRate calculateRouteFitRate() {
+		Car_dao carDao = new Car_dao();
+		StationDao staDao = new StationDao();
+		
+		// 查询是否有站点没有被经过
+		List<Station> staList = staDao.showAllSta(1);
+		int numOfNotPass = 0;
+		for (Station sta : staList) {
+			if ("".equals(sta.getS_car())) {
+				numOfNotPass++;
+			}
+		}
+		
+		// 没有经过的站点的百分比
+		double percentOfNotPass = numOfNotPass * 1.0 / staList.size();
+		
+		
+		// 查询是否有车辆超载
+		List<Route> routeList = findAll();
+		int numOfOverload = 0;
+		for (Route route : routeList) {
+			int carId = route.getCar().getId();
+			Car_inf car = carDao.getcarByid(carId);
+			int numOfSeats = car.getSeat();
+			
+			List<RouteStation> stationList = route.getStations();
+			int numOfEmp = 0;
+			for (RouteStation sta : stationList) {
+				numOfEmp += sta.getNum_of_emp();
+			}
+			
+			if (numOfEmp > numOfSeats) {
+				numOfOverload++;
+			}
+		}
+		
+		// 超载车辆百分比
+		double percentOfOverload = numOfOverload * 1.0 / routeList.size(); 
+		
+		// 合适率
+		double fitRate = (1 - percentOfNotPass) * 0.6 + (1 - percentOfOverload) * 0.4;
+		
+		RouteFitRate routeFitRate = new RouteFitRate();
+		routeFitRate.setNumOfNotPass(numOfNotPass);
+		routeFitRate.setNumOfOverload(numOfOverload);
+		routeFitRate.setFitRate(fitRate);
+		
+		return routeFitRate;
 	}
 
 }
