@@ -712,9 +712,9 @@ public class RouteDao {
 			
 			// 构建 RoutePlan 对象
 			RoutePlan routePlan = new RoutePlan();
-			routePlan.setAverageDistance(cal.getAveraged(plan.getDistence()));
-			routePlan.setDistanceVariance(cal.getStandardDevition(plan.getDistence()));
-			routePlan.setChengjun(cal.getAveraged(plan.getLv()));
+			routePlan.setAverageDistance(plan.getJun());
+			routePlan.setDistanceVariance(plan.getCha());
+			routePlan.setChengjun(plan.getChengjun());
 			
 			// 遍历每一条路线，生成对应路线信息
 			List<Route> routeList = new ArrayList<>();

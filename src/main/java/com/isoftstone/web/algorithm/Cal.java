@@ -476,6 +476,52 @@ public class Cal {
         return y;
     }
     
+    /**
+     * 对路线规划的结果做一个简单的排序
+     * 排第一的是平均路线最短
+     * 排第二的是路线方差最小
+     * 排第三的是乘坐率最高
+     * 剩余的随意排序
+     */
+    public void sortPlan() {
+    	int temp = 0;
+    	Plan planTemp;
+    	int len = planlist.size();
+    	
+    	// 找出平均路程最短的方案，并且放到首位
+    	for (int i = 1; i < len; i++) {
+    		if (planlist.get(i).getJun() < planlist.get(temp).getJun()) {
+    			temp = i;
+    		}
+    	}
+    	planTemp = planlist.get(temp);
+    	planlist.set(temp, planlist.get(0));
+    	planlist.set(0, planTemp);
+    	
+    	
+    	// 找出方差最小的方案，并且放到第二位
+    	temp = 1;
+    	for (int i = 2; i < len; i++) {
+    		if (planlist.get(i).getCha() < planlist.get(temp).getCha()) {
+    			temp = i;
+    		}
+    	}
+    	planTemp = planlist.get(temp);
+    	planlist.set(temp, planlist.get(1));
+    	planlist.set(1, planTemp);
+    	
+    	// 找出平均乘坐率最高的，并且放到第三位
+    	temp = 2;
+    	for (int i = 3; i < len; i++) {
+    		if (planlist.get(i).getChengjun() > planlist.get(temp).getChengjun()) {
+    			temp = i;
+    		}
+    	}
+    	planTemp = planlist.get(temp);
+    	planlist.set(temp, planlist.get(2));
+    	planlist.set(2, planTemp);
+    }
+    
     public List<Plan> calplan(double x,double y)
     {
     	//int deepmax=7,deepmin=5,carmin=45,carmax=50,maxroute=11,overmax=53;
@@ -513,6 +559,18 @@ public class Cal {
 		}*/
 		//System.out.println(route.size());
 		find(maxroute, route,overmax,deepmax);
+		
+		// 计算平均路程、路程方差、平均乘坐率
+		for (Plan p : planlist) {
+			double plandis[]=p.getDistence();
+			double planlv[]=p.getLv();
+			p.setJun(getAveraged(plandis));
+			p.setCha(getStandardDevition(plandis));
+			p.setChengjun(getAveraged(planlv));
+		}
+		
+		// 对规划的结果做简单的排序
+		sortPlan();
 		//showallPlan();         
 		return planlist;
     }
