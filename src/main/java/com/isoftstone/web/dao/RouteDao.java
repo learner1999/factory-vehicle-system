@@ -13,6 +13,7 @@ import com.isoftstone.web.algorithm.Plan;
 import com.isoftstone.web.pojo.Car_inf;
 import com.isoftstone.web.pojo.Route;
 import com.isoftstone.web.pojo.RouteCar;
+import com.isoftstone.web.pojo.RoutePlan;
 import com.isoftstone.web.pojo.RouteStation;
 import com.isoftstone.web.pojo.Station;
 import com.isoftstone.web.util.JdbcUtil;
@@ -688,13 +689,78 @@ public class RouteDao {
 		return true;
 	}
 
+	
+	public List<RoutePlan> planRoute() {
+		StationDao staDao = new StationDao();
+		Car_dao carDao = new Car_dao();
+		
+		// 获取公司坐标
+		Station company = staDao.getStaById(1);
+		double longitude = company.getLongitude();
+		double latitude = company.getLatitude();
+		
+		// 规划路线，获取结果
+		Cal cal = new Cal();
+		List<Plan> planList = cal.calplan(longitude, latitude);
+		
+		// 从拿到的Plan列表中提取出前三个，并且组成易于使用RoutePlan的对象
+		List<RoutePlan> routePlanList = new ArrayList<>();
+		for(int i = 0; i < 3; i++) {
+			Plan plan = planList.get(i);
+			int[] cars = plan.getCar();
+			List<int[]> routeIdList = plan.getRoute();
+			
+			// 构建 RoutePlan 对象
+			RoutePlan routePlan = new RoutePlan();
+			routePlan.setAverageDistance(cal.getAveraged(plan.getDistence()));
+			routePlan.setDistanceVariance(cal.getStandardDevition(plan.getDistence()));
+			routePlan.setChengjun(cal.getAveraged(plan.getLv()));
+			
+			// 遍历每一条路线，生成对应路线信息
+			List<Route> routeList = new ArrayList<>();
+			routePlan.setRoutes(routeList);
+			for (int j = 0; j < cars.length; j++) {
+				
+				Route route = new Route();
+				
+				// 获取车辆信息
+				int carId = cars[j];
+				Car_inf carInf = carDao.getcarByid(carId);
+				RouteCar car = new RouteCar(carInf);
+				route.setCar(car);
+				
+				// 获取站点信息
+				int[] staIds = routeIdList.get(j);
+				if (null == staIds || 0 == staIds.length) {
+					continue;
+				}
+
+				List<RouteStation> staList = new ArrayList<>();
+				route.setStations(staList);
+				
+				// 遍历每一个站点，生成对应站点信息
+				int[] manNum = plan.getMan();
+				for (int k = 0; k < staIds.length; k++) {
+					Station sta = staDao.getStaById(staIds[k]);
+					RouteStation routeStation = new RouteStation(sta);
+					routeStation.setNum_of_emp(manNum[k]);
+					staList.add(routeStation);
+				}
+				routeList.add(route);
+			}
+			routePlanList.add(routePlan);
+		}
+		
+		return routePlanList;
+	}
+	
 	public static void main(String[] args) {
 
 		RouteDao routeDao = new RouteDao();
 
 		double x = 120.1541, y = 30.2778;
 		Cal cal = new Cal();
-		Plan plan = cal.calplan(x, y);
+		Plan plan = cal.calplan(x, y).get(0);
 
 		int[] cars = plan.getCar();
 		List<int[]> routeList = plan.getRoute();

@@ -18,7 +18,6 @@ public class RouteCar {
 	}
 	
 	public RouteCar(Car_inf carInf) {
-		super();
 		this.id = carInf.getId();
 		this.brand = carInf.getBrand();
 		this.seat = carInf.getSeat();

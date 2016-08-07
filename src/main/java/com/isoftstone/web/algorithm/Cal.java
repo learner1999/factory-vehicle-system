@@ -8,13 +8,9 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.isoftstone.web.util.JdbcUtil;
+
 public class Cal {
-	/*private static String URL = "jdbc:mysql://115.159.45.39:3306/factory_vehicle_system?useUnicode=true&characterEncoding=UTF-8";
-	private static String USERNAME = "factory_vehicle";
-	private static String PASSWORD = "MfPwtdHpycq3BXtV";*/
-	private static String URL = "jdbc:mysql://localhost:3306/factory_vehicle_system?useUnicode=true&characterEncoding=UTF-8";
-	private static String USERNAME = "root";
-	private static String PASSWORD = "";
 	
 	private List<Car> carList;
 	private List<Emlop> emlopList;
@@ -56,7 +52,7 @@ public class Cal {
 		emlopList.add(e1);
 		try {
 			
-			Connection conn=DriverManager.getConnection(URL,USERNAME,PASSWORD);
+			Connection conn=JdbcUtil.getConnection();
 			String sql="select x.s_id,count(x.e_id),y.longitude,y.latitude "
 					+ "from employee_station_copy as x,station_information_copy as y "
 					+ "where x.s_id=y.s_id and y.s_is_used=1 group by x.s_id "
@@ -91,7 +87,7 @@ public class Cal {
 		List<Car> lcar=new ArrayList<Car>();
 		try {
 			
-			Connection conn=DriverManager.getConnection(URL,USERNAME,PASSWORD);
+			Connection conn=JdbcUtil.getConnection();
 			String sql="select * from car_information order by c_seat";
 			PreparedStatement p=conn.prepareStatement(sql);
 			ResultSet res=p.executeQuery();
@@ -480,7 +476,7 @@ public class Cal {
         return y;
     }
     
-    public Plan calplan(double x,double y)
+    public List<Plan> calplan(double x,double y)
     {
     	//int deepmax=7,deepmin=5,carmin=45,carmax=50,maxroute=11,overmax=53;
     	//deepmax是carmax/6（评估均）+3，deepmin是carmax/6（评估均）-1
@@ -518,13 +514,14 @@ public class Cal {
 		//System.out.println(route.size());
 		find(maxroute, route,overmax,deepmax);
 		//showallPlan();         
-		return planlist.get(0);
+		return planlist;
     }
 
 	public static void main(String[] args) {
 		double x=120.1541,y=30.2778;
 		Cal c=new Cal();
 		c.calplan(x, y);
+		c.showallPlan();
 		//System.out.println(c.isDun(0, 1, 0, 0, 1, -1));
 	}
 	//如果称作率为0就不行

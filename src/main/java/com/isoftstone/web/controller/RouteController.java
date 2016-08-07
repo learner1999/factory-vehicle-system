@@ -15,6 +15,7 @@ import com.isoftstone.web.dao.Car_dao;
 import com.isoftstone.web.dao.RouteDao;
 import com.isoftstone.web.pojo.Car_inf;
 import com.isoftstone.web.pojo.Route;
+import com.isoftstone.web.pojo.RoutePlan;
 
 @RestController
 public class RouteController {
@@ -175,5 +176,17 @@ public class RouteController {
 
 		// 如果出现异常，将状态码设为 internal server error(寻找更好的解决方案中……)
 		return new ResponseEntity<Route>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@RequestMapping(value = "/api/route/plan", method = RequestMethod.GET)
+	public ResponseEntity<List<RoutePlan>> planRoute() {
+		
+		List<RoutePlan> routePlanList = routeDao.planRoute();
+		if(routePlanList != null && routePlanList.size() != 0) {
+			return new ResponseEntity<List<RoutePlan>>(routePlanList, HttpStatus.OK);
+		}
+		
+		// 如果出现异常，将状态码设为 internal server error(寻找更好的解决方案中……)
+		return new ResponseEntity<List<RoutePlan>>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }

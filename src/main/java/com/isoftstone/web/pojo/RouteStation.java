@@ -11,6 +11,15 @@ public class RouteStation {
 	private double longitude;
 	private double latitude;
 	
+	public RouteStation() {
+		super();
+	}
+	public RouteStation(Station sta) {
+		this.s_id = sta.getS_id();
+		this.s_name = sta.getS_name();
+		this.longitude = sta.getLongitude();
+		this.latitude = sta.getLatitude();
+	}
 	public double getLongitude() {
 		return longitude;
 	}
