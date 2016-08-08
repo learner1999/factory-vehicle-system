@@ -14,6 +14,7 @@ public class ExcelToDbDao {
 	private Connection conn = null;
 	private PreparedStatement stmt = null;
 	private ResultSet result = null;
+	private StationDao staDao=new StationDao();
 	
 	/***
 	 * 给定日期获取这一天各站点的人员乘坐信息
@@ -151,6 +152,74 @@ public class ExcelToDbDao {
 		int id = routeId % 100;
 		
 		return id + "号线";
+	}
+	
+	/***
+	 * 通过日期和站点id查询乘车人员名单
+	 * @param date 要查询的日期
+	 * @param sid 要查询的站点id
+	 * @return 员工名单集合
+	 */
+	public List<String> getNameList(String date,int sid)
+	{
+		List<String> eList=new ArrayList<String>();
+		String nameStr="";
+		String sql="select CnameList from Record2016 where CDate=? and CStationId=?";
+		try{
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(sql);
+			stmt.setString(1, date);
+			stmt.setInt(2, sid);
+			result = stmt.executeQuery();
+			while (result.next()) {
+				nameStr=result.getString("CnameList");
+			}
+		}catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+		}
+		eList=staDao.getStaList(nameStr);
+		return eList;
+	}
+	
+	/***
+	 * 通过日期和路线id查询乘车人员名单
+	 * @param date 要查询的日期
+	 * @param sid 要查询的路线id
+	 * @return 员工名单集合
+	 */
+	public List<String> getNameRoute(String date,int rid)
+	{
+		List<String> all=new ArrayList<String>();
+		List<String> eList=new ArrayList<String>();
+		String sql="select CnameList from Record2016 where CDate=? and CRouteId=?";
+		try{
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(sql);
+			stmt.setString(1, date);
+			stmt.setInt(2, rid);
+			result = stmt.executeQuery();
+			while (result.next()) {
+				String nameStr=result.getString("CnameList");
+				eList.add(nameStr);
+			}
+		}catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+		}
+		String addStr="";
+		for(int i=0;i<eList.size();i++)
+		{
+			addStr+=eList.get(i);
+			if(i!=eList.size()-1)
+			{
+				addStr+=",";
+			}
+		}
+		all=staDao.getStaList(addStr);
+		return all;
 	}
 
 }
