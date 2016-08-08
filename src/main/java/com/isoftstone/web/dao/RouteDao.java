@@ -701,6 +701,10 @@ public class RouteDao {
 	}
 
 	
+	/**
+	 * 路线智能规划
+	 * @return
+	 */
 	public List<RoutePlan> planRoute() {
 		StationDao staDao = new StationDao();
 		Car_dao carDao = new Car_dao();
@@ -730,9 +734,11 @@ public class RouteDao {
 			// 遍历每一条路线，生成对应路线信息
 			List<Route> routeList = new ArrayList<>();
 			routePlan.setRoutes(routeList);
+			int[] manNum = plan.getMan();
 			for (int j = 0; j < cars.length; j++) {
 				
 				Route route = new Route();
+				route.setNumOfEmp(manNum[j]);
 				
 				// 获取车辆信息
 				int carId = cars[j];
@@ -750,11 +756,10 @@ public class RouteDao {
 				route.setStations(staList);
 				
 				// 遍历每一个站点，生成对应站点信息
-				int[] manNum = plan.getMan();
 				for (int k = 0; k < staIds.length; k++) {
 					Station sta = staDao.getStaById(staIds[k]);
 					RouteStation routeStation = new RouteStation(sta);
-					routeStation.setNum_of_emp(manNum[k]);
+					routeStation.setNum_of_emp(getNumOfEmpByStaId(staIds[k]));
 					staList.add(routeStation);
 				}
 				routeList.add(route);
