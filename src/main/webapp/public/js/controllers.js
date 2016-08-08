@@ -1,20 +1,36 @@
-factoryVehicle.controller('loginManager', function($scope){
-	$scope.init = function(){
-		$('#mainbody').jParticle({
-			'particlesNumber': 160,
-			'color': '#001D29',
-			'particle': {
-				minSize: 2,
-				maxSize: 5,
-				speed: 120
+factoryVehicle.controller('loginManager', function($scope, $http, $state){
+
+	$scope.user;
+	$scope.pass;
+
+	$scope.login = function(){
+		var url = '/factory_vehicle/api/login?username='+$scope.user+'&password='+$scope.pass;
+
+		$http({
+			method: 'POST',
+			url: url
+		}).success(function(state){
+			console.log(state);
+			if(state == 1){
+				$state.go('affairs.showBus');
+			}else if(state == 2){
+				$state.go('admin.showStations');
+			}else{
+
 			}
+
+		}).error(function(){
+			console.log('登录出错');
 		});
+	}
+});
+
+factoryVehicle.controller('topbarManager',function($scope, $state){
+	$scope.logout = function(){
+		$state.go('login');
 	};
 });
 
-factoryVehicle.controller('topbarManager',function($scope){
-	
-});
 
 factoryVehicle.controller('adminManager',function($scope,$http){
 	$scope.stations = [];	//保存从后台取得的所有站点
@@ -554,6 +570,11 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 		$scope.staffMarkers = [];
 	};
 
+	$scope.deleteStopSta = function(){
+
+	};
+
+
 	/**
 	 * 隐藏该页面下的所有level
 	 * @return {[type]} [description]
@@ -571,7 +592,9 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 	$scope.showLevel01 = function(){
 		hideLevel();
 		$('#station-table').find('#panel-level01').show('normal');
-	};/**
+	};
+
+	/**
 	 * 展示panel-level02
 	 * @return {[type]} [description]
 	 */
@@ -650,11 +673,16 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 	$scope.addpeoples = [{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'},{'id':1212, 'name':'帅全'}]
 	$scope.deletepeole;
 	$scope.updatepeople;
+	$scope.staffList;		//全部员工的信息
+	$scope.searchStaffList;	//搜索到的员工信息
+	$scope.searchCondition;	//搜索条件
+	$scope.chosenStaff;		//被选中查看的员工
+	$scope.chosenStaffMarker;	//被选中员工的标志
+	$scope.staffGoSta			//员工到站点路线
 	
 	//页面加载完成执行的函数
 	$scope.$watch('$viewContentLoaded',function(){
 		initMap('map-people');
-		initChartAll('people-chart-all');
 	});
 
 	/**
@@ -674,6 +702,8 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 
 		//获取站点
 		getStations();
+		//获取员工列表
+		getAllStaff();
 	}
 
 	/**
@@ -699,6 +729,14 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 
 			//添加站点marker
 			addMarker();
+			setTimeout(function(){
+				$('select').material_select();
+
+				$('#people-table').find('.change-station').click(function(){
+					$('#change-sta').openModal();
+				});
+			},100);
+
 		}).error(function(){
 			console.log('从后台获得站点数据失败');
 		});
@@ -757,74 +795,89 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 	 * 更改员工的乘车站点
 	 */
 	var updateEmployeeSta = function(){
-		var url;
-	}
+		var url = '/factory_vehicle/api/EmpMatchSta/'+$scope.chosenStaff.e_id;
 
-	/**
-	 * 初始化人员总数信息表
-	 * @param  {[type]} element [description]
-	 * @return {[type]}         [description]
-	 */
-	var initChartAll = function(element){
-		var mychart = echarts.init(document.getElementById(element));
+		$http({
+			method: 'PUT',
+			url: url,
+			data: {
+				e_id: $scope.chosenStaff.e_id,
+				ems: $scope.chosenStaff.s_id
+			}
+		}).success(function(){
+			console.log('员工站点修改成功！');
+		}).error(function(){
+			console.log('员工站点修改失败！');
+		});
 
-		option = {
-		    title : {
-		        text: '更新人员信息',
-		        left: 'center'
-		    },
-		    tooltip : {
-		        trigger: 'item',
-		        formatter: "{b} : {c} ({d}%)"
-		    },
-		    legend: {
-		        orient: 'vertical',
-		        left: 'center',
-		        top: '28',
-		        data: ['新增人员','修改人员','删除人员']
-		    },
-		    series : [
-		        {
-		            name: '访问来源',
-		            type: 'pie',
-		            radius : '40%',
-		            zlevel: 5,
-		            center: ['50%', '60%'],
-		            data:[
-		                {value:26, name:'新增人员'},
-		                {value:15, name:'修改人员'},
-		                {value:4, name:'删除人员'}
-		            ],
-		            itemStyle: {
-		                emphasis: {
-		                    shadowBlur: 10,
-		                    shadowOffsetX: 0,
-		                    shadowColor: 'rgba(0, 0, 0, 0.5)'
-		                }
-		            }
-		        }
-		    ]
-		};
+		for(var i=0;i<$scope.staffList.length;i++){
+			if($scope.staffList[i].e_id == $scope.chosenStaff.e_id){
+				$scope.staffList[i].s_id = $scope.chosenStaff.s_id;
+				for(var j=0;j<$scope.stations.length;j++){
+					if($scope.stations[j].s_id == $scope.chosenStaff.s_id){
+						$scope.staffList[i].s_name = $scope.$scope.stations[j].s_name;
+						break;
+					}
+				}
+				break;
+			}
+		}
 
-		mychart.setOption(option);
-	}
+		$('#success-change-sta').openModal();
+	};
+
+	var getAllStaff = function(){
+		var url = '/factory_vehicle/api/EmpMatchSta';
+
+		$http.get(url).success(function(data){
+			$scope.staffList = data;
+		}).error(function(){
+			console.log('获取全部员工信息出错');
+		});
+	};
+
+	$scope.searchStaffFunc = function(){
+		var url = '/factory_vehicle/api/EmpMatchSta?name='+$scope.searchCondition;
+
+		$http.get(url).success(function(data){
+			$scope.searchStaffList = data;
+			$scope.showLevel02();
+		}).error(function(){
+			console.log('获取查询人员名单失败');
+		});
+
+	};
+
 
 	/**
 	 * 展示选中的员工和对应的站点
-	 * @param  {[type]} e_id [员工ID]
-	 * @param  {[type]} s_id [站点ID]
 	 */
-	$scope.showEmployeeSta = function(e_id,s_id){
-		$scope.updateStaffSta.e_id = e_id;
-		$scope.updateStaffSta.s_id = s_id;
+	$scope.showEmployeeSta = function(staff){
+		$scope.chosenStaff = staff;
+		// console.log($scope.chosenStaff);
+		if($scope.chosenStaffMarker != undefined){
+			$scope.map.removeOverlay($scope.chosenStaffMarker);
+		}
+		if($scope.staffGoSta != undefined){
+			$scope.staffGoSta.clearResults();
+		}
+		showEmployeeOnMap();
 
-		var ePoint = new BMap.Point(120.198086,30.25777);
+		if(document.getElementById('panel-level02').style.display == 'none'){
+			$scope.showLevel03();
+		}else if(document.getElementById('panel-level01').style.display == 'none'){
+			$scope.showLevel04();
+		}
+	};
+
+	var showEmployeeOnMap = function(){
+		var ePoint = new BMap.Point($scope.chosenStaff.e_x, $scope.chosenStaff.e_y);
 		var homeIcon = new BMap.Icon('./images/sta1.png',new BMap.Size(19,25));
-		var eMarker = new BMap.Marker(ePoint,{icon: homeIcon});
-		$scope.map.addOverlay(eMarker);
-		addEvent(eMarker,'这里是员工的家');
+		$scope.chosenStaffMarker = new BMap.Marker(ePoint,{icon: homeIcon});
+		$scope.map.addOverlay($scope.chosenStaffMarker);
+		addEvent($scope.chosenStaffMarker, $scope.chosenStaff.e_name+'<br>'+$scope.chosenStaff.e_address);
 
-		s_id = 2015002;
+		var s_id = $scope.chosenStaff.s_id;
 		for(var i=0;i<$scope.stations.length;i++){
 			if($scope.stations[i].id == s_id){
 				var sMarker = $scope.staMarkers[i];
@@ -833,8 +886,8 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 		}
 
 		var sPoint = sMarker.point;
-		var walking = new BMap.WalkingRoute($scope.map, {renderOptions:{map: $scope.map, autoViewport: true}});
-		walking.search(ePoint,sPoint);
+		$scope.staffGoSta = new BMap.WalkingRoute($scope.map, {renderOptions:{map: $scope.map, autoViewport: true}});
+		$scope.staffGoSta.search(ePoint,sPoint);
 	};
 
 	/**
@@ -848,11 +901,25 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 	$scope.showLevel01 = function(){
 		hideLevel();
 		$('#people-table').find('#panel-level01').show('normal');
+
+		if($scope.chosenStaffMarker != undefined){
+			$scope.map.removeOverlay($scope.chosenStaffMarker);
+		}
+		if($scope.staffGoSta != undefined){
+			$scope.staffGoSta.clearResults();
+		}
+
+		$scope.map.panTo(new BMap.Point(120.164785,30.2453185));
+		$scope.map.setZoom(12);
+
 	};
 
 	$scope.showLevel02 = function(){
 		hideLevel();
 		$('#people-table').find('#panel-level02').show('normal');
+
+		$scope.map.panTo(new BMap.Point(120.164785,30.2453185));
+		$scope.map.setZoom(12);
 	};
 
 	$scope.showLevel03 = function(){
@@ -873,10 +940,10 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 
 
 
-factoryVehicle.controller('adminReportManager',function($scope){
+factoryVehicle.controller('adminReportManager',function($scope,$http){
 	var month = ['','一月,','二月,','三月,','四月,','五月,','六月,','七月,','八月,','九月,','十月,','十一月,','十二月,'];
 	$scope.date = '2016-08-01';		//查询日期
-	$scope.style = '2';			//查询方式
+	$scope.style = 2;			//查询方式
 	$scope.mychart = null;
 	$scope.xAxis;
 	$scope.num;
@@ -887,9 +954,27 @@ factoryVehicle.controller('adminReportManager',function($scope){
 	});
 
 	$scope.getChartData = function(){
-		createChart();
+		$scope.mychart.showLoading();
 		var date = translateDate();
-		console.log(date,$scope.style);
+
+		var url;
+		if($scope.style == 1){
+			url = '/factory_vehicle/api/Excel/day?day='+date;
+		}else if($scope.style == 2){
+			url = '/factory_vehicle/api/Excel/week?day='+date;
+		}else if($scope.style == 3){
+			url = '/factory_vehicle/api/Excel/month?day='+date;
+		}
+
+		$http.get(url).success(function(data){
+			console.log(data);
+			$scope.xAxis = data.sname;
+			$scope.num = data.count;
+			$scope.mychart.hideLoading();
+			setOption();
+		}).error(function(){
+			console.log('获取报表信息出错');
+		});
 	};
 
 	/**
@@ -949,7 +1034,7 @@ factoryVehicle.controller('adminReportManager',function($scope){
 		    xAxis: {
 		        type: 'category',
 		        boundaryGap: false,
-		        data: ['周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日']
+		        data: []
 		    },
 		    yAxis: {
 		        type: 'value'
@@ -959,12 +1044,25 @@ factoryVehicle.controller('adminReportManager',function($scope){
 		            name:'乘车人数',
 		            type:'line',
 		            stack: '总量',
-		            data:[120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210]
+		            data: []
 		        }
 		    ]
 		}
 
 		$scope.mychart.setOption(option);
+
+		$scope.mychart.showLoading();
+
+		var url = '/factory_vehicle/api/Excel/week?day=2016-08-01';
+		$http.get(url).success(function(data){
+			$scope.xAxis = data.sname;
+			$scope.num = data.count;
+			$scope.mychart.hideLoading();
+			setOption();
+		}).error(function(){
+			console.log('初始化报表出错');
+		});
+
 	}
 
 	/**
@@ -1269,8 +1367,11 @@ factoryVehicle.controller('affairsBusManager',function($scope,$http){
 });
 
 factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
+	$scope.map;
 	$scope.stations;	//保存站点信息
 	$scope.routes;		//保存路线信息
+	$scope.searchRoutes;		//保存查询到的线路信息
+	$scope.searchCondition;		//查询条件
 	$scope.theBus = {
 		'license': '',
 		'driver': '',
@@ -1282,17 +1383,38 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 	};	//保存当前线路的车辆信息
 	$scope.theStations = [];	//保存当前线路的站点信息
 	$scope.theSta = {
+		'id': '',
+		'name': '',
 		'num': 0,
 		'date': ''
 	};		//保存当前产看站点的详情
 	$scope.paths = [];		//保存地图上要展示的路线信息
-
+	$scope.searchPaths = [];
+	$scope.theUpdateSta = {
+		o_id: 0,
+		n_id: 0
+	};		//保存要修改的站点信息
+	$scope.theAddSta = {
+		's_id': 0,
+		's_name': '',
+		'num_of_emp': 0,
+		'used_time': 0,
+		'arrival_time': []
+	};		//保存新增的站点信息
+	$scope.theChangeRoute = {
+		'car': {},
+		'stations': []
+	};	//保存修改的路线信息
+	$scope.theDrivingRoutes = [];	//保存地图上的驾驶路线
 
 	//页面加载完成执行的函数
 	$scope.$watch('$viewContentLoaded',function(){
 		initMap('map-routes');
 		// getRoutes();
 	});
+
+	//地图上路线的预设颜色
+	var pathColors = ['#07377E','#6F89F1','#602BA7','#3275A9','#2AF1EF','#4EE2A8','#C3F03F','#98F3FC'];
 
 	/**
 	 * 初始化地图
@@ -1302,7 +1424,7 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 	var initMap = function(element){
 		var map = new BMap.Map(element);
 		var point = new BMap.Point(120.164785,30.2453185);
-		map.centerAndZoom(point, 14);
+		map.centerAndZoom(point, 13);
 
 		//初始化控件
 		map.addControl(new BMap.NavigationControl({anchor:BMAP_ANCHOR_TOP_RIGHT}));
@@ -1324,6 +1446,9 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 
 		$http.get(url).success(function(data){
 			$scope.stations = data;
+			setTimeout(function(){
+				$('select').material_select();
+			},0);		
 			//添加站点marker
 			addMarker();
 		}).error(function(){
@@ -1368,29 +1493,337 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 				var path = data[i].stations;
 				$scope.paths.push(path);
 			}
+			showRoutes();
 		}).error(function(){
 			console.log('获取全部路线信息出错');
 		})
 	};
 
 	var showRoutes = function(){
-		
+		clearMapRoutes();
+		$scope.theDrivingRoutes = [];
+		var start,end;
+		var num = 0;
+		for(var i=0;i<$scope.paths.length;i++){
+			var l = $scope.paths[i].length;
+			start = new BMap.Point($scope.paths[i][0].longitude,$scope.paths[i][0].latitude);
+			end = new BMap.Point($scope.paths[i][l-1].longitude,$scope.paths[i][l-1].latitude);
+			var droute = new BMap.DrivingRoute($scope.map,{renderOptions:{map:$scope.map}});
+			var waypoints = [];
+			for(var j=1;j<$scope.paths[i].length-1;j++){
+				var point = new BMap.Point($scope.paths[i][j].longitude,$scope.paths[i][j].latitude);
+				waypoints.push(point);
+			}
+			droute.search(start,end,{waypoints: waypoints});
+			droute.setPolylinesSetCallback(function(routes){
+				// console.log(routes,routes[0].getPolyline());
+				for(var k=0;k<routes.length;k++){
+					routes[k].getPolyline().setStrokeColor(pathColors[num]);
+					routes[k].getPolyline().setStrokeOpacity(0.75);
+				}
+				num++;			
+			});
+			$scope.theDrivingRoutes.push(droute);
+		}
+	};
+
+	var clearMapRoutes = function(){
+		for(var i=0;i<$scope.theDrivingRoutes.length;i++){
+			$scope.theDrivingRoutes[i].clearResults();
+		}
+		$scope.theDrivingRoutes = [];
 	}
 
-	var getRouteBus = function(id){
-		var url = '/factory_vehicle/api/car_inf/'+id;
+	var showBus = function(index){
+		$scope.theBus.id = $scope.routes[index].car.id;
+		$scope.theBus.name = $scope.routes[index].car.name;
+		$scope.theBus.brand = $scope.routes[index].car.brand;
+		$scope.theBus.seat = $scope.routes[index].car.seat;
+		$scope.theBus.logon = $scope.routes[index].car.logon;
+		$scope.theBus.dated = $scope.routes[index].car.dated;
+		$scope.theBus.license = $scope.routes[index].car.d_license;
+		$scope.theBus.driver = $scope.routes[index].car.ename;
+		$scope.theBus.driver_license = $scope.routes[index].car.eiden;
+	}
+
+	var showRouteStations = function(index){
+		$scope.theStations = [];
+
+		$scope.theStations = $scope.routes[index].stations;
+		$scope.theChangeRoute.car = $scope.routes[index].car;
+	}
+
+	var getOneSta = function(index){
+		$scope.theSta.id = $scope.theStations[index].s_id;
+		$scope.theSta.name = $scope.theStations[index].s_name;
+		$scope.theSta.num = $scope.theStations[index].num_of_emp;
+		$scope.theSta.date = '' + $scope.theStations[index].arrival_time[0] + '/' + $scope.theStations[index].arrival_time[1];
+	}
+
+	var showOneRouteOnMap = function(index){
+		clearMapRoutes();
+		var l = $scope.paths[index].length;
+		for(var i=0;i<l;i++){
+			var start = new BMap.Point($scope.paths[index][0].longitude,$scope.paths[index][0].latitude);
+			var end = new BMap.Point($scope.paths[index][l-1].longitude,$scope.paths[index][l-1].latitude);
+			var waypoints = [];
+			for(var j=1;j<l-1;j++){
+				var point = new BMap.Point($scope.paths[index][j].longitude,$scope.paths[index][j].latitude);
+				waypoints.push(point);
+			}
+		}
+		var driving = new BMap.DrivingRoute($scope.map, {renderOptions: {map: $scope.map}});
+		driving.search(start, end, {waypoints: waypoints});
+		driving.setPolylinesSetCallback(function(routes){
+			for(var k=0;k<routes.length;k++){
+				routes[k].getPolyline().setStrokeColor('#153F98');
+				routes[k].getPolyline().setStrokeOpacity(0.7);
+			}
+		});
+		$scope.theDrivingRoutes.push(driving);
+	}
+
+	$scope.showOneRoute = function(index){
+		showBus(index);
+		showRouteStations(index);
+		showOneRouteOnMap(index);
+		$scope.showLevel03();
+	};
+
+	$scope.showOneSta = function(index){
+		getOneSta(index);
+		$scope.showLevel05();
+	};
+
+	$scope.lookForRoute = function(){
+		var url = '/factory_vehicle/api/route?station='+$scope.searchCondition;
 
 		$http.get(url).success(function(data){
-
+			$scope.searchRoutes = data;
+			$scope.searchPaths = [];
+			for(var i=0;i<data.length;i++){
+				var path = data[i].stations;
+				$scope.searchPaths.push(path);
+			}
 		}).error(function(){
-			console.log('获取当前路线的车辆信息出错')
+			console.log('查询路线时出错');
 		});
+
+		$scope.showLevel02();
+	};
+
+	var showSearchRoutes = function(){
+		clearMapRoutes();
+		$scope.theDrivingRoutes = [];
+		var start,end;
+		var num = 0;
+		for(var i=0;i<$scope.searchPaths.length;i++){
+			var l = $scope.searchPaths[i].length;
+			start = new BMap.Point($scope.searchPaths[i][0].longitude,$scope.searchPaths[i][0].latitude);
+			end = new BMap.Point($scope.searchPaths[i][l-1].longitude,$scope.searchPaths[i][l-1].latitude);
+			var droute = new BMap.DrivingRoute($scope.map,{renderOptions:{map:$scope.map}});
+			var waypoints = [];
+			for(var j=1;j<$scope.searchPaths[i].length-1;j++){
+				var point = new BMap.Point($scope.searchPaths[i][j].longitude,$scope.searchPaths[i][j].latitude);
+				waypoints.push(point);
+			}
+			droute.search(start,end,{waypoints: waypoints});
+			droute.setPolylinesSetCallback(function(routes){
+				// console.log(routes,routes[0].getPolyline());
+				for(var k=0;k<routes.length;k++){
+					routes[k].getPolyline().setStrokeColor(pathColors[num]);
+					routes[k].getPolyline().setStrokeOpacity(0.75);
+				}
+				num++;			
+			});
+			$scope.theDrivingRoutes.push(droute);
+		}
+	};
+
+	var searchShowBus = function(index){
+		$scope.theBus.id = $scope.searchRoutes[index].car.id;
+		$scope.theBus.name = $scope.searchRoutes[index].car.name;
+		$scope.theBus.brand = $scope.searchRoutes[index].car.brand;
+		$scope.theBus.seat = $scope.searchRoutes[index].car.seat;
+		$scope.theBus.logon = $scope.searchRoutes[index].car.logon;
+		$scope.theBus.dated = $scope.searchRoutes[index].car.dated;
+		$scope.theBus.license = $scope.searchRoutes[index].car.d_license;
+		$scope.theBus.driver = $scope.searchRoutes[index].car.ename;
+		$scope.theBus.driver_license = $scope.searchRoutes[index].car.eiden;
+	};
+
+	var searchShowRouteStations = function(index){
+		$scope.theStations = [];
+
+		$scope.theStations = $scope.searchRoutes[index].stations;
+		$scope.theChangeRoute.car = $scope.searchRoutes[index].car;
+	};
+
+	var searchGetOneSta = function(index){
+		$scope.theSta.id = $scope.theStations[index].s_id;
+		$scope.theSta.name = $scope.theStations[index].s_name;
+		$scope.theSta.num = $scope.theStations[index].num_of_emp;
+		$scope.theSta.date = '' + $scope.theStations[index].arrival_time[0] + '/' + $scope.theStations[index].arrival_time[1];
+		
+	};
+
+	var showSearchOneRouteOnMap = function(index){
+		clearMapRoutes();
+		var l = $scope.searchPaths[index].length;
+		for(var i=0;i<l;i++){
+			var start = new BMap.Point($scope.searchPaths[index][0].longitude,$scope.searchPaths[index][0].latitude);
+			var end = new BMap.Point($scope.searchPaths[index][l-1].longitude,$scope.searchPaths[index][l-1].latitude);
+			var waypoints = [];
+			for(var j=1;j<l-1;j++){
+				var point = new BMap.Point($scope.searchPaths[index][j].longitude,$scope.searchPaths[index][j].latitude);
+				waypoints.push(point);
+			}
+		}
+		var driving = new BMap.DrivingRoute($scope.map, {renderOptions: {map: $scope.map}});
+		driving.search(start, end, {waypoints: waypoints});
+		driving.setPolylinesSetCallback(function(routes){
+			for(var k=0;k<routes.length;k++){
+				routes[k].getPolyline().setStrokeColor('#153F98');
+				routes[k].getPolyline().setStrokeOpacity(0.7);
+			}
+		});
+		$scope.theDrivingRoutes.push(driving);
 	}
 
-	$scope.showRouteInfo = function(index){
-		getRouteBus($scope.routes[index].carId);
+	$scope.searchShowOneRoute = function(index){
+		searchShowBus(index);
+		searchShowRouteStations(index);
+		showSearchOneRouteOnMap(index);
+		$scope.showLevel04();
+	};
 
+	$scope.searchShowOneSta = function(index){
+		searchGetOneSta(index);
+		$scope.showLevel06();
+	};
 
+	$scope.updateBusInfo = function(){
+		var url = '/factory_vehicle/api/car_inf/'+$scope.theBus.id;
+
+		$http({
+			method: 'PUT',
+			url: url,
+			data: {
+				'id': $scope.theBus.id,
+				'brand': $scope.theBus.brand,
+				'seat': $scope.theBus.seat,
+				'logon': $scope.theBus.logon,
+				'dated': $scope.theBus.dated,
+				'd_license': $scope.theBus.license
+			}
+		}).success(function(){
+			console.log('更新路线中的车辆信息成功');
+			$('#success-bus').openModal();
+		}).error(function(){
+			console.log('更新路线中的车辆信息失败');
+		});
+
+	};
+
+	$scope.deleteRouteSta = function(){
+		var url = '/factory_vehicle/api/route/'+$scope.theChangeRoute.car.id;
+
+		removeStaFromRoute();
+		$scope.theChangeRoute.stations = $scope.theStations;
+		$http({
+			method: 'PUT',
+			url: url,
+			data: $scope.theChangeRoute
+		}).success(function(){
+			$('#success-delete-sta').openModal();
+			$scope.showLevel03();
+			console.log('删除路线中的站点成功');
+		}).error(function(){
+			console.log('删除路线中的站点失败');
+		});
+	};
+
+	$scope.deleteSearchRouteSta = function(){
+		var url = '/factory_vehicle/api/route/'+$scope.theChangeRoute.car.id;
+
+		removeStaFromRoute();
+		$scope.theChangeRoute.stations = $scope.theStations;
+		$http({
+			method: 'PUT',
+			url: url,
+			data: $scope.theChangeRoute
+		}).success(function(){
+			$('#success-delete-sta').openModal();
+			$scope.showLevel04();
+			console.log('删除路线中的站点成功');
+		}).error(function(){
+			console.log('删除路线中的站点失败');
+		});
+	};
+
+	var removeStaFromRoute = function(){
+		for(var i=0;i<$scope.theStations.length;i++){
+			if($scope.theSta.id == $scope.theStations[i].s_id){
+				$scope.theStations.splice(i,1);
+				break;
+			}
+		}
+	};
+
+	$scope.addRouteSta = function(){
+		var url = '/factory_vehicle/api/route/'+$scope.theChangeRoute.car.id;
+
+		addStaToRoute();
+		$scope.theChangeRoute.stations = $scope.theStations;
+		console.log($scope.theChangeRoute);
+		$http({
+			method: 'PUT',
+			url: url,
+			data: $scope.theChangeRoute
+		}).success(function(){
+			$('#success-add-sta').openModal();
+			$scope.showLevel03();
+			console.log('添加路线中的站点成功');
+		}).error(function(){
+			console.log('添加路线中的站点失败');
+		});
+	};
+
+	$scope.addSearchRouteSta = function(){
+		var url = '/factory_vehicle/api/route/'+$scope.theChangeRoute.car.id;
+
+		addStaToRoute();
+		$scope.theChangeRoute.stations = $scope.theStations;
+		$http({
+			method: 'PUT',
+			url: url,
+			data: $scope.theChangeRoute
+		}).success(function(){
+			$('#success-add-sta').openModal();
+			$scope.showLevel04();
+			console.log('添加路线中的站点成功');
+		}).error(function(){
+			console.log('添加路线中的站点失败');
+		});
+	};
+
+	var addStaToRoute = function(){
+		for(var i=0;i<$scope.stations.length;i++){
+			if($scope.theAddSta.s_id == $scope.stations[i].s_id){
+				$scope.theAddSta.s_name == $scope.stations[i].s_name;
+				break;
+			}
+		}
+
+		for(var i=0;i<$scope.theStations.length;i++){
+			if($scope.theSta.id == $scope.theStations[i].s_id){
+				$scope.theStations.push({});
+				for(var j=$scope.theStations.length;j>i;j--){
+					$scope.theStations[j] = $scope.theStations[j-1];
+				}
+				$scope.theStations[i+1] = $scope.theAddSta;
+			}
+		}
 	};
 
 	/**
@@ -1410,6 +1843,7 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 	$scope.showLevel01 = function(){
 		hideLevel();
 		$('#panel-level01').show("normal");
+		showRoutes();
 	};
 
 	/**
@@ -1419,6 +1853,7 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 	$scope.showLevel02 = function(){
 		hideLevel();
 		$('#panel-level02').show("normal");
+		showSearchRoutes();
 	};
 
 	/**
@@ -1464,6 +1899,14 @@ factoryVehicle.controller('affairsSchedualManager',function($scope,$http){
 	var date = '';			//保存格式化后的查询时间
 	$scope.date = '';		//保存要查询的时间
 	$scope.week = '';		//保存当前查询的周
+	$scope.showTime = [];
+	$scope.mon;
+	$scope.tue;
+	$scope.wed;
+	$scope.thu;
+	$scope.fri;
+	$scope.sat;
+	$scope.sun;
 
 	//页面加载完成执行的函数
 	$scope.$watch('$viewContentLoaded',function(){
@@ -1519,24 +1962,42 @@ factoryVehicle.controller('affairsSchedualManager',function($scope,$http){
 
 		$scope.week = firstday+'~'+lastday;
 		$scope.$apply();
-		console.log($scope.week);
+		getArrange(firstday);
+		// console.log($scope.week);
 	}
 
 	/**
 	 * 获取排版数据
 	 * @return {[type]} [description]
 	 */
-	var getArrange = function(monday){
-		var url = '';
+	var getArrange = function(date){
+		var url = '/factory_vehicle/api/arrange?date='+date;
+
+		$http.get(url).success(function(data){
+			$scope.showTime = [];
+			for(var i=0;i<data.length;i++){
+				$scope.showTime.push(data[i].date);
+			}
+			$scope.mon = data[0].ag;
+			$scope.tue = data[1].ag;
+			$scope.wed = data[2].ag;
+			$scope.thu = data[3].ag;
+			$scope.fri = data[4].ag;
+			$scope.sat = data[5].ag;				
+			$scope.sun = data[6].ag;
+
+		}).error(function(){
+			console.log('获取排班信息出错');
+		})
 	}
 
 });
 
 
-factoryVehicle.controller('affairsReportManager', function($scope){
+factoryVehicle.controller('affairsReportManager', function($scope,$http){
 	var month = ['','一月,','二月,','三月,','四月,','五月,','六月,','七月,','八月,','九月,','十月,','十一月,','十二月,'];
 	$scope.date = '2016-08-01';		//查询日期
-	$scope.style = '2';			//查询方式
+	$scope.style = 2;			//查询方式
 	$scope.mychart;
 	$scope.xAxis;
 	$scope.num;
@@ -1547,9 +2008,28 @@ factoryVehicle.controller('affairsReportManager', function($scope){
 	});
 
 	$scope.getChartData = function(){
-		createChart();
+		$scope.mychart.showLoading();
 		var date = translateDate();
-		console.log(date,$scope.style);
+		// console.log(date,$scope.style);
+		var url;
+		if($scope.style == 1){
+			url = '/factory_vehicle/api/Excel/routeday?day='+date;			
+		}else if($scope.style == 2){
+			url = '/factory_vehicle/api/Excel/routeweek?day='+date;
+		}else if($scope.style == 3){
+			url = '/factory_vehicle/api/Excel/routemonth?day='+date;
+		}
+		// console.log(url);
+		$http.get(url).success(function(data){
+			// console.log(data,'shaquan');
+			$scope.xAxis = data.sname;
+			$scope.num = data.count;
+			$scope.mychart.hideLoading();
+			setOption();
+		}).error(function(){
+			$scope.mychart.hideLoading();
+			console.log('获取报表信息出错');
+		});
 	};
 
 	/**
@@ -1609,7 +2089,7 @@ factoryVehicle.controller('affairsReportManager', function($scope){
 		    xAxis: {
 		        type: 'category',
 		        boundaryGap: false,
-		        data: ['周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日','周一','周二','周三','周四','周五','周六','周日']
+		        data: []
 		    },
 		    yAxis: {
 		        type: 'value'
@@ -1619,12 +2099,25 @@ factoryVehicle.controller('affairsReportManager', function($scope){
 		            name:'乘车人数',
 		            type:'line',
 		            stack: '总量',
-		            data:[120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210,120, 132, 101, 134, 90, 230, 210]
+		            data: []
 		        }
 		    ]
 		}
 		
 		$scope.mychart.setOption(option);
+
+		$scope.mychart.showLoading();
+
+		var url = '/factory_vehicle/api/Excel/routeweek?day=2016-08-01';
+		$http.get(url).success(function(data){
+			$scope.xAxis = data.sname;
+			$scope.num = data.count;
+			$scope.mychart.hideLoading();
+			setOption();
+		}).error(function(){
+			console.log('初始化报表出错');
+		});
+
 	}
 
 	var setOption = function(){

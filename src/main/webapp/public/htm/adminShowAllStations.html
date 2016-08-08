@@ -115,7 +115,7 @@
 			<div class="card-action">
 				<a href="javascript:void(0)" class="card-delete">删除</a>
 				<a href="javascript:void(0)" class="card-update">修改</a>
-				<a href="javascript:void(0)">设置为站点</a>
+				<a href="javascript:void(0)" class="set-stop1">设置为站点</a>
 			</div>
 		</div>
 	</div>
@@ -136,7 +136,7 @@
 			<div class="card-action">
 				<a href="javascript:void(0)" class="card-delete">删除</a>
 				<a href="javascript:void(0)" class="card-update">修改</a>
-				<a href="javascript:void(0)">设置为站点</a>
+				<a href="javascript:void(0)" class="set-stop2">设置为站点</a>
 			</div>
 		</div>
 	</div>
@@ -215,39 +215,23 @@
 	</div>
 
 </div>
-<!-- <div id="station-staff" style="display:none;">
-	<ul class="collapsible" data-collapsible="accordion">
-		<li>
-			<div class="collapsible-header">
-				<a href="javascript:void(0)">共找到<strong ng-bind="staStaffList.length"></strong>位员工</a>
-			</div>
-			<div class="collapsible-body">
-				<table>
-					<thead>
-						<tr>
-							<td style="text-align:center;">员工</td>
-							<td style="text-align:center;">住址</td>
-						</tr>
-					</thead>
-					<tbody>
-						<tr ng-repeat="staff in staStaffList">
-							<td style="width:25%;text-align:center;" ng-bind="staff.name"></td>
-							<td class="truncate" style="width:90%" ng-bind="staff.eaddress"></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</li>
-	</ul>
-</div> -->
 
-<div id="delete-station" class="modal" style="width:220px;">
+
+<div id="delete-station" class="modal" style="width:300px;">
 	<div class="modal-content">
-		<p>确认删除站点？</p>
-		<p>
-			<input type"checkbox" id="delete-sta-and-stop">
-			<label for="delete-sta-and-stop">同时删除停车点</label>
-		</p>
+		<div class="row">
+			<form class="col s12">
+				<div class="row">
+					<p>确认删除站点？</p>
+				</div>
+				<div class="row" style="width:300px;">
+					<div class="input-field col s6">
+						<input type="checkbox" id="delete-sta-and-stop" checked>
+						<label for="delete-sta-and-stop">同时删除停车点</label>
+					</div>
+				</div>
+			</form>
+		</div>
 	</div>
 	<div class="modal-footer">
       <a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">取消</a>
@@ -255,16 +239,12 @@
     </div>
 </div>
 
-<div id="update-station" class="modal">
+<div id="update-station" class="modal" style="width:320px;">
 	<div class="modal-content">
 		<form class="row">
 			<div class="input-field col s10 offset-s1">
 	          <input placeholder="请输入修改后的站点名称" id="update-station-name" type="text" class="validate" ng-model="updateStaInfo.name">
 	          <label for="update-station-name" class="active">站点名称</label>
-	        </div>
-	        <div class="input-field col s10 offset-s1">
-	          <input placeholder="请输入经度" id="update-station-lng" type="text" class="validate" ng-model="updateStaInfo.address">
-	          <label for="update-station-lng" class="active">经度</label>
 	        </div>
 		</form>
 	</div>
@@ -288,12 +268,15 @@
 	          <input placeholder="请输入新的站点名称" id="add-station-name" type="text" class="validate" ng-model="addStaInfo.name">
 	          <label for="add-station-name" class="active">站点名称</label>
 	        </div>
+	        <div class="row">
+	        	<p class="center">该站点的位置已获取</p>
+	        </div>
 	        <div class="input-field col s6">
-	          <input placeholder="Placeholder" id="add-station-lng" type="text" class="validate" ng-model="addStaInfo.x">
+	          <input placeholder="Placeholder" id="add-station-lng" type="text" class="validate" ng-model="addStaInfo.x" disabled>
 	          <label for="add-station-lng" class="active">经度</label>
 	        </div>
 	        <div class="input-field col s6">
-	          <input placeholder="Placeholder" id="add-station-lat" type="text" class="validate" ng-model="addStaInfo.y">
+	          <input placeholder="Placeholder" id="add-station-lat" type="text" class="validate" ng-model="addStaInfo.y" disabled>
 	          <label for="add-station-lat" class="active">纬度</label>
 	        </div>
 		</form>
@@ -304,13 +287,82 @@
 	</div>
 </div>
 
-<div id="delete-stop-sta" class="modal" style="width:220px;">
+<div id="delete-stop-sta1" class="modal" style="width:220px;">
 	<div class="modal-content">
 		<p>确认删除该停车点？</p>
 	</div>
 	<div class="modal-footer">
       <a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">取消</a>
-      <a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat agree-delete-station">确认</a>
+      <a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat agree-delete-station" ng-click="showLevel01()">确认</a>
+    </div>
+</div>
+
+<div id="delete-stop-sta2" class="modal" style="width:220px;">
+	<div class="modal-content">
+		<p>确认删除该停车点？</p>
+	</div>
+	<div class="modal-footer">
+      <a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">取消</a>
+      <a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat agree-delete-station" ng-click="showLevel02()">确认</a>
+    </div>
+</div>
+
+<div id="stop-to-station1" class="modal" style="width:220px;">
+	<div class="modal-content">
+		<p>是否同意将该停车点设置为站点？</p>
+	</div>
+	<div class="modal-footer">
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">取消</a>
+     	<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat stop-to-station1" ng-click="showLevel01()">确认</a>
+	</div>
+</div>
+
+<div id="stop-to-station2" class="modal" style="width:220px;">
+	<div class="modal-content">
+		<p>是否同意将该停车点设置为站点？</p>
+	</div>
+	<div class="modal-footer">
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">取消</a>
+     	<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat stop-to-station2" ng-click="showLevel02()">确认</a>
+	</div>
+</div>
+
+<div id="success-stop-to-station" class="modal" style="width:220px;">
+	<div class="modal-content">
+		<p>已成功将该停车点设置为站点！</p>
+	</div>
+	<div id="modal-footer">
+		<a href="javascrit:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">确认</a>
+	</div>
+</div>
+
+<div id="update-stop1" class="modal" style="width:320px;">
+	<div class="modal-content">
+		<form class="row">
+			<div class="input-field col s10 offset-s1">
+	          <input placeholder="请输入修改后的站点名称" id="update-station-name" type="text" class="validate" ng-model="updateStaInfo.name">
+	          <label for="update-station-name" class="active">停车点名称</label>
+	        </div>
+		</form>
+	</div>
+	<div class="modal-footer">
+      <a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">取消</a>
+      <a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat agree-update-stop" ng-click="showLevel01()">提交</a>
+    </div>
+</div>
+
+<div id="update-stop2" class="modal" style="width:320px;">
+	<div class="modal-content">
+		<form class="row">
+			<div class="input-field col s10 offset-s1">
+	          <input placeholder="请输入修改后的站点名称" id="update-station-name" type="text" class="validate" ng-model="updateStaInfo.name">
+	          <label for="update-station-name" class="active">停车点名称</label>
+	        </div>
+		</form>
+	</div>
+	<div class="modal-footer">
+      <a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">取消</a>
+      <a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat agree-update-stop" ng-click="showLevel02(">提交</a>
     </div>
 </div>
 
@@ -363,16 +415,29 @@
 			$('#update-station').openModal();
 		});
 		$('#panel-level05').find('.card-delete').click(function(){
-			$('#delete-stop-sta').openModal();
+			$('#delete-stop-sta1').openModal();
 		});
-		$('#panel-level05').find('.card-delete').click(function(){
-			$('#delete-stop-sta').openModal();
-		});
-		$('#panel-level06').find('.card-delete').click(function(){
-			$('#delete-stop-sta').openModal();
+		$('#panel-level05').find('.card-update').click(function(){
+			$('#update-stop1').openModal();
 		});
 		$('#panel-level06').find('.card-delete').click(function(){
-			$('#delete-stop-sta').openModal();
+			$('#delete-stop-sta2').openModal();
+		});
+		$('#panel-level06').find('.card-update').click(function(){
+			$('#update-stop2').openModal();
+		});
+
+		$('#station-table').find('.set-stop1').click(function(){
+			$('#stop-to-station1').openModal();
+		});
+		$('#station-table').find('.set-stop2').click(function(){
+			$('#stop-to-station2').openModal();
+		});
+		$('#stop-to-station1').find('.stop-to-station1').click(function(){
+			$('#success-stop-to-station').openModal();
+		});
+		$('#stop-to-station2').find('.stop-to-station2').click(function(){
+			$('#success-stop-to-station').openModal();
 		});
 	})
 </script>

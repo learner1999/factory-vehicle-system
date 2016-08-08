@@ -2,8 +2,8 @@
 
 <div id="show-routes">
 	<div class="search-route">
-		<input type="text" placeholder="请输入要查询的路线信息">
-		<div class="search-action" ng-click="showLevel02()">
+		<input type="text" placeholder="请输入要查询的路线信息" ng-model="searchCondition">
+		<div class="search-action" ng-click="lookForRoute()">
 			<i class="material-icons md-light md-36">search</i>
 		</div>
 	</div>
@@ -24,8 +24,8 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr ng-repeat="route in routes" ng-click="showLevel03()" style="cursor:pointer;">
-								<td ng-bind="route.id"></td>
+							<tr ng-repeat="route in routes" ng-click="showOneRoute($index)" style="cursor:pointer;">
+								<td ng-bind="route.car.id"></td>
 								<td ng-bind="route.number"></td>
 								<td ng-bind="route.rate"></td>
 							</tr>
@@ -44,20 +44,20 @@
 		<ul class="collapsible" data-collapsible="accordion">
 			<li>
 				<div class="collapsible-header">
-					<a href="javascript:void(0)">&nbsp&nbsp&nbsp&nbsp共找到<strong>13</strong>条符合条件的线路</a>
+					<a href="javascript:void(0)">&nbsp&nbsp&nbsp&nbsp共找到<strong ng-bind="searchRoutes.length"></strong>条符合条件的线路</a>
 				</div>
 				<div class="collapsible-body">
 					<table>
 						<thead>
 							<tr>
-								<td>线路名称</td>
+								<td>线路ID</td>
 								<td>人数</td>
 								<td>乘坐率</td>
 							</tr>
 						</thead>
 						<tbody>
-							<tr ng-repeat="route in routes" ng-click="showLevel04()" style="cursor:pointer;">
-								<td ng-bind="route.name"></td>
+							<tr ng-repeat="route in searchRoutes" ng-click="searchShowOneRoute($index)" style="cursor:pointer;">
+								<td ng-bind="route.car.id"></td>
 								<td ng-bind="route.number"></td>
 								<td ng-bind="route.rate"></td>
 							</tr>
@@ -88,10 +88,10 @@
 				        	<span style="display:inline-block;width:135px;">座位数：<strong ng-bind="theBus.seat">30</strong></span>
 				        	<span style="display:inline-block;width:100%;">注册日期：<strong ng-bind="theBus.logon">2010-10-25</strong></span>
 				        	<span style="display:inline-block;width:100%;">保险日期：<strong ng-bind="theBus.dated">2018-04-13</strong></span>
-							<span style="display:inline-block;width:100%;">驾驶证：<strong ng-bind="driver_license">123456789456123456</strong></span>
+							<span style="display:inline-block;width:100%;">驾驶证：<strong ng-bind="theBus.driver_license">123456789456123456</strong></span>
 				        </div>
 				        <div class="card-action">
-				            <a href="javascript:void(0)">修改车辆信息</a>
+				            <a href="javascript:void(0)" class="update-bus">修改车辆信息</a>
 				        </div>
 				    </div>
 				</div>
@@ -101,13 +101,9 @@
 					<a href="javascript:void(0)">该路线所经过的站点详情</a>
 				</div>
 				<div class="collapsible-body">
-					<ul class="collection">
-						<li class="collection-item" ng-click="showLevel05()" style="cursor:pointer;">杭州东张</li>
-						<li class="collection-item">杭州东张</li>
-						<li class="collection-item">杭州东张</li>
-						<li class="collection-item">杭州东张</li>
-						<li class="collection-item">杭州东张</li>
-					</ul>
+					<ul class="collection" style="cursor:pointer;">
+						<li class="collection-item" ng-repeat="station in theStations" ng-bind="station.s_name" ng-click="showOneSta($index)"></li>
+ 					</ul>
 				</div>
 			</li>
 		</ul>
@@ -133,10 +129,10 @@
 				        	<span style="display:inline-block;width:135px;">座位数：<strong ng-bind="theBus.seat">30</strong></span>
 				        	<span style="display:inline-block;width:100%;">注册日期：<strong ng-bind="theBus.logon">2010-10-25</strong></span>
 				        	<span style="display:inline-block;width:100%;">保险日期：<strong ng-bind="theBus.dated">2018-04-13</strong></span>
-							<span style="display:inline-block;width:100%;">驾驶证：<strong ng-bind="driver_license">123456789456123456</strong></span>
+							<span style="display:inline-block;width:100%;">驾驶证：<strong ng-bind="theBus.driver_license">123456789456123456</strong></span>
 				        </div>
 				        <div class="card-action">
-				            <a href="javascript:void(0)">修改车辆信息</a>
+				            <a href="javascript:void(0)" class="update-bus">修改车辆信息</a>
 				        </div>
 				    </div>
 				</div>
@@ -147,11 +143,7 @@
 				</div>
 				<div class="collapsible-body">
 					<ul class="collection">
-						<li class="collection-item" ng-click="showLevel06()" style="cursor:pointer;">杭州东张</li>
-						<li class="collection-item">杭州东张</li>
-						<li class="collection-item">杭州东张</li>
-						<li class="collection-item">杭州东张</li>
-						<li class="collection-item">杭州东张</li>
+						<li class="collection-item" ng-repeat="station in theStations" ng-bind="station.s_name" ng-click="searchShowOneSta($index)" style="cursor:pointer;"></li>
 					</ul>
 				</div>
 			</li>
@@ -165,22 +157,14 @@
 		</div>
 		<div class="card blue-grey darken-1">
 			<div class="card-content white-text">
-				<span class="card-title">杭州东站</span>
+				<span class="card-title" ng-bind="theSta.name"></span>
 				<br>
-				<span style="display:inline-block;width:135px;">乘车人数：<strong ng-bind="theSta.num">11</strong></span>
-				<span style="display:inline-block;width:135px;">到站时间：<strong ng-bind="theSta.date">8:14</strong></span>
+				<span style="display:inline-block;width:120px;">乘车人数：<strong ng-bind="theSta.num"></strong></span>
+				<span style="display:inline-block;width:150px;">到站时间：<strong ng-bind="theSta.date"></strong></span>
 			</div>
 			<div class="card-action">
-				<a href="javascript:void(0)" class="btn">删除</a>
-			<!-- 	<a href="javascript:void(0)" class="btn dropdown-button" data-activates="change-sta-list">更换</a> -->
-				<a href="javascript:void(0)" class="btn">新增</a>
-				<!-- <ul id="change-sta-list" class="dropdown-content">
-					<li class="collection-item">kjkldsafj</li>
-					<li class="collection-item">dklja;s</li>
-					<li class="collection-item">fkld;aj</li>
-					<li class="collection-item">qioerio</li>
-					<li class="collection-item">lfkdjsl</li>
-				</ul> -->
+				<a href="javascript:void(0)" class="btn delete-sta1">删除</a>
+				<a href="javascript:void(0)" class="btn add-sta1">新增</a>
 			</div>
 		</div>
 	</div>
@@ -192,22 +176,14 @@
 		</div>
 		<div class="card blue-grey darken-1">
 			<div class="card-content white-text">
-				<span class="card-title">杭州东站</span>
+				<span class="card-title" ng-bind="theSta.name"></span>
 				<br>
-				<span style="display:inline-block;width:135px;">乘车人数：<strong ng-bind="theSta.num">11</strong></span>
-				<span style="display:inline-block;width:135px;">到站时间：<strong ng-bind="theSta.date">8:14</strong></span>
+				<span style="display:inline-block;width:120px;">乘车人数：<strong ng-bind="theSta.num"></strong></span>
+				<span style="display:inline-block;width:150px;">到站时间：<strong ng-bind="theSta.date"></strong></span>
 			</div>
 			<div class="card-action">
-				<a href="javascript:void(0)" class="btn">删除</a>
-			<!-- 	<a href="javascript:void(0)" class="btn dropdown-button" data-activates="change-sta-list">更换</a> -->
-				<a href="javascript:void(0)" class="btn">新增</a>
-				<!-- <ul id="change-sta-list" class="dropdown-content">
-					<li class="collection-item">kjkldsafj</li>
-					<li class="collection-item">dklja;s</li>
-					<li class="collection-item">fkld;aj</li>
-					<li class="collection-item">qioerio</li>
-					<li class="collection-item">lfkdjsl</li>
-				</ul> -->
+				<a href="javascript:void(0)" class="btn delete-sta2">删除</a>
+				<a href="javascript:void(0)" class="btn add-sta2">新增</a>
 			</div>
 		</div>
 	</div>
@@ -216,9 +192,149 @@
 	</div> -->
 </div>
 
-<div id="success-change" class="modal" style="width:220px;">
+<div id="update-bus" class="modal">
+	<div class="modal-content">
+		<div class="row">
+			<form class="col s12">
+				<div class="row">
+					<div class="input-field col s6">
+			          <input id="update-brand" type="text" class="validate" ng-model="theBus.brand">
+			          <label class="active" for="update-brand">品牌：</label>
+			        </div>
+			        <div class="input-field col s6">
+			          <input class="active" id="update-seat" type="text" class="validate" ng-model="theBus.seat">
+			          <label class="active" for="update-seat">座位：</label>
+			        </div>
+			        <div class="input-field col s6">
+			          <input id="update-logon" type="text" class="validate" ng-model="theBus.logon">
+			          <label class="active" for="update-logon">注册日期：</label>
+			        </div>
+			        <div class="input-field col s6">
+			          <input id="update-dated" type="text" class="validate" ng-model="theBus.dated">
+			          <label class="active" for="update-dated">保险日期：</label>
+			        </div>
+			        <div class="input-field col s12">
+			          <input id="update-license" type="text" class="validate" ng-model="theBus.license">
+			          <label class="active" for="update-license">车牌号：</label>
+			        </div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat" ng-click="updateBusInfo()">确认</a>
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">取消</a>
+	</div>
+</div>
+
+<div id="update-station" class="modal">
+	<div class="row">
+		<form class="col s12">
+			<div class="row">
+				<div class="input-field col s6">
+					<input type="text" class="validate" ng-bind="theBus.name" disabled>
+				</div>
+				<div class="input-field col s6">
+					<select ng-model="updateSta">
+						<option value="" disabled>请选择你要更换的站点</option>
+						<option ng-repeat="station in stations" ng-bind="station.s_name" value=""></option>
+					</select>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<div id="add-station1" class="modal" style="width:300px;">
+	<div class="modal-content">
+		<div class="row">
+			<form class="col s12">
+				<div class="row">
+					<div class="input-field col s12">
+						<select ng-model="theAddSta.s_id" ng-options="station.s_id as station.s_name for station in stations">
+							<option value="" disabled>请选择你要添加的站点</option>
+						</select>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat" ng-click="addRouteSta()">确认</a>
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">取消</a>
+	</div>
+</div>
+
+<div id="add-station2" class="modal" style="width:300px;">
+	<div class="modal-content">
+		<div class="row">
+			<form class="col s12">
+				<div class="row">
+					<div class="input-field col s12">
+						<select ng-model="theAddSta.s_id" ng-options="station.s_id as station.s_name for station in stations">
+							<option value="" disabled>请选择你要添加的站点</option>
+						</select>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat" ng-click="addSearchRouteSta()">确认</a>
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">取消</a>
+	</div>
+</div>
+
+<div id="delete-sta1" class="modal" style="width:220px;">
+	<div class="modal-content">
+		<p>是否要从路线中移除该站点？</p>
+	</div>
+	<div class="modal-footer">
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat" ng-click="deleteRouteSta()">确认</a>
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">取消</a>
+	</div>
+</div>
+
+<div id="delete-sta2" class="modal" style="width:220px;">
+	<div class="modal-content">
+		<p>是否要从路线中移除该站点？</p>
+	</div>
+	<div class="modal-footer">
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat" ng-click="deleteSearchRouteSta()">确认</a>
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">取消</a>
+	</div>
+</div>
+
+<div id="success-delete-sta" class="modal" style="width:220px;">
+	<div class="modal-content">
+		<p>已从路线中删除该站点！</p>
+	</div>
+	<div class="modal-footer">
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">确认</a>
+	</div>
+</div>
+
+<div id="success-add-sta" class="modal" style="width:220px;">
+	<div class="modal-content">
+		<p>已在路线中成功添加该站点！</p>
+	</div>
+	<div class="modal-footer">
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">确认</a>
+	</div>
+</div>
+
+<div id="success-route" class="modal" style="width:220px;">
 	<div class="modal-content">
 		<p>路线修改成功！</p>
+	</div>
+	<div class="modal-footer">
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">确认</a>
+	</div>
+</div>
+
+<div id="success-bus" class="modal" style="width:220px;">
+	<div class="modal-content">
+		<p>车辆信息修改成功！</p>
 	</div>
 	<div class="modal-footer">
 		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">确认</a>
@@ -229,6 +345,22 @@
 	$(function(){
 		$('.collapsible').collapsible();
 		$('.tooltipped').tooltip({delay: 50});
+		$('#show-routes').find('.update-bus').click(function(){
+			$('#update-bus').openModal();
+		});
+		$('#show-routes').find('.delete-sta1').click(function(){
+			$('#delete-sta1').openModal();
+		});
+		$('#show-routes').find('.delete-sta2').click(function(){
+			$('#delete-sta2').openModal();
+		});
+		$('#show-routes').find('.add-sta1').click(function(){
+			$('#add-station1').openModal();
+		});
+		$('#show-routes').find('.add-sta2').click(function(){
+			$('#add-station2').openModal();
+		});
+		// $('select').material_select();
 	});
 
 	function hidenAll(){

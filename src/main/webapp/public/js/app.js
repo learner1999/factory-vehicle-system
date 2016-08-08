@@ -18,7 +18,8 @@ factoryVehicle.config(function($stateProvider,$urlRouterProvider) {
 	$stateProvider
 		.state('login',{
 			url: '/login',
-			templateUrl: 'htm/login.html'
+			templateUrl: 'htm/login.html',
+			controller: 'loginManager'
 		})
 		.state('admin',{
 			url: '/admin',
@@ -27,7 +28,8 @@ factoryVehicle.config(function($stateProvider,$urlRouterProvider) {
 					templateUrl: 'htm/admin.html'
 				},
 				'AdminTopbar@admin': {
-					templateUrl: 'htm/adminTopbar.html'
+					templateUrl: 'htm/adminTopbar.html',
+					controller: 'topbarManager'
 				},
 				'AdminSidebar@admin': {
 					templateUrl: 'htm/adminSidebar.html'
@@ -81,7 +83,8 @@ factoryVehicle.config(function($stateProvider,$urlRouterProvider) {
 					templateUrl: 'htm/affairs.html'
 				},
 				'AffairsTopbar@affairs': {
-					templateUrl: 'htm/affairsTopbar.html'
+					templateUrl: 'htm/affairsTopbar.html',
+					controller: 'topbarManager'
 				},
 				'AffairsSidebar@affairs': {
 					templateUrl: 'htm/affairsSidebar.html'
