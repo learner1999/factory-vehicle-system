@@ -52,15 +52,21 @@ public class RouteDao {
 		route.setCar(car);
 		
 		// 获取站点信息
+		int numOfEmp = 0;
 		try {
 			conn = JdbcUtil.getConnection();
 			stmt = conn.prepareStatement(strSql);
 			result = stmt.executeQuery();
 
 			List<RouteStation> stationList = fetchStaData(result);
+			stationList.add(0, new RouteStation(new StationDao().getStaById(1)));
 			calculateArrivalTime(stationList);
 			
 			route.setStations(stationList);
+			
+			for (RouteStation sta : stationList) {
+				numOfEmp += sta.getNum_of_emp();
+			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -68,6 +74,10 @@ public class RouteDao {
 			JdbcUtil.close(result, stmt, conn);
 		}
 
+		// 设置乘坐人数及乘坐率
+		route.setNumOfEmp(numOfEmp);
+		route.setRateOfTake(numOfEmp * 1.0 / carInf.getSeat());
+		
 		return route;
 	}
 
