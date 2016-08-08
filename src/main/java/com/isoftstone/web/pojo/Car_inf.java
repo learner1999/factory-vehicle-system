@@ -9,7 +9,13 @@ public class Car_inf {
 	private Date logon;
 	private Date dated;
 	private String d_license;
-	
+	private String c_license;
+	public String getC_license() {
+		return c_license;
+	}
+	public void setC_license(String c_license) {
+		this.c_license = c_license;
+	}
 	public int getId() {
 		return id;
 	}

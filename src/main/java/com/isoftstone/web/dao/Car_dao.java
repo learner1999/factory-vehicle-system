@@ -212,7 +212,7 @@ public class Car_dao {
 		
 		 */
 	/**
-	 * 判断行驶证是否存在
+	 * 判断驾驶证是否存在
 	 * @param d_license
 	 * @return 是否存在
 	 */
@@ -222,6 +222,33 @@ public class Car_dao {
 			conn = JdbcUtil.getConnection();
 			cs = (CallableStatement) conn.prepareCall(proc);
 			cs.setString(1, d_license);
+			result = cs.executeQuery();
+			if(result.next())
+			{	
+				return true;
+			}
+		}
+			catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				JdbcUtil.close(result, stmt, conn);
+				JdbcUtil.closecs(cs);
+			}
+		return false;
+		}
+	
+	
+	/**
+	 * 判断行驶证是否存在
+	 * @param d_license
+	 * @return 是否存在
+	 */
+	public boolean is_Clicense(String c_license){
+		String proc="{call is_license(?)}";
+		try{
+			conn = JdbcUtil.getConnection();
+			cs = (CallableStatement) conn.prepareCall(proc);
+			cs.setString(1, c_license);
 			result = cs.executeQuery();
 			if(result.next())
 			{	
@@ -293,7 +320,7 @@ public class Car_dao {
 	 * @return 是否创建成功
 	 */
 	public boolean createcar(Car_inf car1){
-		String proc="{call increasecar(?,?,?,?,?)}";
+		String proc="{call increasecar(?,?,?,?,?,?)}";
 		try{
 			conn = JdbcUtil.getConnection();
 			cs = (CallableStatement) conn.prepareCall(proc);
@@ -302,6 +329,7 @@ public class Car_dao {
 			cs.setDate(3, car1.getLogon());
 			cs.setDate(4, car1.getDated());
 			cs.setString(5, car1.getD_license());
+			cs.setString(6, car1.getC_license());
 			if(cs.executeUpdate()==1){
 				return true;
 			}		
@@ -321,7 +349,7 @@ public class Car_dao {
 	 * @return 是否更新成功
 	 */
 	public boolean updatecar(Car_inf car1,int id){
-		String proc="{call updatecar(?,?,?,?,?,?)}";
+		String proc="{call updatecar(?,?,?,?,?,?,?)}";
 		try{
 			conn = JdbcUtil.getConnection();
 			cs = (CallableStatement) conn.prepareCall(proc);
@@ -331,6 +359,7 @@ public class Car_dao {
 			cs.setDate(4, car1.getLogon());
 			cs.setDate(5, car1.getDated());
 			cs.setString(6, car1.getD_license());
+			cs.setString(7, car1.getC_license());
 			if(cs.executeUpdate()==1){
 				return true;
 			}		
@@ -395,7 +424,7 @@ public class Car_dao {
             row.createCell((short) 3).setCellValue(logon); 
             row.createCell((short) 4).setCellValue(dated); 
             row.createCell((short) 5).setCellValue(car.getD_license()); 
-            
+            row.createCell((short) 6).setCellValue(car.getC_license()); 
         }  
         // �������ļ��浽ָ��λ��  
         try  
@@ -431,7 +460,8 @@ public class Car_dao {
          carlist.setLogon(result.getDate("c_logon"));
          carlist.setDated(result.getDate("c_dated"));
          carlist.setD_license(result.getString("c_driving_license"));
-		return carlist;
+		carlist.setC_license(result.getString("c_license"));
+         return carlist;
 	}
 
 }
