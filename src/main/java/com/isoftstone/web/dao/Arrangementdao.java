@@ -50,8 +50,8 @@ public class Arrangementdao {
 	 * @param n
 	 * @return
 	 */
-	public ArrayList driver(int c,int m,int n){
-	ArrayList List = new ArrayList();
+	public List<Arrange> driver(int c,int m,int n){
+	List<Arrange> List = new ArrayList<>();
 	int i,j;
 	float a=(30*c)/(30-n);//司机人数的下限
 	float b=(30*c)/(30-m);//上限
@@ -98,8 +98,8 @@ public class Arrangementdao {
 	 * @param circulation
 	 * @return
 	 */
-	public ArrayList arrange(long days,int drivers,int circulation){
-		ArrayList list = new ArrayList();
+	public List<Arrange> arrange(long days,int drivers,int circulation){
+		List<Arrange> list = new ArrayList<>();
 		int a=(int) (days%circulation);//每组的第几位司机轮休
 		if(a==0){
 			for(int i=1;i<=drivers;i++){
@@ -171,8 +171,8 @@ public class Arrangementdao {
 	 * 从数据库中得到司机的信息
 	 * @return
 	 */
-	public ArrayList drivers(){
-		ArrayList em=new ArrayList();
+	public List<Emlopee> drivers(){
+		List<Emlopee> em=new ArrayList<>();
 		String proc="{call selectDrivers()}";
 		try{
 			conn =JdbcUtil.getConnection();
@@ -199,39 +199,66 @@ public class Arrangementdao {
 	 * 从数据库中得到车辆信息
 	 * @return
 	 */
-	public ArrayList cars(){
-		ArrayList car=new ArrayList();
-		String proc="{call selectCars()}";
-		try{
-			conn =JdbcUtil.getConnection();
-			cs = (CallableStatement) conn.prepareCall(proc);
-			result = cs.executeQuery();
-			while (result.next()){
-			Car_inf car1=new Car_inf();
-			car1.setId(result.getInt(1));
-			car1.setD_license(result.getString(2));
-			car.add(car1);
-			}		
-		}catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			JdbcUtil.close(null, stmt, conn);
-			JdbcUtil.closecs(cs);
-		}
-		
+	public List<Car_inf> cars(List<Integer> ar){
+		List<Car_inf> car=new ArrayList<>();
+		String proc="{call selectCars(?)}";
+		  for(int j=0;j<ar.size();j++){
+			  int a=(Integer)ar.get(j);
+			  try{
+					conn =JdbcUtil.getConnection();
+					cs = (CallableStatement) conn.prepareCall(proc);
+					cs.setInt(1, a);
+					result = cs.executeQuery();
+					while (result.next()){
+					Car_inf car1=new Car_inf();
+					car1.setId(result.getInt(1));
+					car1.setD_license(result.getString(2));
+					car.add(car1);
+					}		
+				}catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}finally {
+					JdbcUtil.close(null, stmt, conn);
+					JdbcUtil.closecs(cs);
+				} 
+		  }
 		return car;
 	}
+	
+	public List<Integer> getCarbyRoute() {
+
+		List<Integer> carid = new ArrayList<>();
+
+		String strSql = "SELECT * FROM information_schema.TABLES WHERE TABLE_NAME LIKE 'car%' AND TABLE_NAME <> 'car_information'";
+
+		try {
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(strSql);
+			result = stmt.executeQuery();
+			while (result.next()) {
+				int tableName = Integer.valueOf(result.getString("TABLE_NAME").split("car")[1]);
+				carid.add(tableName);
+			}
+		} catch (SQLException e) {
+			System.out.println("获取路线表名出错！");
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+		}
+
+		return carid;
+	}
+	
 	/**
 	 * 将排班的信息添加至数据库 
 	 * @param ar
 	 * @param date
 	 * @return
 	 */
-	public ArrayList arrangement(List<Arrange> ar,Date date){
-		ArrayList ag=new ArrayList();
-		ArrayList driver=drivers();  //从数据库获取司机的列表
-       ArrayList car=cars();//从数据库获取车辆信息
+	public List<Arrangement> arrangement(List<Arrange> ar,Date date){
+		List<Arrangement> ag=new ArrayList<>();
+		List<Emlopee> driver=drivers();  //从数据库获取司机的列表
+		List<Car_inf> car=cars(getCarbyRoute());//从数据库获取车辆信息
        for(int j=0;j<ar.size();j++){
 			Arrangement agm=new Arrangement();
 			Arrange c=(Arrange)ar.get(j);
@@ -275,8 +302,8 @@ public class Arrangementdao {
 	  * @param date
 	  * @return
 	  */
-	 public ArrayList is_date(Date date){
-		 ArrayList ar=new ArrayList();
+	 public List<Arrangement> is_date(Date date){
+		 List<Arrangement> ar=new ArrayList<>();
 		 String proc="{call is_date(?)}";
 			try{
 				conn =JdbcUtil.getConnection();
@@ -304,7 +331,11 @@ public class Arrangementdao {
 		 return ar;
 	 }
 	 
-	 
+	 /**
+	  * 将日期往后加一天
+	  * @param date
+	  * @return date
+	  */
 	 public java.util.Date dates(java.util.Date date){
 		 Calendar   calendar   =   new   GregorianCalendar(); 
 	     calendar.setTime(date); 
@@ -313,8 +344,30 @@ public class Arrangementdao {
 		 return date;
 	 }
 	 
-	 public ArrayList get_arr(Date date,int drivers,int circulation){
-		 ArrayList a2=new ArrayList();
+	/**
+	 * 获得所需要的排班信息     
+	 * @param date  必须是星期一
+	 * @param drivers
+	 * @param circulation
+	 * @return
+	 */
+	 public List<Arrangements> get_arr(Date date,int drivers,int circulation){
+		 List<Arrangements> a2=new ArrayList<>();
+		 List<Arrangement> al=is_date(date);//是否排过班
+		 if(al.isEmpty()== false){
+			 for(int i=0;i<7;i++){
+				 Arrangements a1=new Arrangements();
+				 if(i!=0){
+					 java.util.Date utildate=dates(date);   
+					  date   = new java.sql.Date (utildate.getTime());   
+				     }
+	         a1.setMon(mou[i]);
+	         a1.setDate((java.sql.Date) date);
+			 a1.setAg(al);	
+			 a2.add(a1);
+			 } 
+		 }
+		 else{
 		 for(int i=0;i<7;i++){
 			 Arrangements a1=new Arrangements();
 			if(i!=0){
@@ -323,22 +376,14 @@ public class Arrangementdao {
 			}
          a1.setMon(mou[i]);
          a1.setDate((java.sql.Date) date);
-         ArrayList al=is_date(date);//是否排过班
-		if(al.isEmpty()){
+         //ArrayList al=is_date(date);//是否排过班
 		long days=getQuot(date.toString(),"2016-1-1");
 		List<Arrange> ar=arrange(days, drivers, circulation);//获取排班相关信息   
-		if(ar.isEmpty() == false){
-			ArrayList ag=arrangement(ar,date);
+		List<Arrangement> ag=arrangement(ar,date);
 			a1.setAg(ag);
-		}	
-	   }
-		else{
-			a1.setAg(al);
-		}
 		a2.add(a1);
-		 
-		 
 	 }
+		 }
 	 return a2;
 	 }
 }

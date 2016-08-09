@@ -61,21 +61,18 @@ public class ArrangementController {
 	 * @return
 	 */
 	@RequestMapping(value ="/api/arrange", method = RequestMethod.GET)
-	public ResponseEntity<ArrayList> getarrangement(
+	public ResponseEntity <List<Arrangements>> getarrangement(
 			@RequestParam(value = "drivers",defaultValue="7") int drivers,
 			@RequestParam(value = "circulation", defaultValue="7") int circulation,
 			@RequestParam(value = "date", required = false) java.sql.Date date) 
 	{
-		
-		ArrayList a2=new ArrayList();
+		List<Arrangements> a2=new ArrayList<>();
 		if(drivers<=0||circulation<=0||date==null){
-			 return new ResponseEntity<ArrayList>(HttpStatus.NO_CONTENT);
+			 return new ResponseEntity <List<Arrangements>>(HttpStatus.NO_CONTENT);
 		}
 		else{
 			a2=ad.get_arr(date, drivers, circulation);
 			}
-			return  new ResponseEntity<ArrayList>(a2,HttpStatus.OK);
+			return  new ResponseEntity <List<Arrangements>>(a2,HttpStatus.OK);
 		}
-		
-	
 }
