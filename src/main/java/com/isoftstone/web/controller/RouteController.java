@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.isoftstone.web.dao.Car_dao;
 import com.isoftstone.web.dao.RouteDao;
 import com.isoftstone.web.pojo.Car_inf;
+import com.isoftstone.web.pojo.EmpRoute;
 import com.isoftstone.web.pojo.Route;
 import com.isoftstone.web.pojo.RouteFitRate;
 import com.isoftstone.web.pojo.RoutePlan;
@@ -211,4 +212,22 @@ public class RouteController {
 		// 如果出现异常，将状态码设为 internal server error(寻找更好的解决方案中……)
 		return new ResponseEntity<RouteFitRate>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+	
+	/**
+	 * 根据员工id查询相关的站点路线信息
+	 * @param empId
+	 * @return
+	 */
+	@RequestMapping(value = "/api/route/employee/{empId}", method = RequestMethod.GET)
+	public ResponseEntity<EmpRoute> getRouteFitRate(@PathVariable("empId") int empId) {
+		
+		EmpRoute empRoute = routeDao.getRouteByEmpId(empId);
+		if (empRoute != null) {
+			return new ResponseEntity<EmpRoute>(empRoute, HttpStatus.OK);
+		}
+		
+		// 如果出现异常，将状态码设为 internal server error(寻找更好的解决方案中……)
+		return new ResponseEntity<EmpRoute>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
 }

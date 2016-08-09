@@ -11,6 +11,7 @@ import java.util.List;
 import com.isoftstone.web.algorithm.Cal;
 import com.isoftstone.web.algorithm.Plan;
 import com.isoftstone.web.pojo.Car_inf;
+import com.isoftstone.web.pojo.EmpRoute;
 import com.isoftstone.web.pojo.Route;
 import com.isoftstone.web.pojo.RouteCar;
 import com.isoftstone.web.pojo.RouteFitRate;
@@ -958,6 +959,80 @@ public class RouteDao {
 		routeFitRate.setFitRate(fitRate);
 		
 		return routeFitRate;
+	}
+	
+	/**
+	 * 根据员工id查询对应上车站点的id
+	 * @param empId
+	 * @return
+	 */
+	public int getStationIdByEmpId(int empId) {
+		int staId = 0;
+		
+		String strSql = "SELECT s_id FROM employee_station_copy WHERE e_id=?";
+
+		try {
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(strSql);
+			stmt.setInt(1, empId);
+			result = stmt.executeQuery();
+			if(result.next()) {
+				staId = result.getInt("s_id");
+			}
+		} catch (SQLException e) {
+			System.out.println("通过员工id查询站点出错！");
+			return -1;
+		} finally {
+			JdbcUtil.close(result, stmt, conn);
+		}
+		
+		return staId;
+	}
+	
+	/**
+	 * 根据员工id查询与员工相关的站点路线信息
+	 * @param empId
+	 * @return
+	 */
+	public EmpRoute getRouteByEmpId(int empId) {
+
+		EmpRoute empRoute = new EmpRoute();
+		
+		/**
+		 * 根据员工id获取上车站点id
+		 */
+		int staId = getStationIdByEmpId(empId);
+		if (-1 == staId) {
+			return null;
+		} else if (0 == staId) {
+			return empRoute;
+		}
+		
+		/**
+		 * 根据站点id反查路线
+		 * 由于路线规划时，没有出现多条路线经过同一站点的情况，所以默认只会查询到一条路线
+		 */
+		List<Route> routeList = findByStaId(staId);
+		Route route = routeList.get(0);
+		
+		/**
+		 * 查询路线中员工上车的那个站点
+		 */
+		RouteStation empStation = null;
+		List<RouteStation> routeStationList = route.getStations();
+		for (RouteStation routeStation : routeStationList) {
+			if (staId == routeStation.getS_id()) {
+				empStation = routeStation;
+			}
+		}
+		
+		/**
+		 * 构建用户相关的站点路线信息对象
+		 */
+		empRoute.setRoute(route);
+		empRoute.setStation(empStation);
+		
+		return empRoute;
 	}
 
 }
