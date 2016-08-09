@@ -250,6 +250,8 @@ public class StationController {
 		}
 		
 		if(staDao.deleteSta(id)) {
+			EmpMStaDao emsDao=new EmpMStaDao();
+			emsDao.updateEMSForSid(id);
 			System.out.println("OK");
 			return new ResponseEntity<Station>(HttpStatus.OK);
 		}

@@ -300,6 +300,42 @@ public class ExcelController {
 			e.printStackTrace();
 		}
 	}
+	
+	/***
+	 * 给定日期和站点id获取这一天各站点的人员乘坐信息
+	 * 
+	 * @param day,sid
+	 * 		给定的日期,站点id
+	 * @return 这一天在该站点上车的人员名单
+	 */
+	@RequestMapping(value = "/api/Excel/nameSta", method = RequestMethod.GET)
+	public ResponseEntity<List<String>> getStaNameList(@RequestParam("day") String day,
+			@RequestParam(value = "sid", required = false) int sid, HttpServletRequest request,
+			HttpServletResponse response) {
+		List<String> nameList=etDao.getNameList(day, sid);
+		if (nameList.isEmpty()) {
+			return new ResponseEntity<List<String>>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<List<String>>(nameList, HttpStatus.OK);
+	}
+	
+	/***
+	 * 给定日期和路线id获取这一天各站点的人员乘坐信息
+	 * 
+	 * @param day,rid
+	 * 		给定的日期,路线id
+	 * @return 这一天该路线的人员名单
+	 */
+	@RequestMapping(value = "/api/Excel/nameRoute", method = RequestMethod.GET)
+	public ResponseEntity<List<String>> getRouteNameList(@RequestParam("day") String day,
+			@RequestParam(value = "rid", required = false) int rid, HttpServletRequest request,
+			HttpServletResponse response) {
+		List<String> nameList=etDao.getNameRoute(day, rid);
+		if (nameList.isEmpty()) {
+			return new ResponseEntity<List<String>>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<List<String>>(nameList, HttpStatus.OK);
+	}
 }
 
 

@@ -251,6 +251,35 @@ public class EmpMStaDao {
 	}
 	
 	/***
+	 * 将员工表里原来是这个站点的都去掉
+	 * 
+	 * @param s_id
+	 *            站点id
+	 * @return 是否修改成功
+	 */
+	public boolean updateEMSForSid(int s_id) {
+		String sql = "update  employee_station_copy set s_id=null where s_id=?";
+
+		try {
+			conn = JdbcUtil.getConnection();
+			stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, s_id);
+			int counter = stmt.executeUpdate();
+			if (1 == counter) {
+				JdbcUtil.close(null, stmt, conn);
+				return true;
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			JdbcUtil.close(null, stmt, conn);
+		}
+
+		return false;
+	}
+	
+	/***
 	 * 找到虽有匹配站点但没有员工信息的记录
 	 * 
 	 * @return 这类员工信息集
