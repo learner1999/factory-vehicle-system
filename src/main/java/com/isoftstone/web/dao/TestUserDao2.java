@@ -59,6 +59,47 @@ public class TestUserDao2 {
 		return userList;
 	}
 
+	/***
+	 * 查找所有总务部和行政部(已经创建账号)人员
+	 * 传入参数0(全部员工)或1(总务部)或者2(行政部)
+	 * @return 所有用户构成的 list
+	 */
+	public List<Emlopee> findEmpBypart(int part) {
+		// 创建数据库连接时需要的对象
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		ResultSet result = null;
+		// 创建一个 List 用于存放 User 对象
+		List<Emlopee> userList = new ArrayList<>();
+		// 数据库查询语句
+		String prco = "call selectempBypart(?)";
+		String p;
+		try {
+			conn = JdbcUtil.getConnection();
+			cs = (CallableStatement) conn.prepareCall(prco); // 这个地方用了
+	   									// prepareStatement，主要目的是防止
+			 cs.setInt(1, part);
+			result =cs.executeQuery();
+			while (result.next()) {
+				Emlopee user = new Emlopee();
+				user.setEid(result.getInt("EId"));
+				user.setEname(result.getString("EName"));
+				user.setEpart(result.getString("EPart"));
+				user.setEgroup(result.getInt("EGroup"));
+				user.setEtime(result.getInt("ETime"));
+				userList.add(user);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			JdbcUtil.close(result, stmt, conn); // 在最后记得关闭数据库连接
+			JdbcUtil.closecs(cs);
+		}
+
+		return userList;
+	}
+
+	
 	/**
 	 * 判断该账号是否存在
 	 * @param username

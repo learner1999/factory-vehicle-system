@@ -17,6 +17,7 @@ public class EmlopeeDao {
 	private Connection conn = null;
 	private PreparedStatement stmt = null;
 	private ResultSet result = null;
+	private ResultSet result1 = null;
 	CallableStatement cs = null;
 	
 	
@@ -50,17 +51,23 @@ public class EmlopeeDao {
  */
 	public List getemp_inf(int id)
 	{
+		CallableStatement cs1 = null;
 		List<Emlopee> emp = new ArrayList<>();
 		String proc="{call selectByeid(?)}";
+		String proc1="{call selectPartByeid(?)}";
 		try {
 			conn = JdbcUtil.getConnection();
 			cs = (CallableStatement) conn.prepareCall(proc);
 			cs.setInt(1, id);
 			result= cs.executeQuery();
-			while (result.next()) {
+			cs1=(CallableStatement) conn.prepareCall(proc1);
+			cs1.setInt(1, id);
+			result1=cs1.executeQuery();
+			while (result.next() && result1.next()) {
 				Emlopee em= new Emlopee();
 				em.setStation(result.getString(1));
 				em.setAddress(result.getString(2));
+				em.setEpart(result1.getString(1));
 				emp.add(em);
 			}
 		} catch (SQLException e) {

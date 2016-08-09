@@ -17,7 +17,7 @@ import com.isoftstone.web.pojo.TestUser2;
 public class NewUser_Controller {
 	private TestUserDao2 userDao = new TestUserDao2();
 	/**
-	 * 传入参数0(全部员工)或1(总务部)或者2(行政部),返回员工信息
+	 * 传入参数0(全部员工)或1(总务部)或者2(行政部),返回未创建员工信息
 	 * @param part
 	 * @return
 	 */
@@ -26,6 +26,24 @@ public class NewUser_Controller {
 	{
 		System.out.print("查询"+part+"部门的员工信息");
 		List<Emlopee> useridList=userDao.findUsersidBypart(part);
+		if(useridList.isEmpty()) {//结果为空
+			System.out.print("查询失败");
+			return new ResponseEntity<List<Emlopee>>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<List<Emlopee>>(useridList, HttpStatus.OK);
+}
+	
+	
+	/**
+	 * 传入参数0(普通)或1(总务部)或者2(行政部),返回已创建员工信息
+	 * @param part
+	 * @return
+	 */
+	@RequestMapping(value = "/api/Newuser/{part}", method = RequestMethod.GET)
+	public ResponseEntity<List<Emlopee>> getempBypart(@PathVariable("part") int part) 
+	{
+		System.out.print("查询"+part+"部门的员工信息");
+		List<Emlopee> useridList=userDao.findEmpBypart(part);
 		if(useridList.isEmpty()) {//结果为空
 			System.out.print("查询失败");
 			return new ResponseEntity<List<Emlopee>>(HttpStatus.NO_CONTENT);
@@ -94,10 +112,11 @@ public class NewUser_Controller {
 	 * @param id
 	 * @return
 	 */
-		@RequestMapping(value = "/api/newuser/{username}", method = RequestMethod.DELETE)
-		public ResponseEntity<TestUser2> deleteUser(@PathVariable("username") String username) {
-			System.out.println("删除一个用户名=" + username);
+		@RequestMapping(value = "/api/newuser/{eid}", method = RequestMethod.DELETE)
+		public ResponseEntity<TestUser2> deleteUser(@PathVariable("eid") int eid) {
+			System.out.println("删除一个用户名=" + eid);
 			// 检测对应 id 用户是否存在，不存在将状态码设为 NOT_FOUND
+			String username=String.valueOf(eid);
 			if(userDao.findByusername(username)) {
 				System.out.println("找不到 用户名=" +username+" 的用户");
 				return new ResponseEntity<TestUser2>(HttpStatus.NOT_FOUND);
