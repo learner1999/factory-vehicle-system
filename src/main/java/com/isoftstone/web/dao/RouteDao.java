@@ -76,7 +76,9 @@ public class RouteDao {
 
 		// 设置乘坐人数及乘坐率
 		route.setNumOfEmp(numOfEmp);
-		route.setRateOfTake(numOfEmp * 1.0 / carInf.getSeat());
+		double rateOfTake = numOfEmp * 1.0 / carInf.getSeat();
+		rateOfTake = Double.parseDouble(String.format("%.4f", rateOfTake));
+		route.setRateOfTake(rateOfTake);
 		
 		return route;
 	}
