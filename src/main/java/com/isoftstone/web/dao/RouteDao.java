@@ -758,6 +758,9 @@ public class RouteDao {
 				List<RouteStation> staList = new ArrayList<>();
 				route.setStations(staList);
 				
+				// 站点列表首位中插入公司
+				staList.add(new RouteStation(staDao.getStaById(1)));
+				
 				// 遍历每一个站点，生成对应站点信息
 				for (int k = 0; k < staIds.length; k++) {
 					Station sta = staDao.getStaById(staIds[k]);

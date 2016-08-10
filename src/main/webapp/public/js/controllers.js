@@ -165,6 +165,7 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 
 			//添加站点marker
 			addMarker();
+			$('#is-OK1').openModal();
 		}).error(function(){
 			console.log('从后台获得站点数据失败');
 		});
@@ -891,6 +892,7 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 
 		$http.get(url).success(function(data){
 			$scope.staffList = data;
+			$('#match').openModal();
 		}).error(function(){
 			console.log('获取全部员工信息出错');
 		});
@@ -1506,6 +1508,8 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 	$scope.inteMapRoute = [];
 	$scope.inteOneRoute;
 
+	$scope.fitrate;		//保存路线的合适率
+
 	//页面加载完成执行的函数
 	$scope.$watch('$viewContentLoaded',function(){
 		initMap('map-routes');
@@ -1534,6 +1538,11 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 		showStations();
 		//获取路线信息
 		getRoutes();
+	}
+
+	$scope.setToRealRoutes = function(plan){
+		$scope.routes = plan;
+		$scope.showLevel01();
 	}
 
 	/**
@@ -1581,6 +1590,19 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 		});
 	};
 
+	var getRoutesRate = function(){
+		var url = '/factory_vehicle/api/route/fitrate';
+
+		$http.get(url).success(function(data){
+			$scope.fitrate = data;
+			$('#success-fitrate').openModal();
+			getIntelligent();
+			console.log('获取路线合适率成功');
+		}).error(function(){
+			console.log('获取路线合适率失败');
+		})
+	};
+
 	var getRoutes = function(){
 		var url = '/factory_vehicle/api/route';
 
@@ -1592,7 +1614,8 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 				$scope.paths.push(path);
 			}
 			showRoutes();
-			getIntelligent();
+			// getIntelligent();
+			getRoutesRate();
 		}).error(function(){
 			console.log('获取全部路线信息出错');
 		})
@@ -1640,7 +1663,7 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 				driving.setPolylinesSetCallback(function(routes){
 					for(var k=0;k<routes.length;k++){
 						routes[k].getPolyline().setStrokeColor(pathColors[num]);
-						routes[k].getPolyline().setStrokeOpacity(0.7);
+						routes[k].getPolyline().setStrokeOpacity(0.75);
 					}
 					num++;
 				});
@@ -1662,7 +1685,7 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 			driving.setPolylinesSetCallback(function(routes){
 				for(var k=0;k<routes.length;k++){
 					routes[k].getPolyline().setStrokeColor('#153F98');
-					routes[k].getPolyline().setStrokeOpacity(0.75);
+					routes[k].getPolyline().setStrokeOpacity(0.7);
 				}
 			});
 			$scope.inteMapRoute.push(driving);		
@@ -2010,7 +2033,15 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 	 */
 	$scope.showLevel01 = function(){
 		hideLevel();
-		$('#panel-level01').show("normal");
+		$('#panel-level01').show("normal");	
+
+		if($scope.inteMapRoute.length != 0){
+			for(var i=0;i<$scope.inteMapRoute.length;i++){
+				$scope.inteMapRoute[i].clearResults();
+			}
+			$scope.inteMapRoute = [];
+		}
+
 		showRoutes();
 	};
 

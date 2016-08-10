@@ -201,7 +201,7 @@
 			<li>
 				<div class="collapsible-header" ng-click="showIntelligentOnMap(intelligentRoutes[0].routes)">
 					<a href="javascript:void(0)">
-						平均路程最短的路线方案
+						平均路程最短的路线方案&nbsp&nbsp&nbsp&nbsp&nbsp<strong ng-click="setToRealRoutes(intelligentRoutes[0])">设置为路线</strong>
 					</a>
 				</div>
 				<div class="collapsible-body">
@@ -213,7 +213,7 @@
 			<li>
 				<div class="collapsible-header" ng-click="showIntelligentOnMap(intelligentRoutes[1].routes)">
 					<a href="javascript:void(0)">
-						路程方差最小的路线方案
+						路程方差最小的路线方案&nbsp&nbsp&nbsp&nbsp&nbsp<strong ng-click="setToRealRoutes(intelligentRoutes[1])">设置为路线</strong>
 					</a>
 				</div>
 				<div class="collapsible-body">
@@ -225,7 +225,8 @@
 			<li>
 				<div class="collapsible-header" ng-click="showIntelligentOnMap(intelligentRoutes[2].routes)">
 					<a href="javascript:void(0)">
-						车辆乘坐率最高的路线方案
+						车辆乘坐率最高的路线方案&nbsp&nbsp&nbsp&nbsp&nbsp<strong 
+						ng-click="setToRealRoutes(intelligentRoutes[2])">设置为路线</strong>
 					</a>
 				</div>
 				<div class="collapsible-body">
@@ -425,6 +426,15 @@
 	</div>
 	<div class="modal-footer">
 		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">确认</a>
+	</div>
+</div>
+
+<div id="success-fitrate" class="modal" style="width:220px;">
+	<div class="modal-content">
+		<p>当前路线信息：</p>
+		<p>未经过的站点数为:<strong ng-bind="fitrate.numOfNotPass"></strong></p>
+		<p>超载的车辆数为:<strong ng-bind="fitrate.numOfOverload"></strong></p>
+		<p>路线的合适率为:<strong ng-bind="fitrate.fitRate*100+'%'"></strong></p>
 	</div>
 </div>
 
