@@ -212,7 +212,7 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 			$scope.markers.push(marker);
 
 			//给marker添加事件
-			addEvent(marker,$scope.stations[i].name);
+			addEvent(marker,'站点<br>'+$scope.stations[i].name);
 			//给marker添加右键菜单
 			addMarkerMenu(marker,$scope.stations[i].id);
 		}
@@ -224,14 +224,14 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 	var addStopMarker = function(){
 		var point = null;
 		var icon = new BMap.Icon('./images/sta6.png', new BMap.Size(12, 22));
-		for(var i=0;i<200;i++){
+		for(var i=0;i<$scope.altermativeStations.length;i++){
 			point = new BMap.Point($scope.altermativeStations[i].x, $scope.altermativeStations[i].y);
 			var marker = new BMap.Marker(point, {icon: icon});
 			$scope.map.addOverlay(marker);
 
 			$scope.stopMarkers.push(marker);
 
-			addEvent(marker,$scope.altermativeStations[i].name);
+			addEvent(marker,'停车点<br>'+$scope.altermativeStations[i].name);
 		}
 	}
 
@@ -571,8 +571,58 @@ factoryVehicle.controller('adminManager',function($scope,$http){
 	};
 
 	$scope.deleteStopSta = function(){
+		for(var i=0;i<$scope.altermativeStations.length;i++){
+			if($scope.altermativeStations[i].s_id == $scope.stopStationInfo.s_id ){
+				$scope.altermativeStations.splice(i, 1);
+				$scope.map.removeOverlay($scope.stopMarkers[i]);
 
+				break;	
+			}
+		}
+
+		if(document.getElementById('panel-level05').style.display != 'none'){
+			$scope.showLevel01();
+		}else if(document.getElementById('panel-level06').style.display != 'none'){
+			$scope.showLevel02();
+		}
 	};
+
+	$scope.setStopToStation = function(){
+		var url = '/factory_vehicle/api/PointChange/'+$scope.stopStationInfo.s_id;
+
+		$http({
+			method: 'PUT',
+			url: url,
+			data: {
+				id: $scope.stopStationInfo.s_id
+			}
+		}).success(function(){
+
+		}).error(function(){
+
+		});
+
+		for(var i=0;i<$scope.altermativeStations.length;i++){
+			if($scope.altermativeStations[i].s_id == $scope.stopStationInfo.s_id ){
+				$scope.altermativeStations.splice(i, 1);
+				$scope.map.removeOverlay($scope.stopMarkers[i]);
+
+				var stop = $scope.stopStationInfo;
+				var point = new BMap.Point(stop.longitude, stop.latitude);
+				var marker = new BMap.Marker(point);
+
+				addEvent(marker, '站点<br>'+stop.s_name);
+
+				break;	
+			}
+		}
+
+		if(document.getElementById('panel-level05').style.display != 'none'){
+			$scope.showLevel01();
+		}else if(document.getElementById('panel-level06').style.display != 'none'){
+			$scope.showLevel02();
+		}
+	}
 
 
 	/**
@@ -679,6 +729,7 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 	$scope.chosenStaff;		//被选中查看的员工
 	$scope.chosenStaffMarker;	//被选中员工的标志
 	$scope.staffGoSta			//员工到站点路线
+	$scope.changeSID;
 	
 	//页面加载完成执行的函数
 	$scope.$watch('$viewContentLoaded',function(){
@@ -805,6 +856,15 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 				ems: $scope.chosenStaff.s_id
 			}
 		}).success(function(){
+			$('#success-change-sta').openModal();
+			for(var i=0;i<$scope.stations.length;i++){
+				if($scope.stations[i].s_id == chosenStaff.s_id){
+					chosenStaff.s_name = $scope.stations[i].s_name;
+					break;
+				}
+			}
+
+			showEmployeeOnMap();
 			console.log('员工站点修改成功！');
 		}).error(function(){
 			console.log('员工站点修改失败！');
@@ -851,7 +911,7 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 
 	/**
 	 * 展示选中的员工和对应的站点
-	 */
+	*/ 
 	$scope.showEmployeeSta = function(staff){
 		$scope.chosenStaff = staff;
 		// console.log($scope.chosenStaff);
@@ -889,6 +949,38 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 		$scope.staffGoSta = new BMap.WalkingRoute($scope.map, {renderOptions:{map: $scope.map, autoViewport: true}});
 		$scope.staffGoSta.search(ePoint,sPoint);
 	};
+
+
+	$scope.searchNear = function(){
+		var url = '/factory_vehicle/api/EmpMatchSta/Near';
+
+		$http({
+			method: 'PUT',
+			url: url,
+			data: $scope.chosenStaff
+		}).success(function(data){
+			var points = [];
+
+			for(var i=0;i<data.length;i++){
+				for(var j=0;j<$scope.stations.length;j++){
+					if($scope.stations[j].s_id == data[i].s_id){
+						$scope.staMarkers[j].setAnimation(BMAP_ANIMATION_BOUNCE);
+						break;
+					}
+				}
+				var point = new BMap.Point(data[i].longitude, data[i].latitude);
+				points.push(point);
+			}
+
+			$scope.map.setViewport(points);
+
+			console.log(data);
+		}).error(function(){
+			console.log('获取附近站点失败');
+		});
+
+
+	}
 
 	/**
 	 * 隐藏所有Level
@@ -1259,6 +1351,7 @@ factoryVehicle.controller('affairsBusManager',function($scope,$http){
 			url: url,
 			method: 'DELETE'
 		}).success(function(){
+			$('#success-delete').openModal();
 			console.log('车辆删除成功');
 		}).error(function(){
 			console.log('车辆删除失败');
@@ -1285,6 +1378,7 @@ factoryVehicle.controller('affairsBusManager',function($scope,$http){
 		}).success(function(){
 			console.log('新增车辆成功');
 			getBusInfo();		//重新获取车辆数据
+			$('#success-add').openModal();
 		}).error(function(){
 			console.log('新增车辆失败');
 		})
@@ -1331,6 +1425,7 @@ factoryVehicle.controller('affairsBusManager',function($scope,$http){
 				'd_license': $scope.updateBusInfo.d_license
 			}
 		}).success(function(){
+			$('#success-update').openModal();
 			console.log('修改成功');
 		}).error(function(){
 			console.log('修改失败');
@@ -1407,6 +1502,10 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 	};	//保存修改的路线信息
 	$scope.theDrivingRoutes = [];	//保存地图上的驾驶路线
 
+	$scope.intelligentRoutes = [];	//保存路线只能规划结果
+	$scope.inteMapRoute = [];
+	$scope.inteOneRoute;
+
 	//页面加载完成执行的函数
 	$scope.$watch('$viewContentLoaded',function(){
 		initMap('map-routes');
@@ -1472,8 +1571,7 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 			//addMarkerMenu(marker,$scope.stations[i].id);
 		}
 
-		// var paths = [path1,path2,path3];
-		// showRoutes(paths);
+		// getIntelligent();
 	};
 
 	var addEvent = function(marker,name){
@@ -1494,9 +1592,81 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 				$scope.paths.push(path);
 			}
 			showRoutes();
+			getIntelligent();
 		}).error(function(){
 			console.log('获取全部路线信息出错');
 		})
+	};
+
+	var getIntelligent = function(){
+		var url = '/factory_vehicle/api/route/plan';
+
+		$http.get(url).success(function(data){
+			$scope.intelligentRoutes = data;
+			console.log('成功');
+		}).error(function(){
+			console.log('路线智能规划失败');
+		});
+	};
+
+	$scope.showIntelligentOnMap = function(routes){
+		// if(document.getElementById('panel-level07').style.display != 'none'){
+		// 	$scope.showLevel08();
+		// }
+
+		if($scope.inteMapRoute.length != 0){
+			for(var i=0;i<$scope.inteMapRoute.length;i++){
+				$scope.inteMapRoute[i].clearResults();
+			}
+			$scope.inteMapRoute = [];
+		}
+
+		var route;
+		var start,end;
+		if(routes instanceof Array){
+			var num = 0;
+			for(var i=0;i<routes.length;i++){
+				var route = routes[i];
+
+				start = new BMap.Point(route.stations[0].longitude,route.stations[0].latitude);
+				end = new BMap.Point(route.stations[route.stations.length-1].longitude,route.stations[route.stations.length-1].latitude);
+				var waypoints = [];
+				for(var j=1;j<route.stations.length-1;j++){
+					var point = new BMap.Point(route.stations[j].longitude,route.stations[j].latitude);
+					waypoints.push(point);
+				}
+				var driving = new BMap.DrivingRoute($scope.map, {renderOptions: {map: $scope.map, autoViewport:false}, policy: BMAP_DRIVING_POLICY_LEAST_DISTANCE});
+				driving.search(start,end,{waypoints: waypoints});
+				driving.setPolylinesSetCallback(function(routes){
+					for(var k=0;k<routes.length;k++){
+						routes[k].getPolyline().setStrokeColor(pathColors[num]);
+						routes[k].getPolyline().setStrokeOpacity(0.7);
+					}
+					num++;
+				});
+				$scope.inteMapRoute.push(driving);
+
+			}
+		}else{
+			$scope.inteOneRoute = routes;
+			$scope.showLevel08();
+			start = new BMap.Point(routes.stations[0].longitude,routes.stations[0].latitude);
+			end = new BMap.Point(routes.stations[routes.stations.length-1].longitude,routes.stations[routes.stations.length-1].latitude);
+			var waypoints = [];
+			for(var i=1;i<routes.stations.length-1;i++){
+				var point = new BMap.Point(routes.stations[i].longitude,routes.stations[i].latitude);
+				waypoints.push(point);
+			}
+			var driving = new BMap.DrivingRoute($scope.map, {renderOptions: {map: $scope.map, autoViewport:true}, policy: BMAP_DRIVING_POLICY_LEAST_DISTANCE});
+			driving.search(start,end,{waypoints: waypoints});
+			driving.setPolylinesSetCallback(function(routes){
+				for(var k=0;k<routes.length;k++){
+					routes[k].getPolyline().setStrokeColor('#153F98');
+					routes[k].getPolyline().setStrokeOpacity(0.75);
+				}
+			});
+			$scope.inteMapRoute.push(driving);		
+		}
 	};
 
 	var showRoutes = function(){
@@ -1508,7 +1678,7 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 			var l = $scope.paths[i].length;
 			start = new BMap.Point($scope.paths[i][0].longitude,$scope.paths[i][0].latitude);
 			end = new BMap.Point($scope.paths[i][l-1].longitude,$scope.paths[i][l-1].latitude);
-			var droute = new BMap.DrivingRoute($scope.map,{renderOptions:{map:$scope.map}});
+			var droute = new BMap.DrivingRoute($scope.map,{renderOptions:{map:$scope.map, autoViewport: false}, policy: BMAP_DRIVING_POLICY_LEAST_DISTANCE});
 			var waypoints = [];
 			for(var j=1;j<$scope.paths[i].length-1;j++){
 				var point = new BMap.Point($scope.paths[i][j].longitude,$scope.paths[i][j].latitude);
@@ -1563,16 +1733,14 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 	var showOneRouteOnMap = function(index){
 		clearMapRoutes();
 		var l = $scope.paths[index].length;
-		for(var i=0;i<l;i++){
-			var start = new BMap.Point($scope.paths[index][0].longitude,$scope.paths[index][0].latitude);
-			var end = new BMap.Point($scope.paths[index][l-1].longitude,$scope.paths[index][l-1].latitude);
-			var waypoints = [];
-			for(var j=1;j<l-1;j++){
-				var point = new BMap.Point($scope.paths[index][j].longitude,$scope.paths[index][j].latitude);
-				waypoints.push(point);
-			}
+		var start = new BMap.Point($scope.paths[index][0].longitude,$scope.paths[index][0].latitude);
+		var end = new BMap.Point($scope.paths[index][l-1].longitude,$scope.paths[index][l-1].latitude);
+		var waypoints = [];
+		for(var j=1;j<l-1;j++){
+			var point = new BMap.Point($scope.paths[index][j].longitude,$scope.paths[index][j].latitude);
+			waypoints.push(point);
 		}
-		var driving = new BMap.DrivingRoute($scope.map, {renderOptions: {map: $scope.map}});
+		var driving = new BMap.DrivingRoute($scope.map, {renderOptions: {map: $scope.map,autoViewport:true}, policy: BMAP_DRIVING_POLICY_LEAST_DISTANCE});
 		driving.search(start, end, {waypoints: waypoints});
 		driving.setPolylinesSetCallback(function(routes){
 			for(var k=0;k<routes.length;k++){
@@ -1621,7 +1789,7 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 			var l = $scope.searchPaths[i].length;
 			start = new BMap.Point($scope.searchPaths[i][0].longitude,$scope.searchPaths[i][0].latitude);
 			end = new BMap.Point($scope.searchPaths[i][l-1].longitude,$scope.searchPaths[i][l-1].latitude);
-			var droute = new BMap.DrivingRoute($scope.map,{renderOptions:{map:$scope.map}});
+			var droute = new BMap.DrivingRoute($scope.map,{renderOptions:{map:$scope.map, autoViewport:false}, policy: BMAP_DRIVING_POLICY_LEAST_DISTANCE});
 			var waypoints = [];
 			for(var j=1;j<$scope.searchPaths[i].length-1;j++){
 				var point = new BMap.Point($scope.searchPaths[i][j].longitude,$scope.searchPaths[i][j].latitude);
@@ -1679,7 +1847,7 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 				waypoints.push(point);
 			}
 		}
-		var driving = new BMap.DrivingRoute($scope.map, {renderOptions: {map: $scope.map}});
+		var driving = new BMap.DrivingRoute($scope.map, {renderOptions: {map: $scope.map, autoViewport: true}, policy: BMAP_DRIVING_POLICY_LEAST_DISTANCE});
 		driving.search(start, end, {waypoints: waypoints});
 		driving.setPolylinesSetCallback(function(routes){
 			for(var k=0;k<routes.length;k++){
@@ -1891,14 +2059,25 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 		hideLevel();
 		$('#panel-level06').show("normal");
 	};
+
+	$scope.showLevel07 = function(){
+		hideLevel();
+		$('#panel-level07').show("normal");
+		clearMapRoutes();
+	};
+
+	$scope.showLevel08 = function(){
+		hideLevel();
+		$('#panel-level08').show("normal");
+	};
 });
 
 
 factoryVehicle.controller('affairsSchedualManager',function($scope,$http){
 	var month = ['','一月,','二月,','三月,','四月,','五月,','六月,','七月,','八月,','九月,','十月,','十一月,','十二月,']	
 	var date = '';			//保存格式化后的查询时间
-	$scope.date = '';		//保存要查询的时间
-	$scope.week = '';		//保存当前查询的周
+	$scope.date = '2016-08-08';		//保存要查询的时间
+	$scope.week = '2016-8-8~2016-8-14';		//保存当前查询的周
 	$scope.showTime = [];
 	$scope.mon;
 	$scope.tue;
@@ -1910,7 +2089,12 @@ factoryVehicle.controller('affairsSchedualManager',function($scope,$http){
 
 	//页面加载完成执行的函数
 	$scope.$watch('$viewContentLoaded',function(){
+		getArrange('2016-08-08');
 	});
+
+	$scope.lastWeek = function(){
+		getArrange('2016-08-08');
+	}
 
 	/*
 	获取用户要查询的日期
@@ -1988,7 +2172,7 @@ factoryVehicle.controller('affairsSchedualManager',function($scope,$http){
 
 		}).error(function(){
 			console.log('获取排班信息出错');
-		})
+		});
 	}
 
 });

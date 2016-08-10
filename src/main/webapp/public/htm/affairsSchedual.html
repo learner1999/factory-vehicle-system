@@ -2,14 +2,14 @@
 	<div class="heading">
 		<p>当前周(<strong ng-bind="week"></strong>)排班表</p>
 		<div class="date-chose">
-			<div class="last-week week-btn" style="margin-right:-3px;">
+			<div class="last-week week-btn tooltipped" style="margin-right:-3px;" ng-click="lastWeek()" data-position="top" data-delay="50" data-tooltip="上一周">
 				<i class="material-icons md-dark center">keyboard_arrow_left</i>
 			</div>
 			<div class="now-week week-btn datepicker" ng-click="getDate()">
 				<input type="date" class="datepicker" ng-model="date" value="2016-08-02">
 				<i class="material-icons">event_note</i>
 			</div>
-			<div class="next-week week-btn">
+			<div class="next-week week-btn tooltipped" data-position="top" data-delay="50" data-tooltip="后一周">
 				<i class="material-icons center">keyboard_arrow_right</i>
 			</div>
 		</div>
@@ -71,5 +71,6 @@
 			selectMonths: true,
 			selectYears: 15
 		});
+		$('.tooltipped').tooltip({delay: 50});
 	});
 </script>

@@ -9,11 +9,11 @@
 	</div>
 
 	<div id="panel-level01" class="panel">
-		<div class="goback" ng-click="showLevel05()">
+		<!-- <div class="goback" ng-click="showLevel05()">
 			<i class="material-icons center">keyboard_arrow_left</i>
 			<a href="javascript:void(0)">进行员工站点智能匹配</a>
 		</div>
-		<ul class="collapsible" data-collapsible="accordion">
+ -->		<ul class="collapsible" data-collapsible="accordion">
 			<li>
 				<div class="collapsible-header">
 					<a href="javascript:void(0)">目前，共有<strong ng-bind="staffList.length"></strong>名员工</a>
@@ -82,8 +82,8 @@
 				<span class="col row">站点：<strong ng-bind="chosenStaff.s_name"></strong></span>
 			</div>
 			<div class="card-action">
-				<a href="javascript:void(0)" class="change-station">修改站点</a>
-				<a href="javascript:void(0)">查看附近站点</a>
+				<a href="javascript:void(0)" class="change-station" ng-click="updateEmployeeSta()">修改站点</a>
+				<a href="javascript:void(0)" ng-click="searchNear()">查看附近站点</a>
 			</div>
 		</div>
 	</div>
@@ -102,8 +102,8 @@
 				<span class="col row">站点：<strong ng-bind="chosenStaff.s_name"></strong></span>
 			</div>
 			<div class="card-action">
-				<a href="javascript:void(0)" class="change-station">修改站点</a>
-				<a href="javascript:void(0)">查看附近站点</a>
+				<a href="javascript:void(0)" class="change-station" ng-click="updateEmployeeSta()">修改站点</a>
+				<a href="javascript:void(0)" ng-click="searchNear()">查看附近站点</a>
 			</div>
 		</div>
 	</div>
@@ -165,8 +165,8 @@
 		<div class="row">
 			<form class="col s12">
 				<div class="row">
-					<select ng-model="chosenStaff.s_id" ng-options="station.s_id as station.s_name for station in stations"></select>
-					<option value="" disabled selected>请选择你要更换的站点</option>
+					<select ng-model="chosenStaff.s_id" ng-options="station.id as station.name for station in stations"></select>
+					<option value="" disabled>请选择你要更换的站点</option>
 				</div>
 			</form>
 		</div>

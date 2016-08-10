@@ -221,6 +221,56 @@
 	border-radius: 4px;
 	background-color: rgba(255, 255, 255, 0.55);
 }
+#show-routes .panel .goback {
+	position: relative;
+	width: 100%;
+	height: 30px;
+	line-height: 30px;
+	background-color: #fff;
+	cursor: pointer;
+}
+#show-routes .panel .goback i {
+	margin-top: 3px;
+	margin-left: 10px;
+	width: 24px;
+	height: 24px;
+	color: #039be5;
+}
+#show-routes .panel .goback a {
+	position: absolute;
+	top: 0;
+	right: 0;
+	display: inline-block;
+	width: 282px;
+	height: 30px;
+	line-height: 30px;
+}
+#show-routes .panel .collapsible {
+	margin-bottom: 0 !important;
+	border-radius: 4px;
+}
+#show-routes .panel .collapsible-header {
+	height: 36px;
+	min-height: 36px;
+	line-height: 36px;
+	font-weight: bold;
+	border-radius: 4px;
+	background-color: rgba(255, 255, 255, 0.55);
+}
+#show-routes .panel .collapsible-header:hover,
+#station-table .panel .collapsible-header.active {
+	background-color: #fff;
+}
+#show-routes .panel .collapsible-body {
+	margin-top: 5px;
+	width: 320px;
+	max-height: 400px;
+	overflow-y: auto;
+	border-radius: 4px;
+	background-color: rgba(255, 255, 255, 0.6);
+	cursor: pointer;
+}
+
 
 
 ::-webkit-scrollbar {
