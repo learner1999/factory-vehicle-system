@@ -9,11 +9,11 @@
 	</div>
 
 	<div id="panel-level01" class="panel">
-		<!-- <div class="goback" ng-click="showLevel05()">
+		<div class="goback" ng-click="showLevel05()">
 			<i class="material-icons center">keyboard_arrow_left</i>
-			<a href="javascript:void(0)">进行员工站点智能匹配</a>
+			<a href="javascript:void(0)">进行员工站点智能规划</a>
 		</div>
- -->		<ul class="collapsible" data-collapsible="accordion">
+		<ul class="collapsible" data-collapsible="accordion">
 			<li>
 				<div class="collapsible-header">
 					<a href="javascript:void(0)">目前，共有<strong ng-bind="staffList.length"></strong>名员工</a>
@@ -116,41 +116,20 @@
 		<ul class="collapsible" data-collapsible="accordion">
 			<li>
 				<div class="collapsible-header">
-					<a href="javascript:void(0)">新增员工</a>
+					<a href="javascript:void(0)">员工站点智能规划</a>
 				</div>
 				<div class="collapsible-body">
 					<table class="bordered hoverable">
 						<thead>
 							<tr>
-								<td>员工</td>
-								<td>已匹配站点</td>
+								<td>员工姓名</td>
+								<td>智能匹配站点</td>
 							</tr>
 						</thead>
 						<tbody>
-							<tr ng-repeat="people in addpeoples" ng-click="showEmployeeSta(1,2)">
-								<td ng-bind="people.id"></td>
-								<td ng-bind="people.name"></td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-			</li>
-			<li>
-				<div class="collapsible-header">
-					<a href="javascript:void(0)">已修改员工</a>
-				</div>
-				<div class="collapsible-body">
-					<table class="bordered hoverable">
-						<thead>
-							<tr>
-								<td>员工</td>
-								<td>已匹配站点</td>
-							</tr>
-						</thead>
-						<tbody>
-							<tr ng-repeat="people in addpeoples" ng-click="showEmployeeSta(1,2)">
-								<td ng-bind="people.id"></td>
-								<td ng-bind="people.name"></td>
+							<tr ng-repeat="staff in guihuaList">
+								<td ng-bind="staff.eid[0].e_name"></td>
+								<td ng-bind="staff.sid.s_name"></td>
 							</tr>
 						</tbody>
 					</table>
@@ -158,6 +137,13 @@
 			</li>
 		</ul>
 	</div>
+
+	<div class="fixed-action-btn" style="right:1%;bottom:3%;">
+		<a class="btn-floating btn-large red tooltipped waves-effect waves-lignt export" data-position="left" data-delay="50" data-tooltip="同步员工信息">
+			<i class="material-icons">perm_contact_calendar</i>
+		</a>
+	</div>
+
 </div>
 
 <div id="change-sta" class="modal" style="width:320px;">
@@ -199,6 +185,10 @@
 	$(function(){
 		$('.collapsible').collapsible();
 		$('.dropdown-button').dropdown();
+		$('.tooltipped').tooltip({delay:50});
+		$('#people-table').find('.fixed-action-btn').click(function(){
+			$('#match').openModal();
+		})
 		// $('#people-table').find('.change-station').click(function(){
 		// 	$('#change-sta').openModal();
 		// });

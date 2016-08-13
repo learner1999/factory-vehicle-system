@@ -1029,7 +1029,21 @@ factoryVehicle.controller('adminPeopleManager',function($scope,$http){
 	$scope.showLevel05 = function(){
 		hideLevel();
 		$('#people-table').find('#panel-level05').show('normal');
+		showGuiHua();
 	};
+
+	$scope.guihuaList;
+
+	var showGuiHua = function(){
+		var url = '/factory_vehicle/api/EmpMatchSta/calcu';
+
+		$http.get(url).success(function(data){
+			$scope.guihuaList = data;
+			console.log(data);
+		}).error(function(){
+			console.log('人员规划失败');
+		});
+	}
 });
 
 
@@ -1138,6 +1152,7 @@ factoryVehicle.controller('adminReportManager',function($scope,$http){
 		            name:'乘车人数',
 		            type:'line',
 		            stack: '总量',
+		            silent: false,
 		            data: []
 		        }
 		    ]
@@ -1157,6 +1172,36 @@ factoryVehicle.controller('adminReportManager',function($scope,$http){
 			console.log('初始化报表出错');
 		});
 
+		$scope.mychart.on('click',function(params){
+			console.log(params);
+			if(params.componentType == 'series'){
+				getNameList(params.name);
+			}
+		});
+
+	}
+
+	$scope.nameList;
+
+	var getNameList = function(name){
+		var url = '/factory_vehicle/api/Excel/nameSta';
+
+		var date = translateDate();
+
+		$http({
+			method: 'GET',
+			url: url,
+			params: {
+				day: date,
+				sname: name
+			}
+		}).success(function(data){
+			console.log(data);
+			$scope.nameList = data;
+			$('#name-list').openModal();
+		}).error(function(){
+			console.log('获取名单失败');
+		});
 	}
 
 	/**
@@ -1174,6 +1219,7 @@ factoryVehicle.controller('adminReportManager',function($scope,$http){
 					name: '乘车人数',
 					type: 'line',
 					stack: '总量',
+					silent: false,
 					data: $scope.num
 				}
 			]
@@ -1193,7 +1239,7 @@ factoryVehicle.controller('adminReportManager',function($scope,$http){
 		return dateStr;
 	}
 
-	var createChart = function(){
+	/*var createChart = function(){
 		var mychart = echarts.init(document.getElementById('body-chart'));
 
 		option = {
@@ -1261,7 +1307,7 @@ factoryVehicle.controller('adminReportManager',function($scope,$http){
 		}
 		mychart.setOption(option);
 
-	}
+	}*/
 
 });
 
@@ -1541,7 +1587,7 @@ factoryVehicle.controller('affairsRoutesManager', function($scope,$http){
 	}
 
 	$scope.setToRealRoutes = function(plan){
-		$scope.routes = plan;
+		$scope.routes = plan.routes;
 		$scope.showLevel01();
 	}
 

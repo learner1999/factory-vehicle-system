@@ -29,7 +29,7 @@
 		<div id="body-chart"></div>
 	</div>
 	<div class="fixed-action-btn" style="right:1%;bottom:3%;">
-		<a class="btn-floating btn-large red tooltipped waves-effect waves-lignt export" data-position="left" data-delay="50" data-tooltip="导出报表">
+		<a href="/factory_vehicle/api/Excel/Station?download=true" class="btn-floating btn-large red tooltipped waves-effect waves-lignt export" data-position="left" data-delay="50" data-tooltip="导出报表">
 			<i class="material-icons">assessment</i>
 		</a>
 	</div>
@@ -38,6 +38,16 @@
 <div id="success-export" class="modal" style="width:220px;">
 	<div class="modal-content">
 		<p>报表已成功导出！</p>
+	</div>
+	<div class="modal-footer">
+		<a href="javascript:void(0)" class=" modal-action modal-close waves-effect waves-green btn-flat">确认</a>
+	</div>
+</div>
+
+<div id="name-list" class="modal" style="width:160px;">
+	<div class="modal-content">
+		<h6 style="font-weight:700;font-size:22px;">乘车人员名单：</h6>
+		<p ng-repeat="name in nameList" ng-bind="name"></p>
 	</div>
 	<div class="modal-footer">
 		<a href="javascript:void(0)" class=" modal-action modal-close waves-effect waves-green btn-flat">确认</a>
