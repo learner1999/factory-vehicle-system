@@ -363,7 +363,8 @@ public class Arrangementdao {
 				     }
 	         a1.setMon(mou[i]);
 	         a1.setDate((java.sql.Date) date);
-			 a1.setAg(al);	
+	         List<Arrangement> al1=is_date(date);
+			 a1.setAg(al1);	
 			 a2.add(a1);
 			 } 
 		 }
