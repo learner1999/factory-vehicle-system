@@ -1,0 +1,89 @@
+<nav id="topbar">
+	<ul>
+		<li class="side-tab button-collapse" data-activates="sidebar"><i class="medium material-icons center">subject</i></li>
+		<li><h5>厂车管理系统</h5></li>
+		<li class="quit right tooltipped" data-position="bottom" data-delay="50" data-tooltip="点我可以退出" ng-click="logout()"><i class="material-icons center">power_settings_new</i></li>
+		<li class="user dropdown-button right" data-activates="user-info"><img src="images/manager.jpg" alt="用户头像" class="circle"><p>曹爽</p></li>
+		<ul id="user-info" class="dropdown-content">
+			<li>修改密码</li>
+			<li>个人信息</li>
+		</ul>
+	</ul>
+</nav>
+
+<div id="content">
+	<div id="manager-table">
+		<div class="admin manager">
+			<div class="heading">
+				<p>行政部人员权限</p>
+			</div>
+			<div class="body">
+				<table class="centered highlignt">
+					<thead>
+						<tr>
+							<th>员工ID</th>
+							<th>员工名称</th>
+							<th>部门</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						<tr ng-repeat="staff in adminStaff">
+							<td ng-bind="staff.eid"></td>
+							<td ng-bind="staff.ename"></td>
+							<td ng-bind="staff.epart"></td>
+							<td><a href="javascript:void(0)" ng-click="setToManager(staff)">设置为管理员</a></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="affairs manager">
+			<div class="heading">
+				<p>总务部人员权限</p>
+			</div>
+			<div class="body">
+				<table class="centered highlight">
+					<thead>
+						<tr>
+							<th>员工ID</th>
+							<th>员工名称</th>
+							<th>部门</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="staff in affairsStaff">
+							<td ng-bind="staff.eid"></td>
+							<td ng-bind="staff.ename"></td>
+							<td ng-bind="staff.epart"></td>
+							<td><a href="javascript:void(0)" ng-click="setToManager(staff)">设置为管理员</a></td>
+						</tr>
+					</tbody> 
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="success" class="modal" style="width:220px;">
+	<div class="modal-content">
+		<p>已成功将该员工设置为管理员</p>
+	</div>
+	<div class="modal-footer">
+		<a href="javascript:void(0)" class="modal-action modal-close waves-effect waves-green btn-flat">确认</a>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(function(){
+		$('.tooltipped').tooltip({delay:50});
+			$(".dropdown-button").dropdown({
+				inDuration: 300,
+				outDuration: 150,
+				hover: true,
+				belowOrigin: true
+			});
+		});
+</script>

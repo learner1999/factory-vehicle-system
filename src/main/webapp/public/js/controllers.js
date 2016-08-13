@@ -2485,3 +2485,69 @@ factoryVehicle.controller('affairsReportManager', function($scope,$http){
 
 	};
 });
+
+
+factoryVehicle.controller('manager', function($scope, $http){
+	$scope.adminStaff;
+	$scope.affairsStaff;
+
+	//页面加载完成执行的函数
+	$scope.$watch('$viewContentLoaded',function(){
+		getStaff();
+		// getAdminStaff();
+		// getAffairsStaff();
+	});
+
+	var getStaff = function(){
+		url = '/factory_vehicle/api/newuser/0';
+
+		$http.get(url).success(function(data){
+			console.log(data);
+			$scope.adminStaff = data;
+			$scope.affairsStaff = data;
+		}).error(function(){
+			console.log('bug');
+		})
+	};
+
+	var getAdminStaff = function(){
+		url = '/factory_vehicle/api/newuser/2';
+
+		$http.get(url).success(function(data){
+			console.log(data);
+			$scope.adminStaff = data;
+			// $scope.affairsStaff = data;
+		}).error(function(){
+			console.log('bug');
+		})
+	};
+
+	var getAffairsStaff = function(){
+		url = '/factory_vehicle/api/newuser/1';
+
+		$http.get(url).success(function(data){
+			console.log(data);
+			// $scope.adminStaff = data;
+			$scope.affairsStaff = data;
+		}).error(function(){
+			console.log('bug');
+		})
+	};
+
+	$scope.setToManager = function(staff){
+		for(var i=0;i<$scope.adminStaff.length;i++){
+			if($scope.adminStaff[i].eid == staff.eid){
+				$scope.adminStaff.splice(i, 1);
+				break;
+			}
+		}
+		for(var i=0;i<$scope.affairsStaff.length;i++){
+			if($scope.affairsStaff[i].eid == staff.eid){
+				$scope.affairsStaff.splice(i, 1);
+				break;
+			}
+		}
+
+		$('#success').openModal();
+	}
+});

@@ -143,4 +143,13 @@ factoryVehicle.config(function($stateProvider,$urlRouterProvider) {
 				}
 			}
 		})
+		.state('manager', {
+			url: '/manager',
+			views: {
+				'': {
+					templateUrl: 'htm/manager.html',
+					controller: 'manager'
+				}
+			}
+		})
 });
