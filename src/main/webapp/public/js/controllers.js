@@ -2493,9 +2493,9 @@ factoryVehicle.controller('manager', function($scope, $http){
 
 	//页面加载完成执行的函数
 	$scope.$watch('$viewContentLoaded',function(){
-		getStaff();
-		// getAdminStaff();
-		// getAffairsStaff();
+		// getStaff();
+		getAdminStaff();
+		getAffairsStaff();
 	});
 
 	var getStaff = function(){
