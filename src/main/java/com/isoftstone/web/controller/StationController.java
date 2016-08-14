@@ -1,8 +1,12 @@
 package com.isoftstone.web.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -260,17 +264,36 @@ public class StationController {
 	}
 	
 	/**导出excel*/
-	@RequestMapping(value = "/api/Excel/Station", method = RequestMethod.POST)
-	public ResponseEntity<String> addStaToExcel(@RequestBody List<Station> stalist,HttpServletRequest request) {
-				
+	@RequestMapping(value = "/api/Excel/Station", method = RequestMethod.GET)
+	public ResponseEntity<List<Station>> addStaToExcel(@RequestParam(value = "download", required = false) String download, HttpServletRequest request, HttpServletResponse response) {
+		List<Station> stalist=staDao.showAllSta(1);
 		String path="/public/excel/";
 		String realpath=request.getSession().getServletContext().getRealPath(path);
-		if(staDao.addToExcel(stalist,realpath)){
-			return new ResponseEntity<String>("/excel/站点.xls",HttpStatus.OK);
+		if(staDao.addToExcel(stalist,realpath)&&download.equals("true")){
+			// 重定向下载 excel
+			String filePath = "/excel/站点.xls";
+			String fileDisplay = null;
+			try {
+				fileDisplay = URLEncoder.encode("站点.xls", "UTF-8"); // 下载文件时显示的文件保存名称
+			} catch (UnsupportedEncodingException e1) {
+				e1.printStackTrace();
+			}
+			response.setContentType("application/x-download");// 设置为下载application/x-download
+			response.addHeader("Content-Disposition", "attachment;filename=" + fileDisplay);
+
+			try {
+				RequestDispatcher dis = request.getRequestDispatcher(filePath);
+				if (dis != null) {
+					dis.forward(request, response);
+				}
+				response.flushBuffer();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return new ResponseEntity<List<Station>>(stalist,HttpStatus.OK);
 		}
 		
 		// 如果出现异常，将状态码设为 internal server error(寻找更好的解决方案中……)
-		return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<List<Station>>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
 }

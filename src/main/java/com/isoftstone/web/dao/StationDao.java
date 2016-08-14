@@ -305,7 +305,7 @@ public class StationDao {
 		}
 		return false;
 	}
-
+	
 	//在新建的时候判断用的。提示，已存在名为***的停车点或站点
 	/***
 	 * 测试站点是否已经存在
